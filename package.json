@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/bitfocus/companion-module-hyperdeck/issues"
   },
-  "homepage": "https://github.com/bitfocus/companion-module-hyperdeck#readme"
+  "homepage": "https://github.com/bitfocus/companion-module-hyperdeck#readme",
+  "dependencies": {
+    "hyperdeck-js-lib": "^1.5.0"
+  }
 }

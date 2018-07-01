@@ -1,8 +1,5 @@
 var instance_skel = require('../../instance_skel');
 var HyperdeckLib = require("hyperdeck-js-lib");
-var Logger = HyperdeckLib.Logger;
-Logger.setLevel(Logger.DEBUG);
-
 var debug;
 var log;
 
@@ -10,58 +7,76 @@ function instance(system, id, config) {
 	var self = this;
 	// super-constructor
 	instance_skel.apply(this, arguments);
-	self.actions(); // export actions
-	self.connect();
 	return self;
 }
 
-instance.prototype.connect = function() {
-	var self = this;
-	self.hyperdeck = new HyperdeckLib.Hyperdeck(self.config.host);
-};
-
 instance.prototype.updateConfig = function(config) {
 	var self = this;
-
 	self.config = config;
+	self.destroy();
+	self.connect();
+};
+
+instance.prototype.connect = function() {
+	var self = this;
+	self.status(self.STATE_WARNING,'Connecting');
+	self.actions(); // export actions
+
+	self.destroy();
+
+	if (self.config.host !== undefined && self.config.host != "") {
+		debug("trying to connect to",self.config.host);
+		self.hyperdeck;
+		self.hyperdeck = new HyperdeckLib.Hyperdeck(self.config.host);
+		self.hyperdeck.onConnected().then(function() {
+			self.debug('onConnected().then');
+			self.status(self.STATE_OK);
+			self.log('info', "Connected to " + self.config.host);
+			self.connected = true;
+
+	    self.hyperdeck.getNotifier().on("connectionLost", function() {
+				self.debug('getNotifier().on(connectionLost)');
+				self.log('error', 'disconnected');
+	    });
+
+		}).catch(function() {
+			self.debug('onConnected().catch()');
+			self.status(self.STATE_ERROR, "disconnected");
+			self.connected = false;
+			self.destroy();
+
+			if (self.reconnect_timer !== undefined) {
+				clearTimeout(self.reconnect_timer);
+			}
+
+			self.debug('set reconnect timer');
+
+			self.reconnect_timer = setTimeout(function() {
+				self.debug('reconnect timer done', self.config);
+				self.connect();
+			}, 5000);
+
+		});
+	}
+	else {
+		self.status(self.STATE_ERROR, "no ip configured");
+	}
 };
 
 instance.prototype.init = function() {
 	var self = this;
-	self.status(self.STATE_OK); // report status ok!
+
 	debug = self.debug;
 	log = self.log;
 
+	self.status(self.STATE_WARNING,'Connecting');
+	self.connected = false;
+	self.connect();
+
+	return true;
+
 };
 
-/*
-self.hyperdeck.onConnected().then(function() {
-	self.hyperdeck.makeRequest("device info").then(function(response) {
-	  console.log("Got response with code "+response.code+".");
-	  console.log("Hyperdeck unique id: "+response.params["unique id"]);
-	}).catch(function(errResponse) {
-	  if (!errResponse) {
-	    console.error("The request failed because the hyperdeck connection was lost.");
-	  }
-	  else {
-	    console.error("The hyperdeck returned an error with status code "+errResponse.code+".");
-	  }
-	});
-
-	self.hyperdeck.getNotifier().on("asynchronousEvent", function(response) {
-	  console.log("Got an asynchronous event with code "+response.code+".");
-	});
-
-	self.hyperdeck.getNotifier().on("connectionLost", function() {
-	  console.error("Connection lost.");
-	});
-}).catch(function() {
-	console.error("Failed to connect to hyperdeck.");
-});
-
-*/
-
-// Return config fields for web config
 instance.prototype.config_fields = function () {
 	var self = this;
 	return [
@@ -78,8 +93,15 @@ instance.prototype.config_fields = function () {
 
 // When module gets deleted
 instance.prototype.destroy = function() {
+
 	var self = this;
-	debug("destory", self.id);;
+	self.connected = false;
+
+	if (self.hyperdeck !== undefined) {
+		self.hyperdeck.destroy();
+		delete self.hyperdeck;
+	}
+
 };
 
 instance.prototype.actions = function(system) {

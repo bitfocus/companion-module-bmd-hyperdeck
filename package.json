@@ -1,22 +1,11 @@
 {
-  "name": "companion-module-hyperdeck",
-  "version": "1.0.0",
-  "description": "",
+  "name": "hyperdeck",
+  "version": "0.0.5",
+  "description": "Module to control Hyperdeck",
   "main": "hyperdeck.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bitfocus/companion-module-hyperdeck.git"
-  },
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/bitfocus/companion-module-hyperdeck/issues"
-  },
-  "homepage": "https://github.com/bitfocus/companion-module-hyperdeck#readme",
-  "dependencies": {
-    "hyperdeck-js-lib": "^1.5.0"
-  }
+  "author": "Per Roine",
+  "license": "MIT"
 }

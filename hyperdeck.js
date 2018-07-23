@@ -1,66 +1,24 @@
+var tcp = require('../../tcp');
 var instance_skel = require('../../instance_skel');
-var HyperdeckLib = require("hyperdeck-js-lib");
 var debug;
 var log;
 
 function instance(system, id, config) {
 	var self = this;
+
 	// super-constructor
 	instance_skel.apply(this, arguments);
+
+	self.actions(); // export actions
+
 	return self;
 }
 
 instance.prototype.updateConfig = function(config) {
 	var self = this;
+
 	self.config = config;
-	self.destroy();
-	self.connect();
-};
-
-instance.prototype.connect = function() {
-	var self = this;
-	self.status(self.STATE_WARNING,'Connecting');
-	self.actions(); // export actions
-
-	self.destroy();
-
-	if (self.config.host !== undefined && self.config.host != "") {
-		debug("trying to connect to",self.config.host);
-		self.hyperdeck;
-		self.hyperdeck = new HyperdeckLib.Hyperdeck(self.config.host);
-		self.hyperdeck.onConnected().then(function() {
-			self.debug('onConnected().then');
-			self.status(self.STATE_OK);
-			self.log('info', "Connected to " + self.config.host);
-			self.connected = true;
-
-	    self.hyperdeck.getNotifier().on("connectionLost", function() {
-				self.debug('getNotifier().on(connectionLost)');
-				self.log('error', 'disconnected');
-	    });
-
-		}).catch(function() {
-			self.debug('onConnected().catch()');
-			self.status(self.STATE_ERROR, "disconnected");
-			self.connected = false;
-			self.destroy();
-
-			if (self.reconnect_timer !== undefined) {
-				clearTimeout(self.reconnect_timer);
-			}
-
-			self.debug('set reconnect timer');
-
-			self.reconnect_timer = setTimeout(function() {
-				self.debug('reconnect timer done', self.config);
-				self.connect();
-			}, 5000);
-
-		});
-	}
-	else {
-		self.status(self.STATE_ERROR, "no ip configured");
-	}
+	self.init_tcp();
 };
 
 instance.prototype.init = function() {
@@ -69,14 +27,43 @@ instance.prototype.init = function() {
 	debug = self.debug;
 	log = self.log;
 
-	self.status(self.STATE_WARNING,'Connecting');
-	self.connected = false;
-	self.connect();
+	self.status(1,'Connecting'); // status ok!
 
-	return true;
-
+	self.init_tcp();
 };
 
+instance.prototype.init_tcp = function() {
+	var self = this;
+
+	if (self.socket !== undefined) {
+		self.socket.destroy();
+		delete self.socket;
+	}
+
+	if (self.config.host) {
+		self.socket = new tcp(self.config.host, 9993);
+
+		self.socket.on('status_change', function (status, message) {
+			self.status(status, message);
+		});
+
+		self.socket.on('error', function (err) {
+			debug("Network error", err);
+			self.status(self.STATE_ERROR, err);
+			self.log('error',"Network error: " + err.message);
+		});
+
+		self.socket.on('connect', function () {
+			self.status(self.STATE_OK);
+			debug("Connected");
+		})
+
+		self.socket.on('data', function (data) {});
+	}
+};
+
+
+// Return config fields for web config
 instance.prototype.config_fields = function () {
 	var self = this;
 	return [
@@ -85,7 +72,6 @@ instance.prototype.config_fields = function () {
 			id: 'host',
 			label: 'Target IP',
 			width: 6,
-			tooltip: 'The IP of the HyperDeck',
 			regex: self.REGEX_IP
 		}
 	]
@@ -93,47 +79,84 @@ instance.prototype.config_fields = function () {
 
 // When module gets deleted
 instance.prototype.destroy = function() {
-
 	var self = this;
-	self.connected = false;
 
-	if (self.hyperdeck !== undefined) {
-		self.hyperdeck.destroy();
-		delete self.hyperdeck;
+	if (self.socket !== undefined) {
+		self.socket.destroy();
 	}
 
+	debug("destroy", self.id);;
 };
+
 
 instance.prototype.actions = function(system) {
 	var self = this;
 	self.system.emit('instance_actions', self.id, {
 		'vplay':	{
-			 label: 'Play (Speed %)',
-			 options: [
+			label: 'Play (Speed %)',
+			options: [
 				{
-					 type: 'textinput',
-					 label: 'Speed %',
-					 id: 'speed',
-					 default: "1"
+					type: 'textinput',
+					label: 'Speed %',
+					id: 'speed',
+					default: "1"
 				}
-			 ]
-			 },
+			]
+		},
 
-		'play':     { label: 'Play' },
-		'rec':      { label: 'Record' },
-		'stop':     { label: 'Stop' },
-		'goto':     {
-			 label: 'Goto (Tc)',
-			 options: [
+		'play':      { label: 'Play' },
+		'playSingle':{ label: 'Play Single Clip' },
+		'playLoop':  { label: 'Play Clip in Loop' },
+		'rec':       { label: 'Record' },
+		'stop':      { label: 'Stop' },
+		'goto':      {
+			label: 'Goto (Tc)',
+			options: [
 				{
 					type: 'textinput',
 					label: 'Timecode hh:mm:ss:ff',
 					id: 'tc',
 					default: "00:00:01:00",
 					regex: self.REGEX_TIMECODE
+			 }
+			]
+		},
+		'gotoN':     {
+			label: 'Goto Clip (n)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Clip Number',
+					id: 'clip',
+					default: '1',
+					regex: self.REGEX_NUMBER
+				}
+			]
+		},
+		'goFwd':     {
+			label: 'Go forward (n) clips',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Number of clips',
+					id: 'clip',
+					default: '1',
+					regex: self.REGEX_NUMBER
 				 }
 			]
-			},
+		},
+		'goRew':     {
+			label: 'Go backward (n) clips',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Number of clips',
+					id: 'clip',
+					default: '1',
+					regex: self.REGEX_NUMBER
+				}
+			]
+		},
 		'select':   {
 			label: 'select (slot)',
 			options: [
@@ -143,57 +166,93 @@ instance.prototype.actions = function(system) {
 						 id: 'slot',
 						 default: "1",
 						 choices: [
-			 				{ id: 1, label: 'Slot 1' },
-			 				{ id: 2, label: 'Slot 2' }
-			 			]
+							 { id: 1, label: 'Slot 1' },
+							 { id: 2, label: 'Slot 2' }
+						 ]
 				}
 			]
 		}
 
 	});
-}
-
-instance.prototype.action = function(action) {
-	var self = this;
-	var id = action.action;
-
-	switch (action.action) {
-
-		case 'vplay':
-			self.hyperdeck.play(action.options.speed);
-			break;
-
-		case 'play':
-			self.hyperdeck.play();
-			self.hyperdeck.transportInfo();
-			break;
-
-		case 'stop':
-			self.hyperdeck.stop()
-			break;
-
-		case 'rec':
-			self.hyperdeck.record();
-			break;
-
-		case 'goto':
-			self.hyperdeck.goTo(action.options.tc);
-			break;
-
-		case 'select':
-			self.hyperdeck.slotSelect(action.options.slot);
-			break;
+};
 
 
+	instance.prototype.action = function(action) {
+		var self = this;
+		var opt = action.options
 
+		switch (action.action) {
+
+			case 'vplay':
+				cmd = 'play: speed: '+ opt.speed;
+				break;
+
+			case 'play':
+				cmd = 'play';
+				break;
+
+			case 'playSingle':
+				cmd = 'play: single clip: true';
+				break;
+
+			case 'playLoop':
+				cmd = 'play: loop: true';
+				break;
+
+			case 'stop':
+				cmd = 'stop';
+				break;
+
+			case 'rec':
+				cmd = 'record';
+				break;
+
+			case 'goto':
+				cmd = 'goto: timecode: '+ opt.tc;
+				break;
+
+			case 'select':
+				cmd = 'slot select: slot id: '+ opt.slot;
+				break;
+
+			case 'gotoN':
+				cmd = 'goto: clip id: '+ opt.clip;
+				break;
+
+			case 'goFwd':
+				cmd = 'goto: clip id: +'+ opt.clip;
+				break;
+
+			case 'goRew':
+				cmd = 'goto: clip id: -'+ opt.clip;
+				break;
 	};
+
+
+
+
+
+	if (cmd !== undefined) {
+
+		debug('sending ',cmd,"to",self.config.host);
+
+		if (self.socket !== undefined && self.socket.connected) {
+			self.socket.send(cmd + "\n");
+			self.socket.send('notify: transport: true'+ '\n')
+		} else {
+			debug('Socket not connected :(');
+		}
+
+	}
+
+	// debug('action():', action);
 
 };
 
 instance.module_info = {
 	label: 'BMD Hyperdeck',
-	id: 'hyperdeck',
-	version: '0.0.1'
+	id: 'hyperdeck2',
+	version: '0.0.5'
 };
 
 instance_skel.extendedBy(instance);

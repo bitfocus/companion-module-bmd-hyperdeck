@@ -103,6 +103,29 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'vplaysingle':	{
+			label: 'Play single clip at (Speed %)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Speed %',
+					id: 'speed',
+					default: "1"
+				}
+			]
+		},
+
+		'vplayloop':	{
+			label: 'Play clip in loop at (Speed %)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Speed %',
+					id: 'speed',
+					default: "1"
+				}
+			]
+		},
 
 		'play':      { label: 'Play' },
 		'playSingle':{ label: 'Play Single Clip' },
@@ -187,6 +210,14 @@ instance.prototype.actions = function(system) {
 				cmd = 'play: speed: '+ opt.speed;
 				break;
 
+			case 'vplaysingle':
+				cmd = 'play: single clip: true: speed: '+ opt.speed;
+				break;
+
+			case 'vplayloop':
+				cmd = 'play: loop: true: speed: '+ opt.speed;
+				break;
+
 			case 'play':
 				cmd = 'play';
 				break;
@@ -251,8 +282,8 @@ instance.prototype.actions = function(system) {
 
 instance.module_info = {
 	label: 'BMD Hyperdeck',
-	id: 'hyperdeck2',
-	version: '0.0.5'
+	id: 'hyperdeck',
+	version: '0.0.6'
 };
 
 instance_skel.extendedBy(instance);

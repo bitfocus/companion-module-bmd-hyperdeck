@@ -68,6 +68,13 @@ instance.prototype.config_fields = function () {
 	var self = this;
 	return [
 		{
+			type: 'text',
+			id: 'info',
+			width: 12,
+			label: 'Information',
+			value: 'Warning Hyperdeck only supports 1 connection at any given time. Be sure to disconect any other devices controling it. Remember to press the remote button on the frontpanel of the Hyperdeck to enable remote control.'
+		},
+		{
 			type: 'textinput',
 			id: 'host',
 			label: 'Target IP',

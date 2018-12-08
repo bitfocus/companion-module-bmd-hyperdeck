@@ -71,8 +71,8 @@ instance.prototype.config_fields = function () {
 			type: 'text',
 			id: 'info',
 			width: 12,
-			label: 'Information',
-			value: 'Warning Hyperdeck only supports 1 connection at any given time. Be sure to disconect any other devices controling it. Remember to press the remote button on the frontpanel of the Hyperdeck to enable remote control.'
+			label: 'Warning',
+			value: 'Hyperdeck only supports 1 connection at any given time. Be sure to disconect any other devices controling it. Remember to press the remote button on the frontpanel of the Hyperdeck to enable remote control.'
 		},
 		{
 			type: 'textinput',
@@ -138,6 +138,18 @@ instance.prototype.actions = function(system) {
 		'playSingle':{ label: 'Play Single Clip' },
 		'playLoop':  { label: 'Play Clip in Loop' },
 		'rec':       { label: 'Record' },
+		'recname': {
+			label: 'Record (with name)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Filename (without extension)',
+					id: 'name',
+					default: '',
+					regex: self.REGEX_SOMETHING
+				}
+			]
+		},
 		'stop':      { label: 'Stop' },
 		'goto':      {
 			label: 'Goto (Tc)',
@@ -245,6 +257,10 @@ instance.prototype.actions = function(system) {
 				cmd = 'record';
 				break;
 
+			case 'recname':
+				cmd = 'record: name: ' + opt.name;
+				break;
+
 			case 'goto':
 				cmd = 'goto: timecode: '+ opt.tc;
 				break;
@@ -276,7 +292,7 @@ instance.prototype.actions = function(system) {
 
 		if (self.socket !== undefined && self.socket.connected) {
 			self.socket.send(cmd + "\n");
-			self.socket.send('notify: transport: true'+ '\n')
+			self.socket.send('notify: transport: true\n')
 		} else {
 			debug('Socket not connected :(');
 		}

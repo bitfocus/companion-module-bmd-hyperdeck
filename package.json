@@ -1,8 +1,8 @@
 {
   "name": "hyperdeck",
-  "version": "1.0.0",
-	"api_version": "1.0.0",
-	"keywords": [ "Recording" ],
+  "version": "1.0.1",
+	"api_version": "1.8",
+	"keywords": [ "Recording", "Video" ],
 	"manufacturer": "Blackmagic Design",
 	"product": "Hyperdeck",
 	"shortname": "hyperdeck",
@@ -11,6 +11,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Per Roine <per.roine@gmail.com>",
+  "author": "Per Roine <per.roine@gmail.com>, Stephen Harrison <stephen@redleopard.org>",
   "license": "MIT"
 }

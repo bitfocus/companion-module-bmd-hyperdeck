@@ -49,12 +49,12 @@ instance.prototype.init_tcp = function() {
 
 		self.socket.on('error', function (err) {
 			debug("Network error", err);
-			self.status(self.STATE_ERROR, err);
+			self.status(self.STATUS_ERROR, err);
 			self.log('error',"Network error: " + err.message);
 		});
 
 		self.socket.on('connect', function () {
-			self.status(self.STATE_OK);
+			self.status(self.STATUS_OK);
 			debug("Connected");
 		})
 
@@ -99,7 +99,7 @@ instance.prototype.destroy = function() {
 instance.prototype.actions = function(system) {
 	var self = this;
 	self.system.emit('instance_actions', self.id, {
-		'vplay':	{
+		'vplay': {
 			label: 'Play (Speed %)',
 			options: [
 				{
@@ -110,7 +110,7 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
-		'vplaysingle':	{
+		'vplaysingle': {
 			label: 'Play single clip at (Speed %)',
 			options: [
 				{
@@ -121,8 +121,7 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
-
-		'vplayloop':	{
+		'vplayloop': {
 			label: 'Play clip in loop at (Speed %)',
 			options: [
 				{
@@ -133,12 +132,19 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
-
-		'play':      { label: 'Play' },
-		'playSingle':{ label: 'Play Single Clip' },
-		'playLoop':  { label: 'Play Clip in Loop' },
-		'rec':       { label: 'Record' },
-		'recname': {
+		'play': {
+			label: 'Play'
+		},
+		'playSingle': {
+			label: 'Play Single Clip'
+		},
+		'playLoop': {
+			label: 'Play Clip in Loop'
+		},
+		'rec': {
+			label: 'Record'
+		},
+		'recName': {
 			label: 'Record (with name)',
 			options: [
 				{
@@ -150,8 +156,10 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
-		'stop':      { label: 'Stop' },
-		'goto':      {
+		'stop': {
+			label: 'Stop'
+		},
+		'goto': {
 			label: 'Goto (Tc)',
 			options: [
 				{
@@ -160,10 +168,10 @@ instance.prototype.actions = function(system) {
 					id: 'tc',
 					default: "00:00:01:00",
 					regex: self.REGEX_TIMECODE
-			 }
+				}
 			]
 		},
-		'gotoN':     {
+		'gotoN': {
 			label: 'Goto Clip (n)',
 			options: [
 				{
@@ -175,7 +183,7 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
-		'goFwd':     {
+		'goFwd': {
 			label: 'Go forward (n) clips',
 			options: [
 				{
@@ -184,10 +192,10 @@ instance.prototype.actions = function(system) {
 					id: 'clip',
 					default: '1',
 					regex: self.REGEX_NUMBER
-				 }
+				}
 			]
 		},
-		'goRew':     {
+		'goRew': {
 			label: 'Go backward (n) clips',
 			options: [
 				{
@@ -199,18 +207,88 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
-		'select':   {
-			label: 'select (slot)',
+		'goStartEnd': {
+			label: 'Go to (start|end) of clip',
 			options: [
 				{
 					type: 'dropdown',
-						 label: 'Slot (1/2)',
-						 id: 'slot',
-						 default: "1",
-						 choices: [
-							 { id: 1, label: 'Slot 1' },
-							 { id: 2, label: 'Slot 2' }
-						 ]
+					id: 'startEnd',
+					default: 'start',
+					choices: [
+						{ id: 'start', label: 'Start'},
+						{ id: 'end', label: 'End'}
+					]
+				}
+			]
+		},
+		'jogFwd': {
+			label: 'Jog forward (TC) duration',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Timecode hh:mm:ss:ff',
+					id: 'jogFwdTc',
+					default: "00:00:00:01",
+					regex: self.REGEX_TIMECODE
+				}
+			]
+		},
+		'jogRew': {
+			label: 'Jog backward (TC) duration',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Timecode hh:mm:ss:ff',
+					id: 'jogRewTc',
+					default: "00:00:00:01",
+					regex: self.REGEX_TIMECODE
+				}
+			]
+		},
+		'select': {
+			label: 'Select (slot)',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Slot (1/2)',
+					id: 'slot',
+					default: "1",
+					choices: [
+						{ id: 1, label: 'Slot 1' },
+						{ id: 2, label: 'Slot 2' }
+					]
+				}
+			]
+		},
+		'videoSrc': {
+			label: 'video source',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Input',
+					id: 'videoSrc',
+					default: 'SDI',
+					choices: [
+						{ id: 'SDI', label: 'SDI' },
+						{ id: 'HDMI', label: 'HDMI' },
+						{ id: 'component', label: 'Component' }
+					]
+				}
+			]
+		},
+		'audioSrc': {
+			label: 'Audio source',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Input',
+					id: 'audioSrc',
+					default: 'embedded',
+					choices: [
+						{ id: 'embedded', label: 'Embedded' },
+						{ id: 'XLR', label: 'XLR' },
+						{ id: 'RCA', label: 'RCA' }
+					]
 				}
 			]
 		}
@@ -219,76 +297,92 @@ instance.prototype.actions = function(system) {
 };
 
 
-	instance.prototype.action = function(action) {
-		var self = this;
-		var opt = action.options
+instance.prototype.action = function(action) {
+	var self = this;
+	var opt = action.options
 
-		switch (action.action) {
+	switch (action.action) {
 
-			case 'vplay':
-				cmd = 'play: speed: '+ opt.speed;
-				break;
+		case 'vplay':
+			cmd = 'play: speed: '+ opt.speed;
+			break;
 
-			case 'vplaysingle':
-				cmd = 'play: single clip: true: speed: '+ opt.speed;
-				break;
+		case 'vplaysingle':
+			cmd = 'play: single clip: true: speed: '+ opt.speed;
+			break;
 
-			case 'vplayloop':
-				cmd = 'play: loop: true: speed: '+ opt.speed;
-				break;
+		case 'vplayloop':
+			cmd = 'play: loop: true: speed: '+ opt.speed;
+			break;
 
-			case 'play':
-				cmd = 'play';
-				break;
+		case 'play':
+			cmd = 'play';
+			break;
 
-			case 'playSingle':
-				cmd = 'play: single clip: true';
-				break;
+		case 'playSingle':
+			cmd = 'play: single clip: true';
+			break;
 
-			case 'playLoop':
-				cmd = 'play: loop: true';
-				break;
+		case 'playLoop':
+			cmd = 'play: loop: true';
+			break;
 
-			case 'stop':
-				cmd = 'stop';
-				break;
+		case 'stop':
+			cmd = 'stop';
+			break;
 
-			case 'rec':
-				cmd = 'record';
-				break;
+		case 'rec':
+			cmd = 'record';
+			break;
 
-			case 'recname':
-				cmd = 'record: name: ' + opt.name;
-				break;
+		case 'recName':
+			cmd = 'record: name: ' + opt.name;
+			break;
 
-			case 'goto':
-				cmd = 'goto: timecode: '+ opt.tc;
-				break;
+		case 'goto':
+			cmd = 'goto: timecode: '+ opt.tc;
+			break;
 
-			case 'select':
-				cmd = 'slot select: slot id: '+ opt.slot;
-				break;
+		case 'gotoN':
+			cmd = 'goto: clip id: '+ opt.clip;
+			break;
 
-			case 'gotoN':
-				cmd = 'goto: clip id: '+ opt.clip;
-				break;
+		case 'goFwd':
+			cmd = 'goto: clip id: +'+ opt.clip;
+			break;
 
-			case 'goFwd':
-				cmd = 'goto: clip id: +'+ opt.clip;
-				break;
+		case 'goRew':
+			cmd = 'goto: clip id: -'+ opt.clip;
+			break;
+				
+		case 'goStartEnd':
+			cmd = 'goto: clip: '+ opt.startEnd;
+			break;
 
-			case 'goRew':
-				cmd = 'goto: clip id: -'+ opt.clip;
-				break;
+		case 'jogFwd':
+			cmd = 'jog: timecode: +'+ opt.jogFwdTc;
+			break;
+				
+		case 'jogRew':
+			cmd = 'jog: timecode: -'+ opt.jogRewTc;
+			break;
+				
+		case 'select':
+			cmd = 'slot select: slot id: '+ opt.slot;
+			break;
+				
+		case 'videoSrc':
+			cmd = 'configuration: video input: '+ opt.videoSrc;
+			break;
+				
+		case 'audioSrc':
+			cmd = 'configuration: audio input: '+ opt.audioSrc;
+			break;
 	};
-
-
-
-
 
 	if (cmd !== undefined) {
 
-		debug('sending ',cmd,"to",self.config.host);
+		debug('sending',cmd,"to",self.config.host);
 
 		if (self.socket !== undefined && self.socket.connected) {
 			self.socket.send(cmd + "\n");
@@ -301,12 +395,6 @@ instance.prototype.actions = function(system) {
 
 	// debug('action():', action);
 
-};
-
-instance.module_info = {
-	label: 'BMD Hyperdeck',
-	id: 'hyperdeck',
-	version: '0.0.6'
 };
 
 instance_skel.extendedBy(instance);

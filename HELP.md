@@ -2,15 +2,22 @@
 
 **Available commands for Blackmagic Design Hyperdeck**
 
-* Play (Speed%)
 * Play
+* Play (Speed %)
 * Play Single clip
+* Play Single clip (Speed %)
 * Play loop
+* Play loop (Speed %)
 * Record
+* Record (with name)
 * Stop
 * Goto (timecode)
-* select (slot)
+* Goto Clip (n)
 * Go Fwd (n) clips
 * Go Back (n) clips
-* Go to (TC)
-* Go to Clip (n)
+* Goto Start/End of clip
+* Jog forward (timecode) duration
+* Jog backward (timecode) duration
+* Select (slot)
+* Select video input
+* Select audio input

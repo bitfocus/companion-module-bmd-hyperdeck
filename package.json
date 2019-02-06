@@ -13,6 +13,9 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "Per Roine <per.roine@gmail.com>, Stephen Harrison <stephen@redleopard.org>"
+	"author": "Per Roine <per.roine@gmail.com>",
+	"contributors": [
+		"Stephen Harrison <stephen@redleopard.org>"
+	],
 	"license": "MIT"
 }

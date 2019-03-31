@@ -337,7 +337,22 @@ instance.prototype.actions = function(system) {
 					]
 				}
 			]
-		}
+		},
+		'remote': {
+			label: 'Enable Remote Control',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Enable/Disable',
+					id: 'remoteEnable',
+					default: "true",
+					choices: [
+						{ id: 'true', label: 'true' },
+						{ id: 'false', label: 'false' }
+					]
+				}
+			]
+		},
 
 	});
 };
@@ -432,6 +447,10 @@ instance.prototype.action = function(action) {
 
 		case 'audioSrc':
 			cmd = 'configuration: audio input: '+ opt.audioSrc;
+			break;
+
+		case 'remote':
+			cmd = 'remote: enable: '+ opt.remoteEnable;
 			break;
 	};
 

@@ -402,7 +402,7 @@ instance.prototype.action = function(action) {
 
 		case 'recTimestamp':
 			var timeStamp = renameTimestamp();
-			cmd = 'record: name: ' + timeStamp + '_';
+			cmd = 'record: ' + timeStamp + '_';
 			break;
 
 		case 'recCustom':

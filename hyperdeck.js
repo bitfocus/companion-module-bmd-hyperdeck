@@ -387,7 +387,7 @@ instance.prototype.action = function(action) {
 
 		case 'recTimestamp':
 			var timeStamp = renameTimestamp();
-			cmd = 'record: name: ' + timeStamp;
+			cmd = 'record: name: ' + timeStamp + '_';
 			break;
 
 		case 'recCustom':

@@ -3,6 +3,24 @@ var instance_skel = require('../../instance_skel');
 var debug;
 var log;
 
+function addZero(i) {
+	if (i < 10) {
+		i = "0" + i;
+	}
+	return i;
+}
+
+function renameTimestamp() {
+	var d          = new Date();
+	var curr_date  = addZero(d.getDate());
+	var curr_month = addZero(d.getMonth()+1);
+	var curr_year  = addZero(d.getFullYear());
+	var h          = addZero(d.getHours());
+	var m          = addZero(d.getMinutes());
+	var stamp      = curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
+	return stamp;
+};
+
 function instance(system, id, config) {
 	var self = this;
 
@@ -170,6 +188,9 @@ instance.prototype.actions = function(system) {
 					regex: self.REGEX_SOMETHING
 				}
 			]
+		},
+		'recTimestamp': {
+			label: 'Record (name with current time and date)',
 		},
 		'recCustom': {
 			label: 'Record (with custom reel)',
@@ -364,6 +385,11 @@ instance.prototype.action = function(action) {
 			cmd = 'record: name: ' + opt.name;
 			break;
 
+		case 'recTimestamp':
+			var timeStamp = renameTimestamp();
+			cmd = 'record: name: ' + timeStamp;
+			break;
+
 		case 'recCustom':
 			cmd = 'record: name: ' + self.config.reel + '-';
 			break;
@@ -383,7 +409,7 @@ instance.prototype.action = function(action) {
 		case 'goRew':
 			cmd = 'goto: clip id: -'+ opt.clip;
 			break;
-				
+
 		case 'goStartEnd':
 			cmd = 'goto: clip: '+ opt.startEnd;
 			break;
@@ -391,19 +417,19 @@ instance.prototype.action = function(action) {
 		case 'jogFwd':
 			cmd = 'jog: timecode: +'+ opt.jogFwdTc;
 			break;
-				
+
 		case 'jogRew':
 			cmd = 'jog: timecode: -'+ opt.jogRewTc;
 			break;
-				
+
 		case 'select':
 			cmd = 'slot select: slot id: '+ opt.slot;
 			break;
-				
+
 		case 'videoSrc':
 			cmd = 'configuration: video input: '+ opt.videoSrc;
 			break;
-				
+
 		case 'audioSrc':
 			cmd = 'configuration: audio input: '+ opt.audioSrc;
 			break;

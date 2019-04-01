@@ -190,7 +190,7 @@ instance.prototype.actions = function(system) {
 			]
 		},
 		'recTimestamp': {
-			label: 'Record (File prefix with current time and date.)',
+			label: 'Record (File prefix with current time and date)',
 			options: [
 				{
 					type: 'textinput',
@@ -410,8 +410,13 @@ instance.prototype.action = function(action) {
 
 		case 'recTimestamp':
 			var timeStamp = renameTimestamp();
-			cmd = 'record: name: ' + opt.prefix + '_' + timeStamp + '_';
-			break;
+				if (opt.prefix !== '')	{
+						cmd = 'record: name: ' + opt.prefix + '_' + timeStamp + '_';
+						break;
+				}	else {
+						cmd = 'record: name: ' + timeStamp + '_';
+						break;
+					}
 
 		case 'recCustom':
 			cmd = 'record: name: ' + self.config.reel + '-';

@@ -347,7 +347,7 @@ instance.prototype.actions = function(system) {
 			]
 		},
 		'remote': {
-			label: 'Enable Remote Control',
+			label: 'Remote Control - Enable/Disable',
 			options: [
 				{
 					type: 'dropdown',
@@ -355,8 +355,8 @@ instance.prototype.actions = function(system) {
 					id: 'remoteEnable',
 					default: "true",
 					choices: [
-						{ id: 'true', label: 'true' },
-						{ id: 'false', label: 'false' }
+						{ id: 'true', label: 'Enable' },
+						{ id: 'false', label: 'Disable' }
 					]
 				}
 			]

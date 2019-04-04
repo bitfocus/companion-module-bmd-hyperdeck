@@ -3,6 +3,24 @@ var instance_skel = require('../../instance_skel');
 var debug;
 var log;
 
+function addZero(i) {
+	if (i < 10) {
+		i = "0" + i;
+	}
+	return i;
+}
+
+function renameTimestamp() {
+	var d          = new Date();
+	var curr_date  = addZero(d.getDate());
+	var curr_month = addZero(d.getMonth()+1);
+	var curr_year  = addZero(d.getFullYear());
+	var h          = addZero(d.getHours());
+	var m          = addZero(d.getMinutes());
+	var stamp      = curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
+	return stamp;
+};
+
 function instance(system, id, config) {
 	var self = this;
 
@@ -171,6 +189,17 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'recTimestamp': {
+			label: 'Record (File prefix with current time and date)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Filename prefix',
+					id: 'prefix',
+					default: '',
+				}
+			]
+		},
 		'recCustom': {
 			label: 'Record (with custom reel)',
 			options: [
@@ -316,7 +345,22 @@ instance.prototype.actions = function(system) {
 					]
 				}
 			]
-		}
+		},
+		'remote': {
+			label: 'Remote Control - Enable/Disable',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Enable/Disable',
+					id: 'remoteEnable',
+					default: "true",
+					choices: [
+						{ id: 'true', label: 'Enable' },
+						{ id: 'false', label: 'Disable' }
+					]
+				}
+			]
+		},
 
 	});
 };
@@ -364,6 +408,16 @@ instance.prototype.action = function(action) {
 			cmd = 'record: name: ' + opt.name;
 			break;
 
+		case 'recTimestamp':
+			var timeStamp = renameTimestamp();
+				if (opt.prefix !== '')	{
+						cmd = 'record: name: ' + opt.prefix + '_' + timeStamp + '_';
+						break;
+				}	else {
+						cmd = 'record: name: ' + timeStamp + '_';
+						break;
+					}
+
 		case 'recCustom':
 			cmd = 'record: name: ' + self.config.reel + '-';
 			break;
@@ -383,7 +437,7 @@ instance.prototype.action = function(action) {
 		case 'goRew':
 			cmd = 'goto: clip id: -'+ opt.clip;
 			break;
-				
+
 		case 'goStartEnd':
 			cmd = 'goto: clip: '+ opt.startEnd;
 			break;
@@ -391,21 +445,25 @@ instance.prototype.action = function(action) {
 		case 'jogFwd':
 			cmd = 'jog: timecode: +'+ opt.jogFwdTc;
 			break;
-				
+
 		case 'jogRew':
 			cmd = 'jog: timecode: -'+ opt.jogRewTc;
 			break;
-				
+
 		case 'select':
 			cmd = 'slot select: slot id: '+ opt.slot;
 			break;
-				
+
 		case 'videoSrc':
 			cmd = 'configuration: video input: '+ opt.videoSrc;
 			break;
-				
+
 		case 'audioSrc':
 			cmd = 'configuration: audio input: '+ opt.audioSrc;
+			break;
+
+		case 'remote':
+			cmd = 'remote: enable: '+ opt.remoteEnable;
 			break;
 	};
 

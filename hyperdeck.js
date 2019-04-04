@@ -45,7 +45,7 @@ instance.prototype.init = function() {
 	debug = self.debug;
 	log = self.log;
 
-	self.status(1,'Connecting'); // status ok!
+	self.status(self.STATUS_WARNING,'Connecting'); // status ok!
 
 	self.init_tcp();
 };
@@ -80,10 +80,10 @@ instance.prototype.init_tcp = function() {
 	}
 };
 
-
 // Return config fields for web config
 instance.prototype.config_fields = function () {
 	var self = this;
+
 	return [
 		{
 			type: 'text',
@@ -128,12 +128,12 @@ instance.prototype.destroy = function() {
 	debug("destroy", self.id);;
 };
 
-
 instance.prototype.actions = function(system) {
 	var self = this;
+
 	self.system.emit('instance_actions', self.id, {
 		'vplay': {
-			label: 'Play (Speed %)',
+			label: 'Play (speed %)',
 			options: [
 				{
 					type: 'textinput',
@@ -144,7 +144,7 @@ instance.prototype.actions = function(system) {
 			]
 		},
 		'vplaysingle': {
-			label: 'Play single clip at (Speed %)',
+			label: 'Play single clip at (speed %)',
 			options: [
 				{
 					type: 'textinput',
@@ -155,7 +155,7 @@ instance.prototype.actions = function(system) {
 			]
 		},
 		'vplayloop': {
-			label: 'Play clip in loop at (Speed %)',
+			label: 'Play clip in loop at (speed %)',
 			options: [
 				{
 					type: 'textinput',
@@ -190,11 +190,11 @@ instance.prototype.actions = function(system) {
 			]
 		},
 		'recTimestamp': {
-			label: 'Record (File prefix with current time and date)',
+			label: 'Record (with name and current date/time)',
 			options: [
 				{
 					type: 'textinput',
-					label: 'Filename prefix',
+					label: 'Filename (optional)',
 					id: 'prefix',
 					default: '',
 				}
@@ -214,7 +214,7 @@ instance.prototype.actions = function(system) {
 			label: 'Stop'
 		},
 		'goto': {
-			label: 'Goto (Tc)',
+			label: 'Goto (TC)',
 			options: [
 				{
 					type: 'textinput',
@@ -347,7 +347,7 @@ instance.prototype.actions = function(system) {
 			]
 		},
 		'remote': {
-			label: 'Remote Control - Enable/Disable',
+			label: 'Remote Control (enable/disable)',
 			options: [
 				{
 					type: 'dropdown',
@@ -360,11 +360,9 @@ instance.prototype.actions = function(system) {
 					]
 				}
 			]
-		},
-
+		}
 	});
 };
-
 
 instance.prototype.action = function(action) {
 	var self = this;
@@ -410,13 +408,13 @@ instance.prototype.action = function(action) {
 
 		case 'recTimestamp':
 			var timeStamp = renameTimestamp();
-				if (opt.prefix !== '')	{
-						cmd = 'record: name: ' + opt.prefix + '_' + timeStamp + '_';
-						break;
-				}	else {
-						cmd = 'record: name: ' + timeStamp + '_';
-						break;
-					}
+			if (opt.prefix !== '')	{
+				cmd = 'record: name: ' + opt.prefix + '-' + timeStamp + '-';
+			}
+			else {
+				cmd = 'record: name: ' + timeStamp + '-';
+			}
+			break;
 
 		case 'recCustom':
 			cmd = 'record: name: ' + self.config.reel + '-';
@@ -477,11 +475,9 @@ instance.prototype.action = function(action) {
 		} else {
 			debug('Socket not connected :(');
 		}
-
 	}
 
 	// debug('action():', action);
-
 };
 
 instance_skel.extendedBy(instance);

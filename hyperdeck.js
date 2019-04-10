@@ -3,6 +3,24 @@ var instance_skel = require('../../instance_skel');
 var debug;
 var log;
 
+function addZero(i) {
+	if (i < 10) {
+		i = "0" + i;
+	}
+	return i;
+}
+
+function renameTimestamp() {
+	var d          = new Date();
+	var curr_date  = addZero(d.getDate());
+	var curr_month = addZero(d.getMonth()+1);
+	var curr_year  = addZero(d.getFullYear());
+	var h          = addZero(d.getHours());
+	var m          = addZero(d.getMinutes());
+	var stamp      = curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
+	return stamp;
+};
+
 function instance(system, id, config) {
 	var self = this;
 
@@ -27,7 +45,7 @@ instance.prototype.init = function() {
 	debug = self.debug;
 	log = self.log;
 
-	self.status(1,'Connecting'); // status ok!
+	self.status(self.STATUS_WARNING,'Connecting'); // status ok!
 
 	self.init_tcp();
 };
@@ -62,10 +80,10 @@ instance.prototype.init_tcp = function() {
 	}
 };
 
-
 // Return config fields for web config
 instance.prototype.config_fields = function () {
 	var self = this;
+
 	return [
 		{
 			type: 'text',
@@ -80,6 +98,21 @@ instance.prototype.config_fields = function () {
 			label: 'Target IP',
 			width: 6,
 			regex: self.REGEX_IP
+		},
+		{
+			type: 'text',
+			id: 'info',
+			width: 12,
+			label: 'Custom Clip Record Naming',
+			value: 'Companion is able to initiate recordings where the file names use a custom \'Reel-[####]\' naming convention.  The \'Reel\' is a custom name defined below and [####] is auto incremented from \'0\' by the HyperDeck.  <b>This naming is only used when starting records using the \'Record (with custom reel)\' action.</b>'
+		},
+		{
+			type: 'textinput',
+			id: 'reel',
+			label: 'Custom Reel',
+			width: 6,
+			default: 'A001',
+			regex: self.REGEX_SOMETHING
 		}
 	]
 };
@@ -95,12 +128,12 @@ instance.prototype.destroy = function() {
 	debug("destroy", self.id);;
 };
 
-
 instance.prototype.actions = function(system) {
 	var self = this;
+
 	self.system.emit('instance_actions', self.id, {
 		'vplay': {
-			label: 'Play (Speed %)',
+			label: 'Play (speed %)',
 			options: [
 				{
 					type: 'textinput',
@@ -111,7 +144,7 @@ instance.prototype.actions = function(system) {
 			]
 		},
 		'vplaysingle': {
-			label: 'Play single clip at (Speed %)',
+			label: 'Play single clip at (speed %)',
 			options: [
 				{
 					type: 'textinput',
@@ -122,7 +155,7 @@ instance.prototype.actions = function(system) {
 			]
 		},
 		'vplayloop': {
-			label: 'Play clip in loop at (Speed %)',
+			label: 'Play clip in loop at (speed %)',
 			options: [
 				{
 					type: 'textinput',
@@ -156,11 +189,32 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'recTimestamp': {
+			label: 'Record (with name and current date/time)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Filename (optional)',
+					id: 'prefix',
+					default: '',
+				}
+			]
+		},
+		'recCustom': {
+			label: 'Record (with custom reel)',
+			options: [
+				{
+					type: 'text',
+					id: 'info',
+					label: 'Set \'Reel\' in instance config'
+				}
+			]
+		},
 		'stop': {
 			label: 'Stop'
 		},
 		'goto': {
-			label: 'Goto (Tc)',
+			label: 'Goto (TC)',
 			options: [
 				{
 					type: 'textinput',
@@ -291,11 +345,24 @@ instance.prototype.actions = function(system) {
 					]
 				}
 			]
+		},
+		'remote': {
+			label: 'Remote Control (enable/disable)',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Enable/Disable',
+					id: 'remoteEnable',
+					default: "true",
+					choices: [
+						{ id: 'true', label: 'Enable' },
+						{ id: 'false', label: 'Disable' }
+					]
+				}
+			]
 		}
-
 	});
 };
-
 
 instance.prototype.action = function(action) {
 	var self = this;
@@ -339,6 +406,20 @@ instance.prototype.action = function(action) {
 			cmd = 'record: name: ' + opt.name;
 			break;
 
+		case 'recTimestamp':
+			var timeStamp = renameTimestamp();
+			if (opt.prefix !== '')	{
+				cmd = 'record: name: ' + opt.prefix + '-' + timeStamp + '-';
+			}
+			else {
+				cmd = 'record: name: ' + timeStamp + '-';
+			}
+			break;
+
+		case 'recCustom':
+			cmd = 'record: name: ' + self.config.reel + '-';
+			break;
+
 		case 'goto':
 			cmd = 'goto: timecode: '+ opt.tc;
 			break;
@@ -354,7 +435,7 @@ instance.prototype.action = function(action) {
 		case 'goRew':
 			cmd = 'goto: clip id: -'+ opt.clip;
 			break;
-				
+
 		case 'goStartEnd':
 			cmd = 'goto: clip: '+ opt.startEnd;
 			break;
@@ -362,21 +443,25 @@ instance.prototype.action = function(action) {
 		case 'jogFwd':
 			cmd = 'jog: timecode: +'+ opt.jogFwdTc;
 			break;
-				
+
 		case 'jogRew':
 			cmd = 'jog: timecode: -'+ opt.jogRewTc;
 			break;
-				
+
 		case 'select':
 			cmd = 'slot select: slot id: '+ opt.slot;
 			break;
-				
+
 		case 'videoSrc':
 			cmd = 'configuration: video input: '+ opt.videoSrc;
 			break;
-				
+
 		case 'audioSrc':
 			cmd = 'configuration: audio input: '+ opt.audioSrc;
+			break;
+
+		case 'remote':
+			cmd = 'remote: enable: '+ opt.remoteEnable;
 			break;
 	};
 
@@ -386,15 +471,13 @@ instance.prototype.action = function(action) {
 
 		if (self.socket !== undefined && self.socket.connected) {
 			self.socket.send(cmd + "\n");
-			self.socket.send('notify: transport: true\n')
+			self.socket.send('notify: transport: true\n');
 		} else {
 			debug('Socket not connected :(');
 		}
-
 	}
 
 	// debug('action():', action);
-
 };
 
 instance_skel.extendedBy(instance);

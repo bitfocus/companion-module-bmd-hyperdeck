@@ -10,14 +10,45 @@ function addZero(i) {
 	return i;
 }
 
-function renameTimestamp() {
-	var d          = new Date();
-	var curr_date  = addZero(d.getDate());
-	var curr_month = addZero(d.getMonth()+1);
-	var curr_year  = addZero(d.getFullYear());
-	var h          = addZero(d.getHours());
-	var m          = addZero(d.getMinutes());
-	var stamp      = curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
+function renameTimestamp(t_mask) {
+	var d		= new Date();
+	var curr_date	= addZero(d.getDate());
+	var curr_month	= addZero(d.getMonth()+1);
+	var curr_year	= addZero(d.getFullYear());
+	var h		= addZero(d.getHours());
+	var m		= addZero(d.getMinutes());
+	var stamp	= '';
+	if (t_mask == '') {
+		stamp 	= curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
+	} else {
+		var mask = t_mask.split(":");
+		while (mask[0] != undefined) {
+			switch (mask[0]) {
+				case "YYYY" :
+					stamp = stamp.concat(curr_year);
+					break;
+				case "MM" :
+					stamp = stamp.concat(curr_month);
+					break;
+				case "DD" :
+					stamp = stamp.concat(curr_date);
+					break;
+				case "HH" :
+					stamp = stamp.concat(h);
+					break;
+				case "MI" : 
+					stamp = stamp.concat(m);
+					break;
+				case "-" :
+					stamp = stamp.concat("-");
+					break;
+				case "_" :
+					stamp = stamp.concat("_");
+					break;
+			}
+			mask.shift();
+		}
+	}		
 	return stamp;
 };
 
@@ -196,6 +227,12 @@ instance.prototype.actions = function(system) {
 					type: 'textinput',
 					label: 'Filename (optional)',
 					id: 'prefix',
+					default: '',
+				},
+				{
+					type: 'textinput',
+					label: 'Time Mask (optional) Use ":" seperator. YYYY MM DD HH MI "-" "_" are recognized options.',
+					id: 'time_mask',
 					default: '',
 				}
 			]
@@ -407,7 +444,7 @@ instance.prototype.action = function(action) {
 			break;
 
 		case 'recTimestamp':
-			var timeStamp = renameTimestamp();
+			var timeStamp = renameTimestamp(opt.time_mask);
 			if (opt.prefix !== '')	{
 				cmd = 'record: name: ' + opt.prefix + '-' + timeStamp + '-';
 			}

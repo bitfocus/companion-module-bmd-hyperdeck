@@ -36,7 +36,7 @@ function renameTimestamp(t_mask) {
 				case "HH" :
 					stamp = stamp.concat(h);
 					break;
-				case "MI" : 
+				case "MI" :
 					stamp = stamp.concat(m);
 					break;
 				case "-" :
@@ -48,9 +48,9 @@ function renameTimestamp(t_mask) {
 			}
 			mask.shift();
 		}
-	}		
+	}
 	return stamp;
-};
+}
 
 function instance(system, id, config) {
 	var self = this;
@@ -156,13 +156,40 @@ instance.prototype.destroy = function() {
 		self.socket.destroy();
 	}
 
-	debug("destroy", self.id);;
+	debug("destroy", self.id);
 };
 
 instance.prototype.actions = function(system) {
 	var self = this;
 
 	self.system.emit('instance_actions', self.id, {
+		'playCombined': {
+			label: 'Play',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Single or all clips',
+					id: 'single',
+					default: 'true',
+					choices: [{ id: 'true', label: 'single clip'},{ id: 'false', label: 'all clips'}]
+				},
+				{
+					type: 'dropdown',
+					label: 'Loop',
+					id: 'loop',
+					default: 'false',
+					choices: [{ id: 'true', label: 'loop clips'},{ id: 'false', label: 'no loop'}]
+				},
+				{
+					type: 'textinput',
+					label: 'Speed %',
+					id: 'speed',
+					default: '100',
+					regex: self.REGEX_NUMBER
+				}
+			]
+		},
+		/*
 		'vplay': {
 			label: 'Play (speed %)',
 			options: [
@@ -205,6 +232,7 @@ instance.prototype.actions = function(system) {
 		'playLoop': {
 			label: 'Play Clip in Loop'
 		},
+		*/
 		'rec': {
 			label: 'Record'
 		},
@@ -403,9 +431,14 @@ instance.prototype.actions = function(system) {
 
 instance.prototype.action = function(action) {
 	var self = this;
-	var opt = action.options
+	var opt = action.options;
+	var cmd;
 
 	switch (action.action) {
+
+		case 'playCombined':
+			cmd = `play: single clip: ${opt.single} loop: ${opt.loop} speed: ${opt.speed}`;
+			break;
 
 		case 'vplay':
 			cmd = 'play: speed: '+ opt.speed;
@@ -500,7 +533,7 @@ instance.prototype.action = function(action) {
 		case 'remote':
 			cmd = 'remote: enable: '+ opt.remoteEnable;
 			break;
-	};
+	}
 
 	if (cmd !== undefined) {
 

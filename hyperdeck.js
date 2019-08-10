@@ -184,7 +184,7 @@ instance.prototype.actions = function(system) {
 					type: 'textinput',
 					label: 'Speed %',
 					id: 'speed',
-					default: '100',
+					default: '1',
 					regex: self.REGEX_NUMBER
 				}
 			]

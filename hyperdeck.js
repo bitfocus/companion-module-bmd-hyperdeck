@@ -10,16 +10,47 @@ function addZero(i) {
 	return i;
 }
 
-function renameTimestamp() {
-	var d          = new Date();
-	var curr_date  = addZero(d.getDate());
-	var curr_month = addZero(d.getMonth()+1);
-	var curr_year  = addZero(d.getFullYear());
-	var h          = addZero(d.getHours());
-	var m          = addZero(d.getMinutes());
-	var stamp      = curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
+function renameTimestamp(t_mask) {
+	var d		= new Date();
+	var curr_date	= addZero(d.getDate());
+	var curr_month	= addZero(d.getMonth()+1);
+	var curr_year	= addZero(d.getFullYear());
+	var h		= addZero(d.getHours());
+	var m		= addZero(d.getMinutes());
+	var stamp	= '';
+	if (t_mask == '') {
+		stamp 	= curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
+	} else {
+		var mask = t_mask.split(":");
+		while (mask[0] != undefined) {
+			switch (mask[0]) {
+				case "YYYY" :
+					stamp = stamp.concat(curr_year);
+					break;
+				case "MM" :
+					stamp = stamp.concat(curr_month);
+					break;
+				case "DD" :
+					stamp = stamp.concat(curr_date);
+					break;
+				case "HH" :
+					stamp = stamp.concat(h);
+					break;
+				case "MI" :
+					stamp = stamp.concat(m);
+					break;
+				case "-" :
+					stamp = stamp.concat("-");
+					break;
+				case "_" :
+					stamp = stamp.concat("_");
+					break;
+			}
+			mask.shift();
+		}
+	}
 	return stamp;
-};
+}
 
 function instance(system, id, config) {
 	var self = this;
@@ -125,13 +156,40 @@ instance.prototype.destroy = function() {
 		self.socket.destroy();
 	}
 
-	debug("destroy", self.id);;
+	debug("destroy", self.id);
 };
 
 instance.prototype.actions = function(system) {
 	var self = this;
 
 	self.system.emit('instance_actions', self.id, {
+		'playCombined': {
+			label: 'Play',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Single or all clips',
+					id: 'single',
+					default: 'true',
+					choices: [{ id: 'true', label: 'single clip'},{ id: 'false', label: 'all clips'}]
+				},
+				{
+					type: 'dropdown',
+					label: 'Loop',
+					id: 'loop',
+					default: 'false',
+					choices: [{ id: 'true', label: 'loop clips'},{ id: 'false', label: 'no loop'}]
+				},
+				{
+					type: 'textinput',
+					label: 'Speed %',
+					id: 'speed',
+					default: '1',
+					regex: self.REGEX_NUMBER
+				}
+			]
+		},
+		/*
 		'vplay': {
 			label: 'Play (speed %)',
 			options: [
@@ -174,6 +232,7 @@ instance.prototype.actions = function(system) {
 		'playLoop': {
 			label: 'Play Clip in Loop'
 		},
+		*/
 		'rec': {
 			label: 'Record'
 		},
@@ -196,6 +255,12 @@ instance.prototype.actions = function(system) {
 					type: 'textinput',
 					label: 'Filename (optional)',
 					id: 'prefix',
+					default: '',
+				},
+				{
+					type: 'textinput',
+					label: 'Time Mask (optional) Use ":" seperator. YYYY MM DD HH MI "-" "_" are recognized options.',
+					id: 'time_mask',
 					default: '',
 				}
 			]
@@ -366,9 +431,14 @@ instance.prototype.actions = function(system) {
 
 instance.prototype.action = function(action) {
 	var self = this;
-	var opt = action.options
+	var opt = action.options;
+	var cmd;
 
 	switch (action.action) {
+
+		case 'playCombined':
+			cmd = `play: single clip: ${opt.single} loop: ${opt.loop} speed: ${opt.speed}`;
+			break;
 
 		case 'vplay':
 			cmd = 'play: speed: '+ opt.speed;
@@ -407,7 +477,7 @@ instance.prototype.action = function(action) {
 			break;
 
 		case 'recTimestamp':
-			var timeStamp = renameTimestamp();
+			var timeStamp = renameTimestamp(opt.time_mask);
 			if (opt.prefix !== '')	{
 				cmd = 'record: name: ' + opt.prefix + '-' + timeStamp + '-';
 			}
@@ -463,7 +533,7 @@ instance.prototype.action = function(action) {
 		case 'remote':
 			cmd = 'remote: enable: '+ opt.remoteEnable;
 			break;
-	};
+	}
 
 	if (cmd !== undefined) {
 

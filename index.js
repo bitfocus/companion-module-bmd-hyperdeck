@@ -30,44 +30,63 @@ class instance extends instance_skel {
 		this.selected     = 0;
 		this.deviceName   = '';
 
-		// v1.0.* -> v1.1.0
-		/* TODO: finish upgrade conversion of old play commands
+		// v1.0.* -> v1.1.0 (combine old play actions)
 		this.addUpgradeScript(function (config, actions) {
-			// Presets were actions instead of choices
 			var changed = false;
 
 			for (var k in actions) {
 				var action = actions[k];
 
-				var actionid = action.action;
-				var match;
-
-				if (match = actionid.match(/^recall_preset_pvw_id_(\d+)/)) {
-					if (action.options === undefined) {
-						action.options = {};
-					}
-					action.options.preset_in_pvw = match[1];
-					action.action = 'preset_in_pvw';
-					action.label = self.id + ':' + action.action;
-
-					changed = true;
+				if (action.options === undefined) {
+					action.options = {};
 				}
 
-				if (match = actionid.match(/^recall_preset_pgm_id_(\d+)/)) {
-					if (action.options === undefined) {
-						action.options = {};
-					}
-					action.options.preset_in_pgm = match[1];
-					action.action = 'preset_in_pgm';
-					action.label = self.id + ':' + action.action;
-
-					changed = true;
+				switch (action.action) {
+					case 'vplay':
+						action.options.speed = opt.speed;
+						action.options.loop = 'false';
+						action.options.single = 'false';
+						action.action = 'play';
+						action.label = this.id + ':' + action.action;
+						changed = true;
+						break;
+					case 'vplaysingle':
+						action.options.speed = opt.speed;
+						action.options.loop = 'false';
+						action.options.single = 'true';
+						action.action = 'play';
+						action.label = this.id + ':' + action.action;
+						changed = true;
+						break;
+					case 'vplayloop':
+						action.options.speed = opt.speed;
+						action.options.loop = 'false';
+						action.options.single = 'true';
+						action.action = 'play';
+						action.label = this.id + ':' + action.action;
+						changed = true;
+						break;
+					case 'playSingle':
+						action.options.speed = 100;
+						action.options.loop = 'false';
+						action.options.single = 'true';
+						action.action = 'play';
+						action.label = this.id + ':' + action.action;
+						changed = true;
+						break;
+					case 'playLoop':
+						action.options.speed = 100;
+						action.options.loop = 'false';
+						action.options.single = 'true';
+						action.action = 'play';
+						action.label = this.id + ':' + action.action;
+						changed = true;
+						break;
 				}
 			}
 
 			return changed;
 		});
-		*/
 
 		this.CONFIG_MODEL = {
 			hdStudio: {
@@ -514,21 +533,6 @@ class instance extends instance_skel {
 		var opt = action.options;
 
 		switch (action.action) {
-			/*case 'vplay':
-				cmd = 'play: speed: '+ opt.speed;
-				break;
-			case 'vplaysingle':
-				cmd = 'play: single clip: true: speed: '+ opt.speed;
-				break;
-			case 'vplayloop':
-				cmd = 'play: loop: true: speed: '+ opt.speed;
-				break;
-			case 'playSingle':
-				cmd = 'play: single clip: true';
-				break;
-			case 'playLoop':
-				cmd = 'play: loop: true';
-				break;*/
 			case 'play':
 				if (opt.speed != 100 || opt.loop != 'none' || opt.single != 'none') {
 					cmd = 'play:\nspeed: ' + opt.speed + '\n';
@@ -796,9 +800,9 @@ class instance extends instance_skel {
 		if (key.match(/connection info/)) {
 			this.updateDevice(key,data);
 			this.actions();
-			this.initVariables();
-			this.initFeedbacks();
-			this.initPresets();
+			//this.initVariables();
+			//this.initFeedbacks();
+			//this.initPresets();
 		}
 		else {
 			// TODO: find out more about the hyperdeck from stuff that comes in here
@@ -851,9 +855,9 @@ class instance extends instance_skel {
 		this.config = config;
 
 		this.actions();
-		this.initFeedbacks();
-		this.initPresets();
-		this.initVariables();
+		//this.initFeedbacks();
+		//this.initPresets();
+		//this.initVariables();
 
 		if (resetConnection === true || this.socket === undefined) {
 			this.initTCP();

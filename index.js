@@ -1,7 +1,7 @@
-var tcp = require('../../tcp');
-var instance_skel = require('../../instance_skel');
+const instance_skel = require('../../instance_skel');
+const { HyperDeck, Commands } = require('hyperdeck-connection')
+
 var debug;
-var log;
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -534,81 +534,95 @@ class instance extends instance_skel {
 
 		switch (action.action) {
 			case 'play':
+				cmd = Commands.PlayCommand()
 				if (opt.speed != 100 || opt.loop != 'none' || opt.single != 'none') {
-					cmd = 'play:\nspeed: ' + opt.speed + '\n';
-					cmd .= (opt.loop != 'none' ? 'loop: ' + opt.loop + '\n' : '');
-					cmd .= (opt.single != 'none' ? 'single clip: ' + opt.single + '\n' : '');
-				}
-				else {
-					cmd = 'play';
+					cmd.speed = opt.speed;
+					cmd.loop = opt.loop;
+					cmd.singleClip = opt.single;
 				}
 				break;
 			case 'stop':
-				cmd = 'stop';
+				cmd = Commands.StopCommand();
 				break;
 			case 'rec':
-				cmd = 'record';
+				cmd = Commands.RecordCommand();
 				break;
 			case 'recAppend':
-				cmd = 'record: append: true';
+				cmd = Commands.RecordCommand();
+				cmd.append = true
 				break;
 			case 'recName':
-				cmd = 'record: name: ' + opt.name;
+				cmd = Commands.RecordCommand();
+				cmd.name = opt.name;
 				break;
 			case 'recTimestamp':
+				cmd = Commands.RecordCommand();
 				var timeStamp = this.getTimestamp();
 				if (opt.prefix !== '') {
-					cmd = 'record: name: ' + opt.prefix + '-' + timeStamp + '-';
+					cmd.name = opt.prefix + '-' + timeStamp + '-';
 				}
 				else {
-					cmd = 'record: name: ' + timeStamp + '-';
+					cmd.name = timeStamp + '-';
 				}
 				break;
 			case 'recCustom':
-				cmd = 'record: name: ' + this.config.reel + '-';
+				cmd = Commands.RecordCommand();
+				cmd.name = this.config.reel + '-';
 				break;
 			case 'goto':
-				cmd = 'goto: timecode: '+ opt.tc;
+				cmd = Commands.GoToCommand()
+				cmd.timecode = opt.tc;
 				break;
 			case 'gotoN':
-				cmd = 'goto: clip id: '+ opt.clip;
+				cmd = Commands.GoToCommand()
+				cmd.clip = opt.clip;
 				break;
 			case 'goFwd':
-				cmd = 'goto: clip id: +'+ opt.clip;
+				cmd = Commands.GoToCommand()
+				cmd.clip = opt.clip;
 				break;
 			case 'goRew':
-				cmd = 'goto: clip id: -'+ opt.clip;
+				cmd = Commands.GoToCommand()
+				cmd.clipId = opt.clip;
 				break;
 			case 'goStartEnd':
-				cmd = 'goto: clip: '+ opt.startEnd;
+				cmd = Commands.GoToCommand()
+				cmd.clip = opt.startEnd;
 				break;
 			case 'jogFwd':
-				cmd = 'jog: timecode: +'+ opt.jogFwdTc;
+				cmd = Commands.JogCommand()
+				cmd.timecode = '+'+ opt.jogFwdTc;
 				break;
 			case 'jogRew':
-				cmd = 'jog: timecode: -'+ opt.jogRewTc;
+				cmd = Commands.JogCommand()
+				cmd.timecode = '-'+ opt.jogRewTc;
 				break;
 			case 'shuttle':
-				cmd = 'shuttle: speed: -'+ opt.speed;
+				cmd = new Commands.ShuttleCommand()
+				cmd.speed = '-'+ opt.speed;
 				break;
 			case 'select':
-				cmd = 'slot select: slot id: '+ opt.slot;
+				cmd = new Commands.SlotSelectCommand()
+				cmd.slotId = opt.slot;
 				break;
 			case 'videoSrc':
-				cmd = 'configuration: video input: '+ opt.videoSrc;
+				cmd = new Commands.ConfigurationCommand()
+				cmd.videoInput = opt.videoSrc;
 				break;
 			case 'audioSrc':
-				cmd = 'configuration: audio input: '+ opt.audioSrc;
+				cmd = new Commands.ConfigurationCommand()
+				cmd.audioInput = opt.audioSrc;
 				break;
 			case 'remote':
-				cmd = 'remote: enable: '+ opt.remoteEnable;
+				cmd = new Commands.RemoteCommand()
+				cmd.enable = opt.remoteEnable;
 				break;
 		}
 
 		if (cmd !== undefined) {
 
-			if (this.socket !== undefined && this.socket.connected) {
-				this.socket.send(cmd);
+			if (this.hyperDeck !== undefined && this.hyperDeck.connected) {
+				this.hyperDeck.sendCommand(cmd);
 			}
 			else {
 				this.debug('Socket not connected :(');
@@ -673,8 +687,9 @@ class instance extends instance_skel {
 	 */
 	destroy() {
 
-		if (this.socket !== undefined) {
-			this.socket.destroy();
+		if (this.hyperDeck !== undefined) {
+			this.hyperDeck.disconnect()
+			this.hyperDeck = undefined
 		}
 
 		debug("destroy", this.id);
@@ -712,101 +727,39 @@ class instance extends instance_skel {
 
 		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
 
-		this.initTCP();
+		this.initHyperdeck()
 	}
 
 	/**
-	 * INTERNAL: use setup data to initalize the tcp socket object.
+	 * INTERNAL: use setup data to initalize the hyperdeck library.
 	 *
 	 * @access protected
 	 * @since 1.0.0
 	 */
-	initTCP() {
-		var receivebuffer = '';
+	initHyperdeck() {
+		this.hyperDeck = new HyperDeck()
 
-		if (this.socket !== undefined) {
-			this.socket.destroy();
-			delete this.socket;
-		}
+		this.hyperDeck.on('connected', c => {
+			// c contains the result of 500 connection info
+			this.updateDevice(undefined, c)
+			this.actions()
 
-		if (this.config.port === undefined) {
-			this.config.port = 9993;
-		}
+			// @todo: I couldn't find any references in old code that implicates this is actually used.
+			// set notification:
+			// const notify = new Commands.NotifySetCommand()
+			// notify.configuration = true // @todo: not implemented in hyperdeck-connection
+			// notify.transport = true
+			// notify.slot = true
+			// this.hyperDeck.sendCommand(notify)
 
-		if (this.config.host) {
-			this.socket = new tcp(this.config.host, this.config.port);
+			this.status(this.STATUS_OK,'Connected')
+		})
 
-			this.socket.on('status_change', (status, message) => {
-				this.status(status, message);
-			});
+		this.hyperDeck.on('disconnected', () => {
+			this.status(this.STATUS_ERROR,'Disconnected')
+		})
 
-			this.socket.on('error', (err) => {
-				this.debug("Network error", err);
-				this.log('error',"Network error: " + err.message);
-			});
-
-			this.socket.on('connect', () => {
-				this.debug("Connected");
-				this.socket.send('notify:\ntransport: true\nslot: true\nremote: true\nconfiguration: true\n\n');
-			});
-
-			// separate buffered stream into lines with responses
-			this.socket.on('data', (chunk) => {
-				var i = 0, line = '', offset = 0;
-				receivebuffer += chunk;
-
-				while ( (i = receivebuffer.indexOf('\n', offset)) !== -1) {
-					line = receivebuffer.substr(offset, i - offset);
-					offset = i + 1;
-					this.socket.emit('receiveline', line.toString());
-				}
-
-				receivebuffer = receivebuffer.substr(offset);
-			});
-
-			this.socket.on('receiveline', (line) => {
-
-				if (this.command === null && line.match(/:/) ) {
-					this.command = line;
-				}
-				else if (this.command !== null && line.length > 0) {
-					this.stash.push(line.trim());
-				}
-				else if (line.length === 0 && this.command !== null) {
-					var cmd = this.command.trim().split(/:/)[0];
-
-					this.processHyperdeckInformation(cmd, this.stash);
-
-					this.stash = [];
-					this.command = null;
-				}
-				else {
-					this.debug("weird response from hyperdeck", line, line.length);
-				}
-			});
-		}
-	}
-
-	/**
-	 * INTERNAL: Routes incoming data to the appropriate function for processing.
-	 *
-	 * @param {string} key - the command/data type being passed
-	 * @param {Object} data - the collected data
-	 * @access protected
-	 * @since 1.1.0
-	 */
-	processHyperdeckInformation(key,data) {
-
-		if (key.match(/connection info/)) {
-			this.updateDevice(key,data);
-			this.actions();
-			//this.initVariables();
-			//this.initFeedbacks();
-			//this.initPresets();
-		}
-		else {
-			// TODO: find out more about the hyperdeck from stuff that comes in here
-		}
+		this.hyperDeck.connect(this.config.host, this.config.port)
 	}
 
 	/**
@@ -859,8 +812,8 @@ class instance extends instance_skel {
 		//this.initPresets();
 		//this.initVariables();
 
-		if (resetConnection === true || this.socket === undefined) {
-			this.initTCP();
+		if (resetConnection === true || this.hyperDeck === undefined) {
+			this.initHyperdeck();
 		}
 	}
 

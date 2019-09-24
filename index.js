@@ -732,7 +732,7 @@ class instance extends instance_skel {
 					type: 'dropdown',
 					label: 'Transport Status',
 					id: 'status',
-					choices: this.HYPERDECK_STATUS
+					choices: this.CHOICES_HYPERDECK_TRANSPORT_STATUS
 				}
 			]
 		}
@@ -756,12 +756,14 @@ class instance extends instance_skel {
 					type: 'dropdown',
 					label: 'Disk Status',
 					id: 'status',
-					choices: this.HYPERDECK_STATUS
+					choices: this.CHOICES_HYPERDECK_SLOT_STATUS
 				},
 				{
-					type: 'number',
+					type: 'textinput',
 					label: 'Slot Id',
-					id: 'slotId'
+					id: 'slotId',
+					default: 1,
+					regex: this.REGEX_SIGNED_NUMBER
 				}
 			]
 		}
@@ -782,13 +784,13 @@ class instance extends instance_skel {
 		var out  = {};
 		var opt = feedback.options;
 
-		if (opt.type === 'slot_status') {
+		if (feedback.type === 'slot_status') {
 			const slot = this.slotInfo[opt.slotId]
-			if (slot.status === opt.status) {
+			if (slot && slot.status === opt.status) {
 				out = { color: opt.fg, bgcolor: opt.bg };
 			}
 		}
-		else if (opt.type === 'transport_status') {
+		else if (feedback.type === 'transport_status') {
 			if (opt.status === this.transportInfo.status) {
 				out = { color: opt.fg, bgcolor: opt.bg };
 			}
@@ -844,6 +846,7 @@ class instance extends instance_skel {
 		debug = this.debug;
 
 		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
+		this.initFeedbacks()
 
 		this.initHyperdeck()
 	}
@@ -856,6 +859,7 @@ class instance extends instance_skel {
 	 */
 	initHyperdeck() {
 		this.hyperDeck = new Hyperdeck()
+
 		this.hyperDeck.on('error', e => {
 			this.log('error', e)
 		})
@@ -891,12 +895,20 @@ class instance extends instance_skel {
 		})
 
 		this.hyperDeck.on('notify.slot', res => {
-			this.slotInfo[res.slotId] = res
+			this.log('debug', 'Slot Status Changed')
+			this.slotInfo[res.slotId] = {
+				...this.slotInfo[res.slotId],
+				...res
+			}
 			this.checkFeedbacks('slot_status')
 		})
 
 		this.hyperDeck.on('notify.transport', res => {
-			this.transportInfo = res
+			this.log('debug', 'Transport Status Changed')
+			this.transportInfo = {
+				...this.transportInfo,
+				...res
+			}
 			this.checkFeedbacks('transport_status')
 		})
 

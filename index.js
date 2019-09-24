@@ -1,5 +1,5 @@
 const instance_skel = require('../../instance_skel');
-const { HyperDeck, Commands } = require('hyperdeck-connection')
+const { HyperDeck, Commands, SlotStatus, TransportStatus } = require('hyperdeck-connection')
 
 var debug;
 
@@ -25,10 +25,12 @@ class instance extends instance_skel {
 	constructor(system, id, config) {
 		super(system, id, config);
 
-		this.stash        = [];
-		this.command      = null;
-		this.selected     = 0;
-		this.deviceName   = '';
+		this.stash         = [];
+		this.command       = null;
+		this.selected      = 0;
+		this.deviceName    = '';
+		this.slotInfo	   = [];
+		this.transportInfo = [];
 
 		// v1.0.* -> v1.1.0 (combine old play actions)
 		this.addUpgradeScript(function (config, actions) {
@@ -222,6 +224,24 @@ class instance extends instance_skel {
 			{ id: 'true',  label: 'Yes'       },
 			{ id: 'false', label: 'No'        }
 		];
+
+		this.CHOICES_HYPERDECK_SLOT_STATUS = [
+			{ id: SlotStatus.EMPTY,    label: 'Empty' 	 },
+			{ id: SlotStatus.ERROR,    label: 'Error' 	 },
+			{ id: SlotStatus.MOUNTED,  label: 'Mounted'  },
+			{ id: SlotStatus.MOUNTING, label: 'Mounting' }
+		]
+
+		this.CHOICES_HYPERDECK_TRANSPORT_STATUS = [
+			{ id: TransportStatus.PREVIEW, label: 'Preview' },
+			{ id: TransportStatus.STOPPED, label: 'Stopped' },
+			{ id: TransportStatus.PLAY,    label: 'Playing' },
+			{ id: TransportStatus.FORWARD, label: 'Forward' },
+			{ id: TransportStatus.REWIND,  label: 'Rewind'  },
+			{ id: TransportStatus.JOG, 	   label: 'Jog' 	},
+			{ id: TransportStatus.SHUTTLE, label: 'Shuttle' },
+			{ id: TransportStatus.RECORD,  label: 'Record'  }
+		]
 
 		if (this.config.modelID !== undefined){
 			this.model = this.CONFIG_MODEL[this.config.modelID];
@@ -680,6 +700,100 @@ class instance extends instance_skel {
 	}
 
 	/**
+	 * INTERNAL: initialize feedbacks.
+	 *
+	 * @access protected
+	 * @since 1.1.0
+	 */
+	initFeedbacks() {
+		var feedbacks = {};
+
+		feedbacks['transport_status'] = {
+			label: 'Change colors from transport status',
+			description: 'If the HyperDeck is playing, change colors of the bank',
+			options: [
+				{
+					type: 'colorpicker',
+					label: 'Foreground color',
+					id: 'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Background color',
+					id: 'bg',
+					default: this.rgb(0,255,0)
+				},
+				{
+					type: 'dropdown',
+					label: 'Transport Status',
+					id: 'status',
+					choices: this.HYPERDECK_STATUS
+				}
+			]
+		}
+		feedbacks['slot_status'] = {
+			label: 'Change colors from disk status',
+			description: 'Based on disk status, change colors of the bank',
+			options: [
+				{
+					type: 'colorpicker',
+					label: 'Foreground color',
+					id: 'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Background color',
+					id: 'bg',
+					default: this.rgb(0,255,0)
+				},
+				{
+					type: 'dropdown',
+					label: 'Disk Status',
+					id: 'status',
+					choices: this.HYPERDECK_STATUS
+				},
+				{
+					type: 'number',
+					label: 'Slot Id',
+					id: 'slotId'
+				}
+			]
+		}
+
+		this.setFeedbackDefinitions(feedbacks);
+	}
+
+	/**
+	 * Processes a feedback state.
+	 *
+	 * @param {Object} feedback - the feedback type to process
+	 * @param {Object} bank - the bank this feedback is associated with
+	 * @returns {Object} feedback information for the bank
+	 * @access public
+	 * @since 1.0.0
+	 */
+	feedback(feedback, bank) {
+		var out  = {};
+		var opt = feedback.options;
+
+		if (opt.type === 'slot_status') {
+			const slot = this.slotInfo[opt.slotId]
+			if (slot.status === opt.status) {
+				out = { color: opt.fg, bgcolor: opt.bg };
+			}
+		}
+		else if (opt.type === 'transport_status') {
+			if (opt.status === this.transportInfo.status) {
+				out = { color: opt.fg, bgcolor: opt.bg };
+			}
+		}
+
+		return out;
+	}
+
+	/**
 	 * Clean up the instance before it is destroyed.
 	 *
 	 * @access public
@@ -689,6 +803,7 @@ class instance extends instance_skel {
 
 		if (this.hyperDeck !== undefined) {
 			this.hyperDeck.disconnect()
+			this.hyperDeck.removeAllListeners()
 			this.hyperDeck = undefined
 		}
 
@@ -739,24 +854,44 @@ class instance extends instance_skel {
 	initHyperdeck() {
 		this.hyperDeck = new HyperDeck()
 
-		this.hyperDeck.on('connected', c => {
+		this.hyperDeck.on('connected', async c => {
 			// c contains the result of 500 connection info
 			this.updateDevice(undefined, c)
 			this.actions()
 
-			// @todo: I couldn't find any references in old code that implicates this is actually used.
 			// set notification:
-			// const notify = new Commands.NotifySetCommand()
+			const notify = new Commands.NotifySetCommand()
 			// notify.configuration = true // @todo: not implemented in hyperdeck-connection
-			// notify.transport = true
-			// notify.slot = true
-			// this.hyperDeck.sendCommand(notify)
+			notify.transport = true
+			notify.slot = true
+			await this.hyperDeck.sendCommand(notify)
+
+			const { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
+
+			for (let i = 0; i < slots; i++) {
+				this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
+			}
+
+			this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
 			this.status(this.STATUS_OK,'Connected')
+
+			this.checkFeedbacks('slot_status')
+			this.checkFeedbacks('transport_status')
 		})
 
 		this.hyperDeck.on('disconnected', () => {
 			this.status(this.STATUS_ERROR,'Disconnected')
+		})
+
+		this.hyperDeck.on('notify.slot', res => {
+			this.slotInfo[res.slotId] = res
+			this.checkFeedbacks('slot_status')
+		})
+
+		this.hyperDeck.on('notify.transport', res => {
+			this.transportInfo = res
+			this.checkFeedbacks('transport_status')
 		})
 
 		this.hyperDeck.connect(this.config.host, this.config.port)

@@ -1,5 +1,5 @@
 const instance_skel = require('../../instance_skel');
-const { HyperDeck, Commands } = require('hyperdeck-connection')
+const { Hyperdeck, Commands, SlotStatus, TransportStatus } = require('hyperdeck-connection')
 
 var debug;
 
@@ -534,7 +534,7 @@ class instance extends instance_skel {
 
 		switch (action.action) {
 			case 'play':
-				cmd = Commands.PlayCommand()
+				cmd = new Commands.PlayCommand()
 				if (opt.speed != 100 || opt.loop != 'none' || opt.single != 'none') {
 					cmd.speed = opt.speed;
 					cmd.loop = opt.loop;
@@ -542,21 +542,21 @@ class instance extends instance_skel {
 				}
 				break;
 			case 'stop':
-				cmd = Commands.StopCommand();
+				cmd = new Commands.StopCommand();
 				break;
 			case 'rec':
-				cmd = Commands.RecordCommand();
+				cmd = new Commands.RecordCommand();
 				break;
 			case 'recAppend':
-				cmd = Commands.RecordCommand();
+				cmd = new Commands.RecordCommand();
 				cmd.append = true
 				break;
 			case 'recName':
-				cmd = Commands.RecordCommand();
+				cmd = new Commands.RecordCommand();
 				cmd.name = opt.name;
 				break;
 			case 'recTimestamp':
-				cmd = Commands.RecordCommand();
+				cmd = new Commands.RecordCommand();
 				var timeStamp = this.getTimestamp();
 				if (opt.prefix !== '') {
 					cmd.name = opt.prefix + '-' + timeStamp + '-';
@@ -566,35 +566,35 @@ class instance extends instance_skel {
 				}
 				break;
 			case 'recCustom':
-				cmd = Commands.RecordCommand();
+				cmd = new Commands.RecordCommand();
 				cmd.name = this.config.reel + '-';
 				break;
 			case 'goto':
-				cmd = Commands.GoToCommand()
+				cmd = new Commands.GoToCommand()
 				cmd.timecode = opt.tc;
 				break;
 			case 'gotoN':
-				cmd = Commands.GoToCommand()
+				cmd = new Commands.GoToCommand()
 				cmd.clip = opt.clip;
 				break;
 			case 'goFwd':
-				cmd = Commands.GoToCommand()
+				cmd = new Commands.GoToCommand()
 				cmd.clip = opt.clip;
 				break;
 			case 'goRew':
-				cmd = Commands.GoToCommand()
+				cmd = new Commands.GoToCommand()
 				cmd.clipId = opt.clip;
 				break;
 			case 'goStartEnd':
-				cmd = Commands.GoToCommand()
+				cmd = new Commands.GoToCommand()
 				cmd.clip = opt.startEnd;
 				break;
 			case 'jogFwd':
-				cmd = Commands.JogCommand()
+				cmd = new Commands.JogCommand()
 				cmd.timecode = '+'+ opt.jogFwdTc;
 				break;
 			case 'jogRew':
-				cmd = Commands.JogCommand()
+				cmd = new Commands.JogCommand()
 				cmd.timecode = '-'+ opt.jogRewTc;
 				break;
 			case 'shuttle':
@@ -622,7 +622,11 @@ class instance extends instance_skel {
 		if (cmd !== undefined) {
 
 			if (this.hyperDeck !== undefined && this.hyperDeck.connected) {
-				this.hyperDeck.sendCommand(cmd);
+				this.hyperDeck.sendCommand(cmd).catch(e => {
+					if (e.code) {
+						this.log('error', e.code + ' ' + e.name)
+					}
+				});
 			}
 			else {
 				this.debug('Socket not connected :(');
@@ -723,7 +727,6 @@ class instance extends instance_skel {
 	 */
 	init() {
 		debug = this.debug;
-		log = this.log;
 
 		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
 
@@ -737,7 +740,10 @@ class instance extends instance_skel {
 	 * @since 1.0.0
 	 */
 	initHyperdeck() {
-		this.hyperDeck = new HyperDeck()
+		this.hyperDeck = new Hyperdeck()
+		this.hyperDeck.on('error', e => {
+			this.log('error', e)
+		})
 
 		this.hyperDeck.on('connected', c => {
 			// c contains the result of 500 connection info
@@ -827,37 +833,59 @@ class instance extends instance_skel {
 	 */
 	updateDevice(labeltype, object) {
 
-		for (var key in object) {
-			var parsethis = object[key];
-			var a = parsethis.split(/: /);
-			var attribute = a.shift();
-			var value = a.join(" ");
+		// for (var key in object) {
+		// 	var parsethis = object[key];
+		// 	var a = parsethis.split(/: /);
+		// 	var attribute = a.shift();
+		// 	var value = a.join(" ");
 
-			switch (attribute) {
-				case 'model':
-					if (value.match(/Extreme/)) {
-						this.config.modelID = 'hdExtreme8K';
-					}
-					else if (value.match(/Mini/)) {
-						this.config.modelID = 'hdStudioMini';
-					}
-					else if (value.match(/Duplicator/)) {
-						this.config.modelID = 'bmdDup4K';
-					}
-					else if (value.match(/12G/)) {
-						this.config.modelID = 'hdStudio12G';
-					}
-					else if (value.match(/Pro/)) {
-						this.config.modelID = 'hdStudioPro';
-					}
-					else {
-						this.config.modelID = 'hdStudio';
-					}
-					this.deviceName = value;
-					this.log('info', 'Connected to a ' + this.deviceName);
-					break;
-			}
+		// 	switch (attribute) {
+		// 		case 'model':
+		// 			if (value.match(/Extreme/)) {
+		// 				this.config.modelID = 'hdExtreme8K';
+		// 			}
+		// 			else if (value.match(/Mini/)) {
+		// 				this.config.modelID = 'hdStudioMini';
+		// 			}
+		// 			else if (value.match(/Duplicator/)) {
+		// 				this.config.modelID = 'bmdDup4K';
+		// 			}
+		// 			else if (value.match(/12G/)) {
+		// 				this.config.modelID = 'hdStudio12G';
+		// 			}
+		// 			else if (value.match(/Pro/)) {
+		// 				this.config.modelID = 'hdStudioPro';
+		// 			}
+		// 			else {
+		// 				this.config.modelID = 'hdStudio';
+		// 			}
+		// 			this.deviceName = value;
+		// 			this.log('info', 'Connected to a ' + this.deviceName);
+		// 			break;
+		// 	}
+		// }
+
+		const value = object.model
+		if (value.match(/Extreme/)) {
+			this.config.modelID = 'hdExtreme8K';
 		}
+		else if (value.match(/Mini/)) {
+			this.config.modelID = 'hdStudioMini';
+		}
+		else if (value.match(/Duplicator/)) {
+			this.config.modelID = 'bmdDup4K';
+		}
+		else if (value.match(/12G/)) {
+			this.config.modelID = 'hdStudio12G';
+		}
+		else if (value.match(/Pro/)) {
+			this.config.modelID = 'hdStudioPro';
+		}
+		else {
+			this.config.modelID = 'hdStudio';
+		}
+		this.deviceName = value;
+		this.log('info', 'Connected to a ' + this.deviceName);
 
 		this.saveConfig();
 	}

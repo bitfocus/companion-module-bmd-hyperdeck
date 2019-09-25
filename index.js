@@ -46,40 +46,40 @@ class instance extends instance_skel {
 				switch (action.action) {
 					case 'vplay':
 						action.options.speed = opt.speed;
-						action.options.loop = 'false';
-						action.options.single = 'false';
+						action.options.loop = false;
+						action.options.single = false;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
 						break;
 					case 'vplaysingle':
 						action.options.speed = opt.speed;
-						action.options.loop = 'false';
-						action.options.single = 'true';
+						action.options.loop = false;
+						action.options.single = true;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
 						break;
 					case 'vplayloop':
 						action.options.speed = opt.speed;
-						action.options.loop = 'false';
-						action.options.single = 'true';
+						action.options.loop = false;
+						action.options.single = true;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
 						break;
 					case 'playSingle':
 						action.options.speed = 100;
-						action.options.loop = 'false';
-						action.options.single = 'true';
+						action.options.loop = false;
+						action.options.single = true;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
 						break;
 					case 'playLoop':
 						action.options.speed = 100;
-						action.options.loop = 'false';
-						action.options.single = 'true';
+						action.options.loop = false;
+						action.options.single = true;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
@@ -226,21 +226,21 @@ class instance extends instance_skel {
 		];
 
 		this.CHOICES_HYPERDECK_SLOT_STATUS = [
-			{ id: SlotStatus.EMPTY,    label: 'Empty' 	 },
-			{ id: SlotStatus.ERROR,    label: 'Error' 	 },
-			{ id: SlotStatus.MOUNTED,  label: 'Mounted'  },
-			{ id: SlotStatus.MOUNTING, label: 'Mounting' }
+			{ id: 'empty',    label: 'Empty' 	 },
+			{ id: 'error',    label: 'Error' 	 },
+			{ id: 'mounted',  label: 'Mounted'  },
+			{ id: 'mounting', label: 'Mounting' }
 		]
 
 		this.CHOICES_HYPERDECK_TRANSPORT_STATUS = [
-			{ id: TransportStatus.PREVIEW, label: 'Preview' },
-			{ id: TransportStatus.STOPPED, label: 'Stopped' },
-			{ id: TransportStatus.PLAY,    label: 'Playing' },
-			{ id: TransportStatus.FORWARD, label: 'Forward' },
-			{ id: TransportStatus.REWIND,  label: 'Rewind'  },
-			{ id: TransportStatus.JOG, 	   label: 'Jog' 	},
-			{ id: TransportStatus.SHUTTLE, label: 'Shuttle' },
-			{ id: TransportStatus.RECORD,  label: 'Record'  }
+			{ id: 'preview', label: 'Preview' },
+			{ id: 'stopped', label: 'Stopped' },
+			{ id: 'play',    label: 'Playing' },
+			{ id: 'forward', label: 'Forward' },
+			{ id: 'rewind',  label: 'Rewind'  },
+			{ id: 'jog', 	   label: 'Jog' 	},
+			{ id: 'shuttle', label: 'Shuttle' },
+			{ id: 'record',  label: 'Record'  }
 		]
 
 		if (this.config.modelID !== undefined){
@@ -281,16 +281,14 @@ class instance extends instance_skel {
 						range: true
 					},
 					{
-						type: 'dropdown',
+						type: 'checkbox',
 						id: 'loop',
-						default: 'none',
-						choices: this.CHOICES_TRUEFALSE
+						default: false
 					},
 					{
-						type: 'dropdown',
+						type: 'checbox',
 						id: 'single',
-						default: 'none',
-						choices: this.CHOICES_TRUEFALSE
+						default: false
 					}
 				]
 			};
@@ -555,11 +553,9 @@ class instance extends instance_skel {
 		switch (action.action) {
 			case 'play':
 				cmd = new Commands.PlayCommand()
-				if (opt.speed != 100 || opt.loop != 'none' || opt.single != 'none') {
-					cmd.speed = opt.speed;
-					cmd.loop = opt.loop;
-					cmd.singleClip = opt.single;
-				}
+				cmd.speed = opt.speed;
+				cmd.loop = opt.loop;
+				cmd.singleClip = opt.single;
 				break;
 			case 'stop':
 				cmd = new Commands.StopCommand();
@@ -734,7 +730,12 @@ class instance extends instance_skel {
 					id: 'status',
 					choices: this.CHOICES_HYPERDECK_TRANSPORT_STATUS
 				}
-			]
+			],
+			callback: ({ options }, bank) => {
+				if (options.status === this.transportInfo.status) {
+					return { color: options.fg, bgcolor: options.bg };
+				}
+			}
 		}
 		feedbacks['slot_status'] = {
 			label: 'Change colors from disk status',
@@ -765,38 +766,17 @@ class instance extends instance_skel {
 					default: 1,
 					regex: this.REGEX_SIGNED_NUMBER
 				}
-			]
+			],
+			callback: ({ options }, bank) => {
+				const slot = this.slotInfo[opt.slotId]
+				if (slot && slot.status === options.status) {
+					return { color: options.fg, bgcolor: options.bg };
+				}
+			}
+
 		}
 
 		this.setFeedbackDefinitions(feedbacks);
-	}
-
-	/**
-	 * Processes a feedback state.
-	 *
-	 * @param {Object} feedback - the feedback type to process
-	 * @param {Object} bank - the bank this feedback is associated with
-	 * @returns {Object} feedback information for the bank
-	 * @access public
-	 * @since 1.0.0
-	 */
-	feedback(feedback, bank) {
-		var out  = {};
-		var opt = feedback.options;
-
-		if (feedback.type === 'slot_status') {
-			const slot = this.slotInfo[opt.slotId]
-			if (slot && slot.status === opt.status) {
-				out = { color: opt.fg, bgcolor: opt.bg };
-			}
-		}
-		else if (feedback.type === 'transport_status') {
-			if (opt.status === this.transportInfo.status) {
-				out = { color: opt.fg, bgcolor: opt.bg };
-			}
-		}
-
-		return out;
 	}
 
 	/**

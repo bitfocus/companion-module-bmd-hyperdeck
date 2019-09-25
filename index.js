@@ -219,12 +219,6 @@ class instance extends instance_skel {
 			{ id: 'end',   label: 'End'   }
 		];
 
-		this.CHOICES_TRUEFALSE = [
-			{ id: 'none',  label: 'No change' },
-			{ id: 'true',  label: 'Yes'       },
-			{ id: 'false', label: 'No'        }
-		];
-
 		this.CHOICES_HYPERDECK_SLOT_STATUS = [
 			{ id: 'empty',    label: 'Empty' 	 },
 			{ id: 'error',    label: 'Error' 	 },

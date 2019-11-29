@@ -17,7 +17,11 @@
 	"contributors": [
 		"Stephen Harrison <stephen@redleopard.org>",
 		"Keith Rocheck",
-		"Jeffrey Davidsz"
+		"Jeffrey Davidsz",
+		"Balte de Wit <contact@balte.nl>"
 	],
-	"license": "MIT"
+	"license": "MIT",
+	"dependencies": {
+		"hyperdeck-connection": "^0.3.0"
+	}
 }

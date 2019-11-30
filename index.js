@@ -850,7 +850,9 @@ class instance extends instance_skel {
 			notify.slot = true
 			await this.hyperDeck.sendCommand(notify)
 
-			const { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
+			let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
+
+			if (slots === undefined) slots = 2
 
 			for (let i = 0; i < slots; i++) {
 				this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))

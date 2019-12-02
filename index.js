@@ -29,7 +29,7 @@ class instance extends instance_skel {
 		this.command       = null;
 		this.selected      = 0;
 		this.deviceName    = '';
-		this.slotInfo	   = [];
+		this.slotInfo      = [];
 		this.transportInfo = [];
 
 		// v1.0.* -> v1.1.0 (combine old play actions)
@@ -62,8 +62,8 @@ class instance extends instance_skel {
 						break;
 					case 'vplayloop':
 						action.options.speed = opt.speed;
-						action.options.loop = false;
-						action.options.single = true;
+						action.options.loop = true;
+						action.options.single = false;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
@@ -78,11 +78,25 @@ class instance extends instance_skel {
 						break;
 					case 'playLoop':
 						action.options.speed = 100;
-						action.options.loop = false;
-						action.options.single = true;
+						action.options.loop = true;
+						action.options.single = false;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
+						break;
+					case 'play':
+						if (action.options.speed === undefined) {
+							action.options.speed = 100;
+							changed = true;
+						}
+						if (action.options.loop === undefined) {
+							action.options.loop = false;
+							changed = true;
+						}
+						if (action.options.single === undefined) {
+							action.options.single = false;
+							changed = true;
+						}
 						break;
 				}
 			}
@@ -219,20 +233,20 @@ class instance extends instance_skel {
 			{ id: 'end',   label: 'End'   }
 		];
 
-		this.CHOICES_HYPERDECK_SLOT_STATUS = [
-			{ id: 'empty',    label: 'Empty' 	 },
-			{ id: 'error',    label: 'Error' 	 },
+		this.CHOICES_SLOTSTATUS = [
+			{ id: 'empty',    label: 'Empty'    },
+			{ id: 'error',    label: 'Error'    },
 			{ id: 'mounted',  label: 'Mounted'  },
 			{ id: 'mounting', label: 'Mounting' }
 		]
 
-		this.CHOICES_HYPERDECK_TRANSPORT_STATUS = [
+		this.CHOICES_TRANSPORTSTATUS = [
 			{ id: 'preview', label: 'Preview' },
 			{ id: 'stopped', label: 'Stopped' },
 			{ id: 'play',    label: 'Playing' },
 			{ id: 'forward', label: 'Forward' },
 			{ id: 'rewind',  label: 'Rewind'  },
-			{ id: 'jog', 	   label: 'Jog' 	},
+			{ id: 'jog',     label: 'Jog'     },
 			{ id: 'shuttle', label: 'Shuttle' },
 			{ id: 'record',  label: 'Record'  }
 		]
@@ -722,7 +736,7 @@ class instance extends instance_skel {
 					type: 'dropdown',
 					label: 'Transport Status',
 					id: 'status',
-					choices: this.CHOICES_HYPERDECK_TRANSPORT_STATUS
+					choices: this.CHOICES_TRANSPORTSTATUS
 				}
 			],
 			callback: ({ options }, bank) => {
@@ -751,7 +765,7 @@ class instance extends instance_skel {
 					type: 'dropdown',
 					label: 'Disk Status',
 					id: 'status',
-					choices: this.CHOICES_HYPERDECK_SLOT_STATUS
+					choices: this.CHOICES_SLOTSTATUS
 				},
 				{
 					type: 'textinput',
@@ -820,7 +834,9 @@ class instance extends instance_skel {
 		debug = this.debug;
 
 		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
-		this.initFeedbacks()
+		this.initFeedbacks();
+		//this.initPresets();
+		//this.initVariables();
 
 		this.initHyperdeck()
 	}
@@ -832,63 +848,79 @@ class instance extends instance_skel {
 	 * @since 1.0.0
 	 */
 	initHyperdeck() {
-		this.hyperDeck = new Hyperdeck()
 
-		this.hyperDeck.on('error', e => {
-			this.log('error', e)
-		})
+		if (this.hyperDeck !== undefined) {
+			this.hyperDeck.disconnect();
+			this.hyperDeck.removeAllListeners();
+			delete this.hyperDeck;
+		}
 
-		this.hyperDeck.on('connected', async c => {
-			// c contains the result of 500 connection info
-			this.updateDevice(undefined, c)
-			this.actions()
+		if (this.config.port === undefined) {
+			this.config.port = 9993;
+		}
 
-			// set notification:
-			const notify = new Commands.NotifySetCommand()
-			// notify.configuration = true // @todo: not implemented in hyperdeck-connection
-			notify.transport = true
-			notify.slot = true
-			await this.hyperDeck.sendCommand(notify)
+		if (this.config.host) {
+			this.hyperDeck = new Hyperdeck()
 
-			let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
+			this.hyperDeck.on('error', e => {
+				this.log('error', e)
+			})
 
-			if (slots === undefined) slots = 2
+			this.hyperDeck.on('connected', async c => {
+				// c contains the result of 500 connection info
+				this.updateDevice(c)
+				this.actions()
+				this.initFeedbacks()
 
-			for (let i = 0; i < slots; i++) {
-				this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
-			}
+				// set notification:
+				const notify = new Commands.NotifySetCommand()
+				// notify.configuration = true // @todo: not implemented in hyperdeck-connection
+				notify.transport = true
+				notify.slot = true
+				await this.hyperDeck.sendCommand(notify)
 
-			this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
+				let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
 
-			this.status(this.STATUS_OK,'Connected')
+				if (slots === undefined) {
+					slots = 2
+				}
 
-			this.checkFeedbacks('slot_status')
-			this.checkFeedbacks('transport_status')
-		})
+				for (let i = 0; i < slots; i++) {
+					this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
+				}
 
-		this.hyperDeck.on('disconnected', () => {
-			this.status(this.STATUS_ERROR,'Disconnected')
-		})
+				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
-		this.hyperDeck.on('notify.slot', res => {
-			this.log('debug', 'Slot Status Changed')
-			this.slotInfo[res.slotId] = {
-				...this.slotInfo[res.slotId],
-				...res
-			}
-			this.checkFeedbacks('slot_status')
-		})
+				this.status(this.STATUS_OK,'Connected')
 
-		this.hyperDeck.on('notify.transport', res => {
-			this.log('debug', 'Transport Status Changed')
-			this.transportInfo = {
-				...this.transportInfo,
-				...res
-			}
-			this.checkFeedbacks('transport_status')
-		})
+				this.checkFeedbacks('slot_status')
+				this.checkFeedbacks('transport_status')
+			})
 
-		this.hyperDeck.connect(this.config.host, this.config.port)
+			this.hyperDeck.on('disconnected', () => {
+				this.status(this.STATUS_ERROR,'Disconnected')
+			})
+
+			this.hyperDeck.on('notify.slot', res => {
+				this.log('debug', 'Slot Status Changed')
+				this.slotInfo[res.slotId] = {
+					...this.slotInfo[res.slotId],
+					...res
+				}
+				this.checkFeedbacks('slot_status')
+			})
+
+			this.hyperDeck.on('notify.transport', res => {
+				this.log('debug', 'Transport Status Changed')
+				this.transportInfo = {
+					...this.transportInfo,
+					...res
+				}
+				this.checkFeedbacks('transport_status')
+			})
+
+			this.hyperDeck.connect(this.config.host, this.config.port)
+		}
 	}
 
 	/**
@@ -937,7 +969,7 @@ class instance extends instance_skel {
 		this.config = config;
 
 		this.actions();
-		//this.initFeedbacks();
+		this.initFeedbacks();
 		//this.initPresets();
 		//this.initVariables();
 
@@ -949,46 +981,14 @@ class instance extends instance_skel {
 	/**
 	 * INTERNAL: Updates device data from the HyperDeck
 	 *
-	 * @param {string} labeltype - the command/data type being passed
 	 * @param {Object} object - the collected data
 	 * @access protected
 	 * @since 1.1.0
 	 */
-	updateDevice(labeltype, object) {
-
-		// for (var key in object) {
-		// 	var parsethis = object[key];
-		// 	var a = parsethis.split(/: /);
-		// 	var attribute = a.shift();
-		// 	var value = a.join(" ");
-
-		// 	switch (attribute) {
-		// 		case 'model':
-		// 			if (value.match(/Extreme/)) {
-		// 				this.config.modelID = 'hdExtreme8K';
-		// 			}
-		// 			else if (value.match(/Mini/)) {
-		// 				this.config.modelID = 'hdStudioMini';
-		// 			}
-		// 			else if (value.match(/Duplicator/)) {
-		// 				this.config.modelID = 'bmdDup4K';
-		// 			}
-		// 			else if (value.match(/12G/)) {
-		// 				this.config.modelID = 'hdStudio12G';
-		// 			}
-		// 			else if (value.match(/Pro/)) {
-		// 				this.config.modelID = 'hdStudioPro';
-		// 			}
-		// 			else {
-		// 				this.config.modelID = 'hdStudio';
-		// 			}
-		// 			this.deviceName = value;
-		// 			this.log('info', 'Connected to a ' + this.deviceName);
-		// 			break;
-		// 	}
-		// }
+	updateDevice(object) {
 
 		const value = object.model
+
 		if (value.match(/Extreme/)) {
 			this.config.modelID = 'hdExtreme8K';
 		}
@@ -1007,6 +1007,7 @@ class instance extends instance_skel {
 		else {
 			this.config.modelID = 'hdStudio';
 		}
+
 		this.deviceName = value;
 		this.log('info', 'Connected to a ' + this.deviceName);
 

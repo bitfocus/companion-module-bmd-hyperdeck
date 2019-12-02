@@ -708,6 +708,60 @@ class instance extends instance_skel {
 	}
 
 	/**
+	 * Clean up the instance before it is destroyed.
+	 *
+	 * @access public
+	 * @since 1.0.0
+	 */
+	destroy() {
+
+		if (this.hyperDeck !== undefined) {
+			this.hyperDeck.disconnect()
+			this.hyperDeck.removeAllListeners()
+			this.hyperDeck = undefined
+		}
+
+		debug("destroy", this.id);
+	}
+
+	/**
+	 * Creates a string with the current date/time
+	 *
+	 * @returns {string} the current date/time in format 'YYYYMMDD_HHMM'
+	 * @access public
+	 * @since 1.0.3
+	 */
+	getTimestamp() {
+		var d          = new Date();
+		var curr_date  = ('0' + d.getDate()).slice(-2);
+		var curr_month = ('0' + (d.getMonth()+1)).slice(-2);
+		var curr_year  = d.getFullYear();
+		var h          = ('0' + d.getHours()).slice(-2);
+		var m          = ('0' + d.getMinutes().slice(-2));
+		var stamp      = curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
+
+		return stamp;
+	}
+
+	/**
+	 * Main initialization function called once the module
+	 * is OK to start doing things.
+	 *
+	 * @access public
+	 * @since 1.0.0
+	 */
+	init() {
+		debug = this.debug;
+
+		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
+		this.initFeedbacks();
+		//this.initPresets();
+		//this.initVariables();
+
+		this.initHyperdeck()
+	}
+
+	/**
 	 * INTERNAL: initialize feedbacks.
 	 *
 	 * @access protected
@@ -785,60 +839,6 @@ class instance extends instance_skel {
 		}
 
 		this.setFeedbackDefinitions(feedbacks);
-	}
-
-	/**
-	 * Clean up the instance before it is destroyed.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	destroy() {
-
-		if (this.hyperDeck !== undefined) {
-			this.hyperDeck.disconnect()
-			this.hyperDeck.removeAllListeners()
-			this.hyperDeck = undefined
-		}
-
-		debug("destroy", this.id);
-	}
-
-	/**
-	 * Creates a string with the current date/time
-	 *
-	 * @returns {string} the current date/time in format 'YYYYMMDD_HHMM'
-	 * @access public
-	 * @since 1.0.3
-	 */
-	getTimestamp() {
-		var d          = new Date();
-		var curr_date  = ('0' + d.getDate()).slice(-2);
-		var curr_month = ('0' + (d.getMonth()+1)).slice(-2);
-		var curr_year  = d.getFullYear();
-		var h          = ('0' + d.getHours()).slice(-2);
-		var m          = ('0' + d.getMinutes().slice(-2));
-		var stamp      = curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
-
-		return stamp;
-	}
-
-	/**
-	 * Main initialization function called once the module
-	 * is OK to start doing things.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	init() {
-		debug = this.debug;
-
-		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
-		this.initFeedbacks();
-		//this.initPresets();
-		//this.initVariables();
-
-		this.initHyperdeck()
 	}
 
 	/**

@@ -25,10 +25,12 @@ class instance extends instance_skel {
 	constructor(system, id, config) {
 		super(system, id, config);
 
-		this.stash        = [];
-		this.command      = null;
-		this.selected     = 0;
-		this.deviceName   = '';
+		this.stash         = [];
+		this.command       = null;
+		this.selected      = 0;
+		this.deviceName    = '';
+		this.slotInfo      = [];
+		this.transportInfo = [];
 
 		// v1.0.* -> v1.1.0 (combine old play actions)
 		this.addUpgradeScript(function (config, actions) {
@@ -44,43 +46,57 @@ class instance extends instance_skel {
 				switch (action.action) {
 					case 'vplay':
 						action.options.speed = opt.speed;
-						action.options.loop = 'false';
-						action.options.single = 'false';
+						action.options.loop = false;
+						action.options.single = false;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
 						break;
 					case 'vplaysingle':
 						action.options.speed = opt.speed;
-						action.options.loop = 'false';
-						action.options.single = 'true';
+						action.options.loop = false;
+						action.options.single = true;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
 						break;
 					case 'vplayloop':
 						action.options.speed = opt.speed;
-						action.options.loop = 'false';
-						action.options.single = 'true';
+						action.options.loop = true;
+						action.options.single = false;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
 						break;
 					case 'playSingle':
 						action.options.speed = 100;
-						action.options.loop = 'false';
-						action.options.single = 'true';
+						action.options.loop = false;
+						action.options.single = true;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
 						break;
 					case 'playLoop':
 						action.options.speed = 100;
-						action.options.loop = 'false';
-						action.options.single = 'true';
+						action.options.loop = true;
+						action.options.single = false;
 						action.action = 'play';
 						action.label = this.id + ':' + action.action;
 						changed = true;
+						break;
+					case 'play':
+						if (action.options.speed === undefined) {
+							action.options.speed = 100;
+							changed = true;
+						}
+						if (action.options.loop === undefined) {
+							action.options.loop = false;
+							changed = true;
+						}
+						if (action.options.single === undefined) {
+							action.options.single = false;
+							changed = true;
+						}
 						break;
 				}
 			}
@@ -217,11 +233,23 @@ class instance extends instance_skel {
 			{ id: 'end',   label: 'End'   }
 		];
 
-		this.CHOICES_TRUEFALSE = [
-			{ id: 'none',  label: 'No change' },
-			{ id: 'true',  label: 'Yes'       },
-			{ id: 'false', label: 'No'        }
-		];
+		this.CHOICES_SLOTSTATUS = [
+			{ id: 'empty',    label: 'Empty'    },
+			{ id: 'error',    label: 'Error'    },
+			{ id: 'mounted',  label: 'Mounted'  },
+			{ id: 'mounting', label: 'Mounting' }
+		]
+
+		this.CHOICES_TRANSPORTSTATUS = [
+			{ id: 'preview', label: 'Preview' },
+			{ id: 'stopped', label: 'Stopped' },
+			{ id: 'play',    label: 'Playing' },
+			{ id: 'forward', label: 'Forward' },
+			{ id: 'rewind',  label: 'Rewind'  },
+			{ id: 'jog',     label: 'Jog'     },
+			{ id: 'shuttle', label: 'Shuttle' },
+			{ id: 'record',  label: 'Record'  }
+		]
 
 		if (this.config.modelID !== undefined){
 			this.model = this.CONFIG_MODEL[this.config.modelID];
@@ -261,16 +289,14 @@ class instance extends instance_skel {
 						range: true
 					},
 					{
-						type: 'dropdown',
+						type: 'checkbox',
 						id: 'loop',
-						default: 'none',
-						choices: this.CHOICES_TRUEFALSE
+						default: false
 					},
 					{
-						type: 'dropdown',
+						type: 'checbox',
 						id: 'single',
-						default: 'none',
-						choices: this.CHOICES_TRUEFALSE
+						default: false
 					}
 				]
 			};
@@ -535,11 +561,9 @@ class instance extends instance_skel {
 		switch (action.action) {
 			case 'play':
 				cmd = new Commands.PlayCommand()
-				if (opt.speed != 100 || opt.loop != 'none' || opt.single != 'none') {
-					cmd.speed = opt.speed;
-					cmd.loop = opt.loop;
-					cmd.singleClip = opt.single;
-				}
+				cmd.speed = opt.speed;
+				cmd.loop = opt.loop;
+				cmd.singleClip = opt.single;
 				break;
 			case 'stop':
 				cmd = new Commands.StopCommand();
@@ -693,6 +717,7 @@ class instance extends instance_skel {
 
 		if (this.hyperDeck !== undefined) {
 			this.hyperDeck.disconnect()
+			this.hyperDeck.removeAllListeners()
 			this.hyperDeck = undefined
 		}
 
@@ -729,8 +754,91 @@ class instance extends instance_skel {
 		debug = this.debug;
 
 		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
+		this.initFeedbacks();
+		//this.initPresets();
+		//this.initVariables();
 
 		this.initHyperdeck()
+	}
+
+	/**
+	 * INTERNAL: initialize feedbacks.
+	 *
+	 * @access protected
+	 * @since 1.1.0
+	 */
+	initFeedbacks() {
+		var feedbacks = {};
+
+		feedbacks['transport_status'] = {
+			label: 'Change colors from transport status',
+			description: 'If the HyperDeck is playing, change colors of the bank',
+			options: [
+				{
+					type: 'colorpicker',
+					label: 'Foreground color',
+					id: 'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Background color',
+					id: 'bg',
+					default: this.rgb(0,255,0)
+				},
+				{
+					type: 'dropdown',
+					label: 'Transport Status',
+					id: 'status',
+					choices: this.CHOICES_TRANSPORTSTATUS
+				}
+			],
+			callback: ({ options }, bank) => {
+				if (options.status === this.transportInfo.status) {
+					return { color: options.fg, bgcolor: options.bg };
+				}
+			}
+		}
+		feedbacks['slot_status'] = {
+			label: 'Change colors from disk status',
+			description: 'Based on disk status, change colors of the bank',
+			options: [
+				{
+					type: 'colorpicker',
+					label: 'Foreground color',
+					id: 'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Background color',
+					id: 'bg',
+					default: this.rgb(0,255,0)
+				},
+				{
+					type: 'dropdown',
+					label: 'Disk Status',
+					id: 'status',
+					choices: this.CHOICES_SLOTSTATUS
+				},
+				{
+					type: 'textinput',
+					label: 'Slot Id',
+					id: 'slotId',
+					default: 1,
+					regex: this.REGEX_SIGNED_NUMBER
+				}
+			],
+			callback: ({ options }, bank) => {
+				const slot = this.slotInfo[opt.slotId]
+				if (slot && slot.status === options.status) {
+					return { color: options.fg, bgcolor: options.bg };
+				}
+			}
+
+		}
+
+		this.setFeedbackDefinitions(feedbacks);
 	}
 
 	/**
@@ -740,32 +848,79 @@ class instance extends instance_skel {
 	 * @since 1.0.0
 	 */
 	initHyperdeck() {
-		this.hyperDeck = new Hyperdeck()
-		this.hyperDeck.on('error', e => {
-			this.log('error', e)
-		})
 
-		this.hyperDeck.on('connected', c => {
-			// c contains the result of 500 connection info
-			this.updateDevice(undefined, c)
-			this.actions()
+		if (this.hyperDeck !== undefined) {
+			this.hyperDeck.disconnect();
+			this.hyperDeck.removeAllListeners();
+			delete this.hyperDeck;
+		}
 
-			// @todo: I couldn't find any references in old code that implicates this is actually used.
-			// set notification:
-			// const notify = new Commands.NotifySetCommand()
-			// notify.configuration = true // @todo: not implemented in hyperdeck-connection
-			// notify.transport = true
-			// notify.slot = true
-			// this.hyperDeck.sendCommand(notify)
+		if (this.config.port === undefined) {
+			this.config.port = 9993;
+		}
 
-			this.status(this.STATUS_OK,'Connected')
-		})
+		if (this.config.host) {
+			this.hyperDeck = new Hyperdeck()
 
-		this.hyperDeck.on('disconnected', () => {
-			this.status(this.STATUS_ERROR,'Disconnected')
-		})
+			this.hyperDeck.on('error', e => {
+				this.log('error', e)
+			})
 
-		this.hyperDeck.connect(this.config.host, this.config.port)
+			this.hyperDeck.on('connected', async c => {
+				// c contains the result of 500 connection info
+				this.updateDevice(c)
+				this.actions()
+				this.initFeedbacks()
+
+				// set notification:
+				const notify = new Commands.NotifySetCommand()
+				// notify.configuration = true // @todo: not implemented in hyperdeck-connection
+				notify.transport = true
+				notify.slot = true
+				await this.hyperDeck.sendCommand(notify)
+
+				let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
+
+				if (slots === undefined) {
+					slots = 2
+				}
+
+				for (let i = 0; i < slots; i++) {
+					this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
+				}
+
+				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
+
+				this.status(this.STATUS_OK,'Connected')
+
+				this.checkFeedbacks('slot_status')
+				this.checkFeedbacks('transport_status')
+			})
+
+			this.hyperDeck.on('disconnected', () => {
+				this.status(this.STATUS_ERROR,'Disconnected')
+			})
+
+			this.hyperDeck.on('notify.slot', res => {
+				this.log('debug', 'Slot Status Changed')
+				this.slotInfo[res.slotId] = {
+					...this.slotInfo[res.slotId],
+					...res
+				}
+				this.checkFeedbacks('slot_status')
+			})
+
+			this.hyperDeck.on('notify.transport', res => {
+				this.log('debug', 'Transport Status Changed')
+				this.transportInfo = {
+					...this.transportInfo,
+					...res
+				}
+				this.checkFeedbacks('transport_status')
+			})
+
+			this.hyperDeck.connect(this.config.host, this.config.port)
+		}
 	}
 
 	/**
@@ -814,7 +969,7 @@ class instance extends instance_skel {
 		this.config = config;
 
 		this.actions();
-		//this.initFeedbacks();
+		this.initFeedbacks();
 		//this.initPresets();
 		//this.initVariables();
 
@@ -826,46 +981,14 @@ class instance extends instance_skel {
 	/**
 	 * INTERNAL: Updates device data from the HyperDeck
 	 *
-	 * @param {string} labeltype - the command/data type being passed
 	 * @param {Object} object - the collected data
 	 * @access protected
 	 * @since 1.1.0
 	 */
-	updateDevice(labeltype, object) {
-
-		// for (var key in object) {
-		// 	var parsethis = object[key];
-		// 	var a = parsethis.split(/: /);
-		// 	var attribute = a.shift();
-		// 	var value = a.join(" ");
-
-		// 	switch (attribute) {
-		// 		case 'model':
-		// 			if (value.match(/Extreme/)) {
-		// 				this.config.modelID = 'hdExtreme8K';
-		// 			}
-		// 			else if (value.match(/Mini/)) {
-		// 				this.config.modelID = 'hdStudioMini';
-		// 			}
-		// 			else if (value.match(/Duplicator/)) {
-		// 				this.config.modelID = 'bmdDup4K';
-		// 			}
-		// 			else if (value.match(/12G/)) {
-		// 				this.config.modelID = 'hdStudio12G';
-		// 			}
-		// 			else if (value.match(/Pro/)) {
-		// 				this.config.modelID = 'hdStudioPro';
-		// 			}
-		// 			else {
-		// 				this.config.modelID = 'hdStudio';
-		// 			}
-		// 			this.deviceName = value;
-		// 			this.log('info', 'Connected to a ' + this.deviceName);
-		// 			break;
-		// 	}
-		// }
+	updateDevice(object) {
 
 		const value = object.model
+
 		if (value.match(/Extreme/)) {
 			this.config.modelID = 'hdExtreme8K';
 		}
@@ -884,6 +1007,7 @@ class instance extends instance_skel {
 		else {
 			this.config.modelID = 'hdStudio';
 		}
+
 		this.deviceName = value;
 		this.log('info', 'Connected to a ' + this.deviceName);
 

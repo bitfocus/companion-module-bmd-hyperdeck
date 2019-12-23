@@ -33,12 +33,10 @@ class instance extends instance_skel {
 		this.transportInfo = [];
 
 		// v1.0.* -> v1.1.0 (combine old play actions)
-		this.addUpgradeScript(function (config, actions) {
+		this.addUpgradeScript(function (config, actions, releaseActions, feedbacks) {
 			var changed = false;
 
-			for (var k in actions) {
-				var action = actions[k];
-
+			let upgradePass = function(action, changed) {
 				if (action.options === undefined) {
 					action.options = {};
 				}
@@ -99,6 +97,16 @@ class instance extends instance_skel {
 						}
 						break;
 				}
+
+				return changed;
+			}
+
+			for (var k in actions) {
+				changed = upgradePass(actions[k], changed);
+			}
+
+			for (var k in releaseActions) {
+				changed = upgradePass(releaseActions[k], changed);
 			}
 
 			return changed;

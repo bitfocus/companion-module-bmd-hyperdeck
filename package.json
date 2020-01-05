@@ -22,6 +22,6 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"hyperdeck-connection": "^0.3.0"
+		"hyperdeck-connection": "^0.4.2"
 	}
 }

@@ -287,24 +287,26 @@ class instance extends instance_skel {
 				label: 'Play',
 				options: [
 					{
-						type: 'number',
-						label: 'Speed %',
-						id: 'speed',
-						default: 100,
-						min: (0 - this.model.maxShuttle),
-						max: this.model.maxShuttle,
+						type: 		'number',
+						label: 		'Speed %',
+						id: 			'speed',
+						default:	100,
+						min: 			(0 - this.model.maxShuttle),
+						max: 			this.model.maxShuttle,
 						required: true,
-						range: true
+						range: 		true
 					},
 					{
-						type: 'checkbox',
-						id: 'loop',
-						default: false
+						type: 		'checkbox',
+						label:		'Loop clip',
+						id: 			'loop',
+						default: 	false
 					},
 					{
-						type: 'checbox',
-						id: 'single',
-						default: false
+						type: 		'checkbox',
+						label:		'Single clip playback',
+						id: 			'single',
+						default: 	false
 					}
 				]
 			};
@@ -416,10 +418,11 @@ class instance extends instance_skel {
 				label: 'Go to (start|end) of clip',
 				options: [
 					{
-						type: 'dropdown',
-						id: 'startEnd',
-						default: 'start',
-						choices: this.CHOICES_STARTEND
+						type: 		'dropdown',
+						label:		'Go to'
+						id: 			'startEnd',
+						default: 	'start',
+						choices: 	this.CHOICES_STARTEND
 					}
 				]
 			};
@@ -779,7 +782,7 @@ class instance extends instance_skel {
 		var feedbacks = {};
 
 		feedbacks['transport_status'] = {
-			label: 'Change colors from transport status',
+			label: 'Transport status',
 			description: 'If the HyperDeck is playing, change colors of the bank',
 			options: [
 				{
@@ -792,7 +795,7 @@ class instance extends instance_skel {
 					type: 'colorpicker',
 					label: 'Background color',
 					id: 'bg',
-					default: this.rgb(0,255,0)
+					default: this.rgb(0,0,0)
 				},
 				{
 					type: 'dropdown',
@@ -808,7 +811,7 @@ class instance extends instance_skel {
 			}
 		}
 		feedbacks['slot_status'] = {
-			label: 'Change colors from disk status',
+			label: 'Slot/disk status',
 			description: 'Based on disk status, change colors of the bank',
 			options: [
 				{
@@ -821,7 +824,7 @@ class instance extends instance_skel {
 					type: 'colorpicker',
 					label: 'Background color',
 					id: 'bg',
-					default: this.rgb(0,255,0)
+					default: this.rgb(0,0,0)
 				},
 				{
 					type: 'dropdown',
@@ -838,12 +841,75 @@ class instance extends instance_skel {
 				}
 			],
 			callback: ({ options }, bank) => {
-				const slot = this.slotInfo[opt.slotId]
+				const slot = this.slotInfo[options.slotId]
 				if (slot && slot.status === options.status) {
 					return { color: options.fg, bgcolor: options.bg };
 				}
 			}
-
+		}
+		feedbacks['transport_loop'] = {
+			label: 'Loop playback',
+			description: 'Set the colour of the button based on the loop status',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Loop',
+					id: 'setting',
+					choices: this.CHOICES_ENABLEDISABLE
+				},
+				{
+					type: 'colorpicker',
+					label: 'Foreground color',
+					id: 'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Background color',
+					id: 'bg',
+					default: this.rgb(0,0,0)
+				}
+			],
+			callback: ({ options }, bank) => {
+				if (options.setting === String(this.transportInfo.loop)) {
+					return {
+						color: options.fg,
+						bgcolor: options.bg
+					};
+				}
+			}
+		}
+		feedbacks['transport_singleClip'] = {
+			label: 'Single clip playback',
+			description: 'Set the colour of the button for single clip playback',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Single clip',
+					id: 'setting',
+					choices: this.CHOICES_ENABLEDISABLE
+				},
+				{
+					type: 'colorpicker',
+					label: 'Foreground color',
+					id: 'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Background color',
+					id: 'bg',
+					default: this.rgb(0,0,0)
+				}
+			],
+			callback: ({ options }, bank) => {
+				if (options.setting === String(this.transportInfo.singleClip)) {
+					return {
+						color: options.fg,
+						bgcolor: options.bg
+					};
+				}
+			}
 		}
 
 		this.setFeedbackDefinitions(feedbacks);
@@ -924,7 +990,9 @@ class instance extends instance_skel {
 					...this.transportInfo,
 					...res
 				}
-				this.checkFeedbacks('transport_status')
+				this.checkFeedbacks('transport_status');
+				this.checkFeedbacks('transport_loop');
+				this.checkFeedbacks('transport_singleClip');
 			})
 
 			this.hyperDeck.connect(this.config.host, this.config.port)

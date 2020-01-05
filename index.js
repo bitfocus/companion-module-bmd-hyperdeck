@@ -419,7 +419,7 @@ class instance extends instance_skel {
 				options: [
 					{
 						type: 		'dropdown',
-						label:		'Go to'
+						label:		'Go to',
 						id: 			'startEnd',
 						default: 	'start',
 						choices: 	this.CHOICES_STARTEND

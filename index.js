@@ -287,26 +287,26 @@ class instance extends instance_skel {
 				label: 'Play',
 				options: [
 					{
-						type: 		'number',
-						label: 		'Speed %',
-						id: 			'speed',
-						default:	100,
-						min: 			(0 - this.model.maxShuttle),
-						max: 			this.model.maxShuttle,
+						type:     'number',
+						label:    'Speed %',
+						id:       'speed',
+						default:  100,
+						min:      (0 - this.model.maxShuttle),
+						max:      this.model.maxShuttle,
 						required: true,
-						range: 		true
+						range:    true
 					},
 					{
-						type: 		'checkbox',
-						label:		'Loop clip',
-						id: 			'loop',
-						default: 	false
+						type:     'checkbox',
+						label:    'Loop clip',
+						id:       'loop',
+						default:  false
 					},
 					{
-						type: 		'checkbox',
-						label:		'Single clip playback',
-						id: 			'single',
-						default: 	false
+						type:     'checkbox',
+						label:    'Single clip playback',
+						id:       'single',
+						default:  false
 					}
 				]
 			};
@@ -418,11 +418,11 @@ class instance extends instance_skel {
 				label: 'Go to (start|end) of clip',
 				options: [
 					{
-						type: 		'dropdown',
-						label:		'Go to',
-						id: 			'startEnd',
-						default: 	'start',
-						choices: 	this.CHOICES_STARTEND
+						type:     'dropdown',
+						label:    'Go to',
+						id:       'startEnd',
+						default:  'start',
+						choices:  this.CHOICES_STARTEND
 					}
 				]
 			};
@@ -786,22 +786,22 @@ class instance extends instance_skel {
 			description: 'If the HyperDeck is playing, change colors of the bank',
 			options: [
 				{
-					type: 'colorpicker',
-					label: 'Foreground color',
-					id: 'fg',
+					type:    'dropdown',
+					label:   'Transport Status',
+					id:      'status',
+					choices: this.CHOICES_TRANSPORTSTATUS
+				},
+				{
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
 					default: this.rgb(255,255,255)
 				},
 				{
-					type: 'colorpicker',
-					label: 'Background color',
-					id: 'bg',
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
 					default: this.rgb(0,0,0)
-				},
-				{
-					type: 'dropdown',
-					label: 'Transport Status',
-					id: 'status',
-					choices: this.CHOICES_TRANSPORTSTATUS
 				}
 			],
 			callback: ({ options }, bank) => {
@@ -815,29 +815,29 @@ class instance extends instance_skel {
 			description: 'Based on disk status, change colors of the bank',
 			options: [
 				{
-					type: 'colorpicker',
-					label: 'Foreground color',
-					id: 'fg',
-					default: this.rgb(255,255,255)
-				},
-				{
-					type: 'colorpicker',
-					label: 'Background color',
-					id: 'bg',
-					default: this.rgb(0,0,0)
-				},
-				{
-					type: 'dropdown',
-					label: 'Disk Status',
-					id: 'status',
+					type:    'dropdown',
+					label:   'Disk Status',
+					id:      'status',
 					choices: this.CHOICES_SLOTSTATUS
 				},
 				{
-					type: 'textinput',
-					label: 'Slot Id',
-					id: 'slotId',
+					type:    'textinput',
+					label:   'Slot Id',
+					id:      'slotId',
 					default: 1,
-					regex: this.REGEX_SIGNED_NUMBER
+					regex:   this.REGEX_SIGNED_NUMBER
+				},
+				{
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
+					default: this.rgb(0,0,0)
 				}
 			],
 			callback: ({ options }, bank) => {
@@ -852,21 +852,21 @@ class instance extends instance_skel {
 			description: 'Set the colour of the button based on the loop status',
 			options: [
 				{
-					type: 'dropdown',
-					label: 'Loop',
-					id: 'setting',
+					type:    'dropdown',
+					label:   'Loop',
+					id:      'setting',
 					choices: this.CHOICES_ENABLEDISABLE
 				},
 				{
-					type: 'colorpicker',
-					label: 'Foreground color',
-					id: 'fg',
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
 					default: this.rgb(255,255,255)
 				},
 				{
-					type: 'colorpicker',
-					label: 'Background color',
-					id: 'bg',
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
 					default: this.rgb(0,0,0)
 				}
 			],
@@ -884,21 +884,21 @@ class instance extends instance_skel {
 			description: 'Set the colour of the button for single clip playback',
 			options: [
 				{
-					type: 'dropdown',
-					label: 'Single clip',
-					id: 'setting',
+					type:    'dropdown',
+					label:   'Single clip',
+					id:      'setting',
 					choices: this.CHOICES_ENABLEDISABLE
 				},
 				{
-					type: 'colorpicker',
-					label: 'Foreground color',
-					id: 'fg',
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
 					default: this.rgb(255,255,255)
 				},
 				{
-					type: 'colorpicker',
-					label: 'Background color',
-					id: 'bg',
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
 					default: this.rgb(0,0,0)
 				}
 			],

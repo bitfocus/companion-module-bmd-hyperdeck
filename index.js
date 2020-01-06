@@ -923,6 +923,12 @@ class instance extends instance_skel {
 	 */
 	initVariables() {
 		var variables = [];
+		
+		variables.push({
+			label: 'Transport status',
+			name: 'status'
+		});
+		this.setVariable('status', this.transportInfo['status']);
 
 		variables.push({
 			label: 'Clip ID',

@@ -986,9 +986,10 @@ class instance extends instance_skel {
 
 			this.hyperDeck.on('notify.transport', res => {
 				this.log('debug', 'Transport Status Changed')
-				this.transportInfo = {
-					...this.transportInfo,
-					...res
+				for (var id in res) {
+					if (res[id] !== undefined) {
+						this.transportInfo[id] = res[id];
+					}
 				}
 				this.checkFeedbacks('transport_status');
 				this.checkFeedbacks('transport_loop');

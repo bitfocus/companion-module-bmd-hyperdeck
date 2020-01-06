@@ -767,7 +767,7 @@ class instance extends instance_skel {
 		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
 		this.initFeedbacks();
 		//this.initPresets();
-		//this.initVariables();
+		this.initVariables();
 
 		this.initHyperdeck()
 	}
@@ -916,6 +916,25 @@ class instance extends instance_skel {
 	}
 
 	/**
+	 * INTERNAL: initialize variables.
+	 *
+	 * @access protected
+	 * @since 1.1.0
+	 */
+	initVariables() {
+		var variables = [];
+
+		variables.push({
+			label: 'Slot ID',
+			name: 'slotId'
+		});
+
+		this.setVariable('slotId', this.transportInfo['slotId']);
+
+		this.setVariableDefinitions(variables);
+	}
+
+	/**
 	 * INTERNAL: use setup data to initalize the hyperdeck library.
 	 *
 	 * @access protected
@@ -945,6 +964,7 @@ class instance extends instance_skel {
 				this.updateDevice(c)
 				this.actions()
 				this.initFeedbacks()
+				this.initVariables()
 
 				// set notification:
 				const notify = new Commands.NotifySetCommand()
@@ -964,6 +984,7 @@ class instance extends instance_skel {
 				}
 
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
+				console.log("\n== TRANSPORT INFO ==\n", this.transportInfo);
 
 				this.status(this.STATUS_OK,'Connected')
 
@@ -982,17 +1003,21 @@ class instance extends instance_skel {
 					...res
 				}
 				this.checkFeedbacks('slot_status')
+				console.log("\nSlot Info: \n", this.slotInfo);
 			})
 
 			this.hyperDeck.on('notify.transport', res => {
 				this.log('debug', 'Transport Status Changed')
-				this.transportInfo = {
-					...this.transportInfo,
-					...res
+				for (var id in res) {
+					if (res[id] !== undefined) {
+						this.transportInfo[id] = res[id];
+					}
 				}
 				this.checkFeedbacks('transport_status');
 				this.checkFeedbacks('transport_loop');
 				this.checkFeedbacks('transport_singleClip');
+				this.initVariables();
+//				console.log("\n== TRANSPORT INFO ==\n", this.transportInfo);
 			})
 
 			this.hyperDeck.connect(this.config.host, this.config.port)

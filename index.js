@@ -925,10 +925,15 @@ class instance extends instance_skel {
 		var variables = [];
 
 		variables.push({
+			label: 'Clip ID',
+			name: 'clipId'
+		});
+		this.setVariable('clipId', this.transportInfo['clipId']);
+
+		variables.push({
 			label: 'Slot ID',
 			name: 'slotId'
 		});
-
 		this.setVariable('slotId', this.transportInfo['slotId']);
 
 		this.setVariableDefinitions(variables);
@@ -963,8 +968,7 @@ class instance extends instance_skel {
 				// c contains the result of 500 connection info
 				this.updateDevice(c)
 				this.actions()
-				this.initFeedbacks()
-				this.initVariables()
+//				this.initFeedbacks()
 
 				// set notification:
 				const notify = new Commands.NotifySetCommand()
@@ -984,12 +988,13 @@ class instance extends instance_skel {
 				}
 
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
-				console.log("\n== TRANSPORT INFO ==\n", this.transportInfo);
+//				console.log("\n== TRANSPORT INFO ==\n", this.transportInfo);
 
 				this.status(this.STATUS_OK,'Connected')
 
 				this.checkFeedbacks('slot_status')
 				this.checkFeedbacks('transport_status')
+				this.initVariables()
 			})
 
 			this.hyperDeck.on('disconnected', () => {
@@ -1003,7 +1008,7 @@ class instance extends instance_skel {
 					...res
 				}
 				this.checkFeedbacks('slot_status')
-				console.log("\nSlot Info: \n", this.slotInfo);
+//				console.log("\nSlot Info: \n", this.slotInfo);
 			})
 
 			this.hyperDeck.on('notify.transport', res => {

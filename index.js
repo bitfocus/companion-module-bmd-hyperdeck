@@ -948,6 +948,12 @@ class instance extends instance_skel {
 		});
 		this.setVariable('slotId', this.transportInfo['slotId']);
 
+		variables.push({
+			label: 'Video format',
+			name: 'videoFormat'
+		});
+		this.setVariable('videoFormat', this.transportInfo['videoFormat']);
+
 		this.setVariableDefinitions(variables);
 	}
 

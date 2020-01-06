@@ -610,15 +610,15 @@ class instance extends instance_skel {
 				break;
 			case 'gotoN':
 				cmd = new Commands.GoToCommand()
-				cmd.clip = opt.clip;
+				cmd.clipId = opt.clip;
 				break;
 			case 'goFwd':
 				cmd = new Commands.GoToCommand()
-				cmd.clip = opt.clip;
+				cmd.clipId = '+' + opt.clip;
 				break;
 			case 'goRew':
 				cmd = new Commands.GoToCommand()
-				cmd.clipId = opt.clip;
+				cmd.clipId = '-' + opt.clip;
 				break;
 			case 'goStartEnd':
 				cmd = new Commands.GoToCommand()

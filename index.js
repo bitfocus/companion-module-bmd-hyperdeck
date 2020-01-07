@@ -31,14 +31,15 @@ class instance extends instance_skel {
 		this.deviceName    = '';
 		this.slotInfo      = [];
 		this.transportInfo = {
-			"status":      '',
-			"speed":       '',
-			"slotId":      '',
-			"clipId":      '',
-			"singleClip":  '',
-			"timecode":    '',
-			"videoFormat": '',
-			"loop":        ''
+			"status":          '',
+			"speed":           '',
+			"slotId":          '',
+			"clipId":          '',
+			"singleClip":      '',
+			"timecode":        '',
+			"displayTimecode": '',
+			"videoFormat":     '',
+			"loop":            ''
 		};
 		this.pollTimer    = null;
 
@@ -1000,7 +1001,7 @@ class instance extends instance_skel {
 		let tcHMS  = '';
  		let tcHMSF = '';
 
-		let tc = this.transportInfo['timecode'].match(/((\d\d):(\d\d):(\d\d)):(\d\d)/) || [];
+		let tc = this.transportInfo['displayTimecode'].match(/((\d\d):(\d\d):(\d\d)):(\d\d)/) || [];
 		if (tc.length >= 6) {
 			tcH    = tc[2];
 			tcM    = tc[3];

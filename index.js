@@ -30,7 +30,18 @@ class instance extends instance_skel {
 		this.selected      = 0;
 		this.deviceName    = '';
 		this.slotInfo      = [];
-		this.transportInfo = [];
+		this.transportInfo = {
+			"status":          '',
+			"speed":           '',
+			"slotId":          '',
+			"clipId":          '',
+			"singleClip":      '',
+			"timecode":        '',
+			"displayTimecode": '',
+			"videoFormat":     '',
+			"loop":            ''
+		};
+		this.pollTimer    = null;
 
 		// v1.0.* -> v1.1.0 (combine old play actions)
 		this.addUpgradeScript(function (config, actions, releaseActions, feedbacks) {
@@ -679,41 +690,65 @@ class instance extends instance_skel {
 	config_fields() {
 		return [
 			{
-				type: 'text',
-				id: 'info',
-				width: 12,
-				label: 'Warning',
-				value: 'Hyperdeck only supports 1 connection at any given time. Be sure to disconect any other devices controling it. Remember to press the remote button on the frontpanel of the Hyperdeck to enable remote control.'
+				type:     'text',
+				id:       'info',
+				width:    12,
+				label:    'Warning',
+				value:    'Hyperdeck only supports 1 connection at any given time. Be sure to disconect any other devices controling it. Remember to press the remote button on the frontpanel of the Hyperdeck to enable remote control.'
 			},
 			{
-				type: 'textinput',
-				id: 'host',
-				label: 'Target IP',
-				width: 6,
-				regex: this.REGEX_IP
+				type:     'textinput',
+				id:       'host',
+				label:    'Target IP',
+				width:    6,
+				regex:    this.REGEX_IP
 			},
 			{
-				type:    'dropdown',
-				id:      'modelID',
-				label:   'Model',
-				width:   6,
-				choices: this.CHOICES_MODEL,
-				default: 0
+				type:     'dropdown',
+				id:       'modelID',
+				label:    'Model',
+				width:    6,
+				choices:  this.CHOICES_MODEL,
+				default:  0
 			},
 			{
-				type: 'text',
-				id: 'info',
-				width: 12,
-				label: 'Custom Clip Record Naming',
-				value: 'Companion is able to initiate recordings where the file names use a custom \'Reel-[####]\' naming convention.  The \'Reel\' is a custom name defined below and [####] is auto incremented from \'0\' by the HyperDeck.  <b>This naming is only used when starting records using the \'Record (with custom reel)\' action.</b>'
+				type:     'text',
+				id:       'info',
+				width:    12,
+				label:    'Custom Clip Record Naming',
+				value:    'Companion is able to initiate recordings where the file names use a custom \'Reel-[####]\' naming convention.  The \'Reel\' is a custom name defined below and [####] is auto incremented from \'0\' by the HyperDeck.  <b>This naming is only used when starting records using the \'Record (with custom reel)\' action.</b>'
 			},
 			{
-				type: 'textinput',
-				id: 'reel',
-				label: 'Custom Reel',
-				width: 6,
-				default: 'A001',
-				regex: this.REGEX_SOMETHING
+				type:     'textinput',
+				id:       'reel',
+				label:    'Custom Reel',
+				width:    6,
+				default:  'A001',
+				regex:    this.REGEX_SOMETHING
+			},
+			{
+				type:     'text',
+				id:       'info',
+				width:    12,
+				label:    'Displaying Timecode Variable',
+				value:    'If you want to use the timecode variable, you will need to enable this to retrieve the current timecode, and set the Polling Interval to an appropriate value.'
+			},
+			{
+				type:     'checkbox',
+				id:       'pollingOn',
+				label:    'Enable Timecode Polling?',
+				width:    6,
+				default:  false
+			},
+			{
+				type:     'number',
+				id:       'pollingInterval',
+				label:    'Polling Interval (in ms)',
+				width:    6,
+				min:      15,
+				max:      10000,
+				default:  40,
+				required: true
 			}
 		]
 	}
@@ -730,6 +765,10 @@ class instance extends instance_skel {
 			this.hyperDeck.disconnect()
 			this.hyperDeck.removeAllListeners()
 			this.hyperDeck = undefined
+		}
+
+		if (this.pollTimer !== undefined) {
+			clearInterval(this.pollTimer);
 		}
 
 		debug("destroy", this.id);
@@ -767,7 +806,7 @@ class instance extends instance_skel {
 		this.status(this.STATUS_WARNING,'Connecting'); // status ok!
 		this.initFeedbacks();
 		//this.initPresets();
-		//this.initVariables();
+		this.initVariables();
 
 		this.initHyperdeck()
 	}
@@ -951,6 +990,101 @@ class instance extends instance_skel {
 	}
 
 	/**
+	 * INTERNAL: initialize variables.
+	 *
+	 * @access protected
+	 * @since 1.1.0
+	 */
+	initVariables() {
+		var variables = [];
+		
+		variables.push({
+			label: 'Transport status',
+			name:  'status'
+		});
+		this.setVariable('status', this.transportInfo['status']);
+
+		variables.push({
+			label: 'Play speed',
+			name:  'speed'
+		});
+		this.setVariable('speed', this.transportInfo['speed']);
+
+		variables.push({
+			label: 'Clip ID',
+			name:  'clipId'
+		});
+		this.setVariable('clipId', this.transportInfo['clipId']);
+
+		variables.push({
+			label: 'Slot ID',
+			name:  'slotId'
+		});
+		this.setVariable('slotId', this.transportInfo['slotId']);
+
+		variables.push({
+			label: 'Video format',
+			name:  'videoFormat'
+		});
+		this.setVariable('videoFormat', this.transportInfo['videoFormat']);
+
+		// Timecode variables
+		let tcH    = '';
+		let tcM    = '';
+		let tcS    = '';
+		let tcF    = '';
+		let tcHMS  = '';
+ 		let tcHMSF = '';
+
+		let tc = this.transportInfo['displayTimecode'].match(/((\d\d):(\d\d):(\d\d)):(\d\d)/) || [];
+		if (tc.length >= 6) {
+			tcH    = tc[2];
+			tcM    = tc[3];
+			tcS    = tc[4];
+			tcF    = tc[5];
+			tcHMS  = tc[1];
+ 			tcHMSF = tc[0];
+		}
+		variables.push({
+			label: 'Timecode (HH:MM:SS)',
+			name:  'timecodeHMS'
+		});
+		this.setVariable('timecodeHMS', tcHMS);
+
+		variables.push({
+			label: 'Timecode (HH:MM:SS:FF)',
+			name:  'timecodeHMSF'
+		});
+		this.setVariable('timecodeHMSF', tcHMSF);
+
+		variables.push({
+			label: 'Timecode (HH)',
+			name:  'timecodeH'
+		});
+		this.setVariable('timecodeH', tcH);
+
+		variables.push({
+			label: 'Timecode (MM)',
+			name:  'timecodeM'
+		});
+		this.setVariable('timecodeM', tcM);
+
+		variables.push({
+			label: 'Timecode (SS)',
+			name:  'timecodeS'
+		});
+		this.setVariable('timecodeS', tcS);
+
+		variables.push({
+			label: 'Timecode (FF)',
+			name:  'timecodeF'
+		});
+		this.setVariable('timecodeF', tcF);
+
+		this.setVariableDefinitions(variables);
+	}
+
+	/**
 	 * INTERNAL: use setup data to initalize the hyperdeck library.
 	 *
 	 * @access protected
@@ -962,6 +1096,10 @@ class instance extends instance_skel {
 			this.hyperDeck.disconnect();
 			this.hyperDeck.removeAllListeners();
 			delete this.hyperDeck;
+		}
+
+		if (this.pollTimer !== undefined) {
+			clearInterval(this.pollTimer);
 		}
 
 		if (this.config.port === undefined) {
@@ -979,7 +1117,7 @@ class instance extends instance_skel {
 				// c contains the result of 500 connection info
 				this.updateDevice(c)
 				this.actions()
-				this.initFeedbacks()
+//				this.initFeedbacks()
 
 				// set notification:
 				const notify = new Commands.NotifySetCommand()
@@ -999,14 +1137,28 @@ class instance extends instance_skel {
 				}
 
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
+//				console.log("\n== TRANSPORT INFO ==\n", this.transportInfo);
 
 				this.status(this.STATUS_OK,'Connected')
 
-				this.checkFeedbacks();
+
+				this.checkFeedbacks()
+				
+				// If polling is enabled, setup interval command
+				if (this.config.pollingOn === true) {
+					this.pollTimer = setInterval(
+						this.sendPollCommand.bind(this),
+						(this.config.pollingInterval)
+					);
+				}
 			})
 
 			this.hyperDeck.on('disconnected', () => {
 				this.status(this.STATUS_ERROR,'Disconnected')
+
+				if (this.pollTimer !== undefined) {
+					clearInterval(this.pollTimer);
+				}
 			})
 
 			this.hyperDeck.on('notify.slot', res => {
@@ -1015,18 +1167,24 @@ class instance extends instance_skel {
 					...this.slotInfo[res.slotId],
 					...res
 				}
+
+				// Update the transport status to catch slot changes
+				this.sendPollCommand();
 				this.checkFeedbacks('slot_status');
 				this.checkFeedbacks('transport_slot');
+
 			})
 
 			this.hyperDeck.on('notify.transport', res => {
 				this.log('debug', 'Transport Status Changed')
+//				console.log("\n== STATUS CHANGE ==\n", res);
 				for (var id in res) {
 					if (res[id] !== undefined) {
 						this.transportInfo[id] = res[id];
 					}
 				}
 				this.checkFeedbacks();
+				this.initVariables();
 			})
 
 			this.hyperDeck.connect(this.config.host, this.config.port)
@@ -1062,6 +1220,20 @@ class instance extends instance_skel {
 	}
 
 	/**
+	 * INTERNAL: Send a poll command to refresh status
+	 *
+	 * @access protected
+	 * @since 1.1.0
+	 */
+	sendPollCommand() {
+		let that = this;
+		this.hyperDeck.sendCommand(new Commands.TransportInfoCommand()).then((transportInfo) => {
+			that.transportInfo = transportInfo;
+		})
+		this.initVariables();
+	}
+
+	/**
 	 * Process an updated configuration array.
 	 *
 	 * @param {Object} config - the new configuration
@@ -1081,7 +1253,18 @@ class instance extends instance_skel {
 		this.actions();
 		this.initFeedbacks();
 		//this.initPresets();
-		//this.initVariables();
+		this.initVariables();
+
+		// If polling is enabled, setup interval command
+		if (this.pollTimer !== undefined) {
+			clearInterval(this.pollTimer);
+		}
+		if (this.config.pollingOn === true) {
+			this.pollTimer = setInterval(
+				this.sendPollCommand.bind(this),
+				(this.config.pollingInterval)
+			)
+		}
 
 		if (resetConnection === true || this.hyperDeck === undefined) {
 			this.initHyperdeck();

@@ -822,7 +822,7 @@ class instance extends instance_skel {
 
 		feedbacks['transport_status'] = {
 			label: 'Transport status',
-			description: 'If the HyperDeck is playing, change colors of the bank',
+			description: 'Based on transport status, change colors of the bank',
 			options: [
 				{
 					type:    'dropdown',
@@ -888,7 +888,7 @@ class instance extends instance_skel {
 		}
 		feedbacks['transport_slot'] = {
 			label: 'Active slot',
-			description: 'Set the colour  based on the which slot is active',
+			description: 'Set the colour based on the which slot is active',
 			options: [
 				{
 					type:    'textinput',
@@ -911,9 +911,7 @@ class instance extends instance_skel {
 				}
 			],
 			callback: ({ options }, bank) => {
-				console.log("match: ", options.setting, this.transportInfo.slotId)
-				console.log(this.transportInfo)
-				if (options.setting === this.transportInfo.slotId) {
+				if (options.setting == this.transportInfo.slotId) {
 					return {
 						color: options.fg,
 						bgcolor: options.bg
@@ -1117,7 +1115,6 @@ class instance extends instance_skel {
 				// c contains the result of 500 connection info
 				this.updateDevice(c)
 				this.actions()
-//				this.initFeedbacks()
 
 				// set notification:
 				const notify = new Commands.NotifySetCommand()
@@ -1137,11 +1134,10 @@ class instance extends instance_skel {
 				}
 
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
-//				console.log("\n== TRANSPORT INFO ==\n", this.transportInfo);
 
 				this.status(this.STATUS_OK,'Connected')
 
-
+				this.initVariables()
 				this.checkFeedbacks()
 				
 				// If polling is enabled, setup interval command
@@ -1161,7 +1157,7 @@ class instance extends instance_skel {
 				}
 			})
 
-			this.hyperDeck.on('notify.slot', res => {
+			this.hyperDeck.on('notify.slot', async res => {
 				this.log('debug', 'Slot Status Changed')
 				this.slotInfo[res.slotId] = {
 					...this.slotInfo[res.slotId],
@@ -1169,15 +1165,14 @@ class instance extends instance_skel {
 				}
 
 				// Update the transport status to catch slot changes
-				this.sendPollCommand();
+				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand());
 				this.checkFeedbacks('slot_status');
 				this.checkFeedbacks('transport_slot');
-
+				this.initVariables();
 			})
 
 			this.hyperDeck.on('notify.transport', res => {
 				this.log('debug', 'Transport Status Changed')
-//				console.log("\n== STATUS CHANGE ==\n", res);
 				for (var id in res) {
 					if (res[id] !== undefined) {
 						this.transportInfo[id] = res[id];

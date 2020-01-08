@@ -847,6 +847,41 @@ class instance extends instance_skel {
 				}
 			}
 		}
+		feedbacks['transport_slot'] = {
+			label: 'Active slot',
+			description: 'Set the colour  based on the which slot is active',
+			options: [
+				{
+					type:    'textinput',
+					label:   'Slot Id',
+					id:      'setting',
+					default: 1,
+					regex:   this.REGEX_SIGNED_NUMBER
+				},
+				{
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
+					default: this.rgb(0,0,0)
+				}
+			],
+			callback: ({ options }, bank) => {
+				console.log("match: ", options.setting, this.transportInfo.slotId)
+				console.log(this.transportInfo)
+				if (options.setting === this.transportInfo.slotId) {
+					return {
+						color: options.fg,
+						bgcolor: options.bg
+					};
+				}
+			}
+		}
 		feedbacks['transport_loop'] = {
 			label: 'Loop playback',
 			description: 'Set the colour of the button based on the loop status',
@@ -967,8 +1002,7 @@ class instance extends instance_skel {
 
 				this.status(this.STATUS_OK,'Connected')
 
-				this.checkFeedbacks('slot_status')
-				this.checkFeedbacks('transport_status')
+				this.checkFeedbacks();
 			})
 
 			this.hyperDeck.on('disconnected', () => {
@@ -981,7 +1015,8 @@ class instance extends instance_skel {
 					...this.slotInfo[res.slotId],
 					...res
 				}
-				this.checkFeedbacks('slot_status')
+				this.checkFeedbacks('slot_status');
+				this.checkFeedbacks('transport_slot');
 			})
 
 			this.hyperDeck.on('notify.transport', res => {
@@ -991,9 +1026,7 @@ class instance extends instance_skel {
 						this.transportInfo[id] = res[id];
 					}
 				}
-				this.checkFeedbacks('transport_status');
-				this.checkFeedbacks('transport_loop');
-				this.checkFeedbacks('transport_singleClip');
+				this.checkFeedbacks();
 			})
 
 			this.hyperDeck.connect(this.config.host, this.config.port)

@@ -645,7 +645,7 @@ class instance extends instance_skel {
 				break;
 			case 'shuttle':
 				cmd = new Commands.ShuttleCommand()
-				cmd.speed = '-'+ opt.speed;
+				cmd.speed = opt.speed;
 				break;
 			case 'select':
 				cmd = new Commands.SlotSelectCommand()

@@ -787,7 +787,7 @@ class instance extends instance_skel {
 		var curr_month = ('0' + (d.getMonth()+1)).slice(-2);
 		var curr_year  = d.getFullYear();
 		var h          = ('0' + d.getHours()).slice(-2);
-		var m          = ('0' + d.getMinutes().slice(-2));
+		var m          = ('0' + d.getMinutes()).slice(-2);
 		var stamp      = curr_year + "" + curr_month + "" + curr_date + "_" + h + m;
 
 		return stamp;
@@ -995,7 +995,7 @@ class instance extends instance_skel {
 	 */
 	initVariables() {
 		var variables = [];
-		
+
 		variables.push({
 			label: 'Transport status',
 			name:  'status'
@@ -1032,7 +1032,7 @@ class instance extends instance_skel {
 		let tcS    = '';
 		let tcF    = '';
 		let tcHMS  = '';
- 		let tcHMSF = '';
+		 let tcHMSF = '';
 
 		let tc = this.transportInfo['displayTimecode'].match(/((\d\d):(\d\d):(\d\d)):(\d\d)/) || [];
 		if (tc.length >= 6) {
@@ -1041,7 +1041,7 @@ class instance extends instance_skel {
 			tcS    = tc[4];
 			tcF    = tc[5];
 			tcHMS  = tc[1];
- 			tcHMSF = tc[0];
+			 tcHMSF = tc[0];
 		}
 		variables.push({
 			label: 'Timecode (HH:MM:SS)',
@@ -1139,7 +1139,7 @@ class instance extends instance_skel {
 
 				this.initVariables()
 				this.checkFeedbacks()
-				
+
 				// If polling is enabled, setup interval command
 				if (this.config.pollingOn === true) {
 					this.pollTimer = setInterval(

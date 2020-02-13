@@ -747,7 +747,7 @@ class instance extends instance_skel {
 				width:    6,
 				min:      15,
 				max:      10000,
-				default:  40,
+				default:  500,
 				required: true
 			}
 		]

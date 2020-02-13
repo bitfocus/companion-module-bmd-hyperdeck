@@ -1001,36 +1001,29 @@ class instance extends instance_skel {
 			name:  'status'
 		});
 		this.setVariable('status', this.transportInfo['status']);
-
-		//Speed, Clip ID, and Slot ID  null exceptions
 		
-		let speedVariable = '';
-		if (this.transportInfo['speed'] == 0) {
-			speedVariable = 'Stopped';
-		} else {
-			speedVariable = this.transportInfo['speed'];
-		}
+		variables.push({
+			label: 'Play speed',
+			name:  'speed'
+		});
+		this.setVariable('speed', this.transportInfo['speed']);
 
+		//Clip ID and Slot ID  null exceptions
+		
 		let clipIdVariable = '';
 		if (this.transportInfo['clipId'] == null) {
-			clipIdVariable = 'No clip selected';
+			clipIdVariable = 'None';
 		} else {
 			clipIdVariable = this.transportInfo['clipId'];
 		}
 
 		let slotIdVariable = '';
 		if (this.transportInfo['slotId'] == null) {
-			slotIdVariable = 'No disks mounted';
+			slotIdVariable = 'Empty';
 		} else {
 			slotIdVariable = this.transportInfo['slotId'];
 		}
-
-		variables.push({
-			label: 'Play speed',
-			name:  'speed'
-		});
-		this.setVariable('speed', speedVariable);
-
+		
 		variables.push({
 			label: 'Clip ID',
 			name:  'clipId'

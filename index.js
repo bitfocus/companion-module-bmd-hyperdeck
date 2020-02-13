@@ -1034,7 +1034,7 @@ class instance extends instance_skel {
 		let tcHMS  = '';
 		 let tcHMSF = '';
 
-		let tc = this.transportInfo['displayTimecode'].match(/((\d\d):(\d\d):(\d\d)):(\d\d)/) || [];
+		let tc = this.transportInfo['displayTimecode'].match(/((\d\d):(\d\d):(\d\d))[:;](\d\d)/) || [];
 		if (tc.length >= 6) {
 			tcH    = tc[2];
 			tcM    = tc[3];

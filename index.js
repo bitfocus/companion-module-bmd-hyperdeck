@@ -1032,7 +1032,7 @@ class instance extends instance_skel {
 		let tcS    = '';
 		let tcF    = '';
 		let tcHMS  = '';
-		 let tcHMSF = '';
+		let tcHMSF = '';
 
 		let tc = this.transportInfo['displayTimecode'].match(/((\d\d):(\d\d):(\d\d))[:;](\d\d)/) || [];
 		if (tc.length >= 6) {
@@ -1041,7 +1041,7 @@ class instance extends instance_skel {
 			tcS    = tc[4];
 			tcF    = tc[5];
 			tcHMS  = tc[1];
-			 tcHMSF = tc[0];
+			tcHMSF = tc[0];
 		}
 		variables.push({
 			label: 'Timecode (HH:MM:SS)',

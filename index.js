@@ -1002,23 +1002,46 @@ class instance extends instance_skel {
 		});
 		this.setVariable('status', this.transportInfo['status']);
 
+		//Speed, Clip ID, and Slot ID  null exceptions
+		
+		let speedVariable = '';
+		if (this.transportInfo['speed'] == 0) {
+			speedVariable = 'Stopped';
+		} else {
+			speedVariable = this.transportInfo['speed'];
+		}
+
+		let clipIdVariable = '';
+		if (this.transportInfo['clipId'] == null) {
+			clipIdVariable = 'No clip selected';
+		} else {
+			clipIdVariable = this.transportInfo['clipId'];
+		}
+
+		let slotIdVariable = '';
+		if (this.transportInfo['slotId'] == null) {
+			slotIdVariable = 'No disks mounted';
+		} else {
+			slotIdVariable = this.transportInfo['slotId'];
+		}
+
 		variables.push({
 			label: 'Play speed',
 			name:  'speed'
 		});
-		this.setVariable('speed', this.transportInfo['speed']);
+		this.setVariable('speed', speedVariable);
 
 		variables.push({
 			label: 'Clip ID',
 			name:  'clipId'
 		});
-		this.setVariable('clipId', this.transportInfo['clipId']);
+		this.setVariable('clipId', clipIdVariable);
 
 		variables.push({
 			label: 'Slot ID',
 			name:  'slotId'
 		});
-		this.setVariable('slotId', this.transportInfo['slotId']);
+		this.setVariable('slotId', slotIdVariable);
 
 		variables.push({
 			label: 'Video format',

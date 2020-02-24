@@ -1012,14 +1012,14 @@ class instance extends instance_skel {
 		
 		let clipIdVariable = '';
 		if (this.transportInfo['clipId'] == null) {
-			clipIdVariable = 'None';
+			clipIdVariable = '';
 		} else {
 			clipIdVariable = this.transportInfo['clipId'];
 		}
 
 		let slotIdVariable = '';
 		if (this.transportInfo['slotId'] == null) {
-			slotIdVariable = 'Empty';
+			slotIdVariable = '';
 		} else {
 			slotIdVariable = this.transportInfo['slotId'];
 		}

@@ -1108,7 +1108,7 @@ class instance extends instance_skel {
 			this.hyperDeck = new Hyperdeck()
 
 			this.hyperDeck.on('error', e => {
-				this.log('error', e)
+				this.log('error', e.message)
 			})
 
 			this.hyperDeck.on('connected', async c => {

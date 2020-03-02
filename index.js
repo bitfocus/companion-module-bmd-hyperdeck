@@ -1011,17 +1011,12 @@ class instance extends instance_skel {
 		//Clip ID and Slot ID  null exceptions
 		
 		let clipIdVariable = '—';
-		if (this.transportInfo['clipId'] == null) {
-			clipIdVariable = '—';
-		} else {
+		if (this.transportInfo['clipId'] != null) {
 			clipIdVariable = this.transportInfo['clipId'];
 		}
-
 		let slotIdVariable = '—';
-		if (this.transportInfo['slotId'] == null) {
+		if (this.transportInfo['slotId'] != null) {
 			slotIdVariable = '—';
-		} else {
-			slotIdVariable = this.transportInfo['slotId'];
 		}
 		
 		variables.push({

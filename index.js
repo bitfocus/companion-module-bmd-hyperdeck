@@ -1016,7 +1016,7 @@ class instance extends instance_skel {
 		}
 		let slotIdVariable = '—';
 		if (this.transportInfo['slotId'] != null) {
-			slotIdVariable = '—';
+			slotIdVariable = this.transportInfo['slotId'];
 		}
 		
 		variables.push({

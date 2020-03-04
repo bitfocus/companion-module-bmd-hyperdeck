@@ -1001,24 +1001,35 @@ class instance extends instance_skel {
 			name:  'status'
 		});
 		this.setVariable('status', this.transportInfo['status']);
-
+		
 		variables.push({
 			label: 'Play speed',
 			name:  'speed'
 		});
 		this.setVariable('speed', this.transportInfo['speed']);
 
+		//Clip ID and Slot ID  null exceptions
+		
+		let clipIdVariable = '—';
+		if (this.transportInfo['clipId'] != null) {
+			clipIdVariable = this.transportInfo['clipId'];
+		}
+		let slotIdVariable = '—';
+		if (this.transportInfo['slotId'] != null) {
+			slotIdVariable = this.transportInfo['slotId'];
+		}
+		
 		variables.push({
 			label: 'Clip ID',
 			name:  'clipId'
 		});
-		this.setVariable('clipId', this.transportInfo['clipId']);
+		this.setVariable('clipId', clipIdVariable);
 
 		variables.push({
 			label: 'Slot ID',
 			name:  'slotId'
 		});
-		this.setVariable('slotId', this.transportInfo['slotId']);
+		this.setVariable('slotId', slotIdVariable);
 
 		variables.push({
 			label: 'Video format',
@@ -1225,6 +1236,10 @@ class instance extends instance_skel {
 		this.hyperDeck.sendCommand(new Commands.TransportInfoCommand()).then((transportInfo) => {
 			that.transportInfo = transportInfo;
 		})
+		.catch((error) => {
+			this.log('error', 'Timecode polling failed')
+			clearInterval(this.pollTimer);
+		  });
 		this.initVariables();
 	}
 

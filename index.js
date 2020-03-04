@@ -1236,6 +1236,10 @@ class instance extends instance_skel {
 		this.hyperDeck.sendCommand(new Commands.TransportInfoCommand()).then((transportInfo) => {
 			that.transportInfo = transportInfo;
 		})
+		.catch((error) => {
+			this.log('error', 'Timecode polling failed')
+			clearInterval(this.pollTimer);
+		  });
 		this.initVariables();
 	}
 

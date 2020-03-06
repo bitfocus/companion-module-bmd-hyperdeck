@@ -1,7 +1,11 @@
 ## Blackmagic Design Hyperdeck
 
-**Available commands for Blackmagic Design Hyperdeck**
+Allows you to connect and control any model of Hyperdeck available from Blackmagic Design.
 
+**Connecting**
+The Hyperdeck can **only be connected to one controller at a time.** This includes ATEM switchers or other instances of Companion. If you're having trouble connecting, make sure all other controlers are disconnected.
+
+**Supported commands**
 * Play
 * Play (Speed %)
 * Play Single clip
@@ -24,3 +28,18 @@
 * Select video input
 * Select audio input
 * Remote Control (enable/disable)
+
+**Supported feedback**
+* Transport status
+* Slot/Disk Status
+* Active Slot
+* Loop Playback Status
+* Single Clip Playback Status
+
+**Supported button variables**
+* Transport status
+* Speed
+* Clip ID
+* Slot ID
+* Video Format
+* Timecode

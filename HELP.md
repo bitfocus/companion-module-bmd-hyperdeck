@@ -3,7 +3,7 @@
 Allows you to connect and control any model of Hyperdeck available from Blackmagic Design.
 
 **Connecting**
-The Hyperdeck can **only be connected to one controller at a time.** This includes ATEM switchers or other instances of Companion. If you're having trouble connecting, make sure all other controlers are disconnected.
+The Hyperdeck can **only be connected to one controller at a time.** This includes ATEM switchers or other instances of Companion. If you're having trouble connecting, make sure all other controllers are disconnected.
 
 **Supported commands**
 * Play

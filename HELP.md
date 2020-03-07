@@ -6,12 +6,7 @@ Allows you to connect and control any model of Hyperdeck available from Blackmag
 The Hyperdeck can **only be connected to one controller at a time.** This includes ATEM switchers or other instances of Companion. If you're having trouble connecting, make sure all other controllers are disconnected.
 
 **Supported commands**
-* Play
-* Play (Speed %)
-* Play Single clip
-* Play Single clip (Speed %)
-* Play loop
-* Play loop (Speed %)
+* Play (options for speed %, single clip, and lopp)
 * Record
 * Record (with name)
 * Record (with name and current date/time)

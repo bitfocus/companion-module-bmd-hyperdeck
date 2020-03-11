@@ -781,7 +781,7 @@ class instance extends instance_skel {
 	 * @access public
 	 * @since 1.0.3
 	 */
-		getTimestamp() {
+	getTimestamp() {
 		var d          = new Date();
 		var curr_date  = ('0' + d.getDate()).slice(-2);
 		var curr_month = ('0' + (d.getMonth()+1)).slice(-2);
@@ -1014,6 +1014,7 @@ class instance extends instance_skel {
 		if (this.transportInfo['clipId'] != null) {
 			clipIdVariable = this.transportInfo['clipId'];
 		}
+
 		let slotIdVariable = '—';
 		if (this.transportInfo['slotId'] != null) {
 			slotIdVariable = this.transportInfo['slotId'];
@@ -1239,7 +1240,7 @@ class instance extends instance_skel {
 		.catch((error) => {
 			this.log('error', 'Timecode polling failed')
 			clearInterval(this.pollTimer);
-			});
+		});
 		this.initVariables();
 	}
 

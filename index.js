@@ -599,21 +599,21 @@ class instance extends instance_skel {
 				break;
 			case 'recName':
 				cmd = new Commands.RecordCommand();
-				cmd.name = opt.name;
+				cmd.filename = opt.name;
 				break;
 			case 'recTimestamp':
 				cmd = new Commands.RecordCommand();
 				var timeStamp = this.getTimestamp();
 				if (opt.prefix !== '') {
-					cmd.name = opt.prefix + '-' + timeStamp + '-';
+					cmd.filename = opt.prefix + '-' + timeStamp + '-';
 				}
 				else {
-					cmd.name = timeStamp + '-';
+					cmd.filename = timeStamp + '-';
 				}
 				break;
 			case 'recCustom':
 				cmd = new Commands.RecordCommand();
-				cmd.name = this.config.reel + '-';
+				cmd.filename = this.config.reel + '-';
 				break;
 			case 'goto':
 				cmd = new Commands.GoToCommand()
@@ -781,7 +781,7 @@ class instance extends instance_skel {
 	 * @access public
 	 * @since 1.0.3
 	 */
-	getTimestamp() {
+		getTimestamp() {
 		var d          = new Date();
 		var curr_date  = ('0' + d.getDate()).slice(-2);
 		var curr_month = ('0' + (d.getMonth()+1)).slice(-2);
@@ -1001,7 +1001,7 @@ class instance extends instance_skel {
 			name:  'status'
 		});
 		this.setVariable('status', this.transportInfo['status']);
-		
+
 		variables.push({
 			label: 'Play speed',
 			name:  'speed'
@@ -1009,7 +1009,7 @@ class instance extends instance_skel {
 		this.setVariable('speed', this.transportInfo['speed']);
 
 		//Clip ID and Slot ID  null exceptions
-		
+
 		let clipIdVariable = '—';
 		if (this.transportInfo['clipId'] != null) {
 			clipIdVariable = this.transportInfo['clipId'];
@@ -1018,7 +1018,7 @@ class instance extends instance_skel {
 		if (this.transportInfo['slotId'] != null) {
 			slotIdVariable = this.transportInfo['slotId'];
 		}
-		
+
 		variables.push({
 			label: 'Clip ID',
 			name:  'clipId'
@@ -1239,7 +1239,7 @@ class instance extends instance_skel {
 		.catch((error) => {
 			this.log('error', 'Timecode polling failed')
 			clearInterval(this.pollTimer);
-		  });
+			});
 		this.initVariables();
 	}
 

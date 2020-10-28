@@ -129,7 +129,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Studio',
 				videoInputs: ['SDI','HDMI'],
 				audioInputs: ['embedded'],
-				formats:     ['uncompressed','prores','proxy','DNxHD220'],
+				fileFormats: ['uncompressed','prores','proxy','DNxHD220'],
 				maxShuttle:  1600
 			},
 			hdStudioPro: {
@@ -137,7 +137,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Studio Pro',
 				videoInputs: ['SDI','HDMI','component'],
 				audioInputs: ['embedded','XLR','RCA'],
-				formats:     ['uncompressed','prores','proxy','DNxHD220'],
+				fileFormats: ['uncompressed','prores','proxy','DNxHD220'],
 				maxShuttle:  1600
 			},
 			hdStudio12G: {
@@ -145,7 +145,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Studio 12G',
 				videoInputs: ['SDI','HDMI'],
 				audioInputs: ['embedded'],
-				formats:     ['uncompressed','prores','proxy','DNx','DNxHD220','DNxHR_HQX'],
+				fileFormats: ['uncompressed','prores','proxy','DNx','DNxHD220','DNxHR_HQX'],
 				maxShuttle:  1600
 			},
 			bmdDup4K: {
@@ -153,7 +153,7 @@ class instance extends instance_skel {
 				label:       'Blackmagic Duplicator 4K',
 				videoInputs: ['SDI','optical'],
 				audioInputs: ['embedded'],
-				formats:     ['H.264','H.265'],
+				fileFormats: ['H.264','H.265'],
 				maxShuttle:  100
 			},
 			hdStudioMini: {
@@ -161,7 +161,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Studio Mini',
 				videoInputs: ['SDI'],
 				audioInputs: ['embedded'],
-				formats:     ['uncompressed','prores','proxy','DNx','DNxHD220','DNxHR_HQX','H.264'],
+				fileFormats: ['prores','proxy','DNx','DNxHD220','DNxHR_HQX','H.264'],
 				maxShuttle:  1600
 			},
 			hdExtreme8K: {
@@ -169,7 +169,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Extreme 8K',
 				videoInputs: ['SDI','HDMI','component','composite','optical'],
 				audioInputs: ['embedded','XLR','RCA'],
-				formats:     ['prores','H.265'],
+				fileFormats: ['prores','H.265'],
 				maxShuttle:  5000
 			}
 		};
@@ -209,7 +209,7 @@ class instance extends instance_skel {
 			{ id: 'H.264Low',              label: 'H.264 Low',              family: 'H.264'        },
 			{ id: 'H.264Medium',           label: 'H.264 Medium',           family: 'H.264'        },
 			{ id: 'H.264High',             label: 'H.264 High',             family: 'H.264'        },
-			{ id: 'H.265Low',              label: 'H.265 Low',              family: 'H.264'        },
+			{ id: 'H.265Low',              label: 'H.265 Low',              family: 'H.265'        },
 			{ id: 'H.265Medium',           label: 'H.265 Medium',           family: 'H.265'        },
 			{ id: 'H.265High',             label: 'H.265 High',             family: 'H.265'        }
 		];
@@ -495,7 +495,7 @@ class instance extends instance_skel {
 
 		if (this.CHOICES_VIDEOINPUTS.length > 1) {
 			actions['videoSrc'] = {
-				label: 'video source',
+				label: 'Video source',
 				options: [
 					{
 						type: 'dropdown',
@@ -530,7 +530,7 @@ class instance extends instance_skel {
 					{
 						type: 'dropdown',
 						label: 'Format',
-						id: 'format',
+						id: 'fileFormat',
 						default: 'QuickTimeProRes',
 						choices: this.CHOICES_FILEFORMATS
 					}
@@ -538,6 +538,9 @@ class instance extends instance_skel {
 			};
 		}
 
+		/**
+		 * Not currently implemented
+		 *
 		if (this.config.modelID == 'hdExtreme8K') {
 			actions['dynamicRange'] = {
 				label: 'Set playback dyanmic range',
@@ -545,13 +548,14 @@ class instance extends instance_skel {
 					{
 						type: 'dropdown',
 						label: 'Dynamic Range',
-						id: 'format',
+						id: 'dynamicRange',
 						default: 'auto',
 						choices: this.CHOICES_DYNAMICRANGE
 					}
 				]
 			};
 		}
+		*/
 
 		actions['remote'] = {
 			label: 'Remote Control (enable/disable)',
@@ -659,6 +663,18 @@ class instance extends instance_skel {
 				cmd = new Commands.ConfigurationCommand()
 				cmd.audioInput = opt.audioSrc;
 				break;
+			case 'fileFormat':
+				cmd = new Commands.ConfigurationCommand()
+				cmd.fileFormat = opt.fileFormat;
+				break;
+			/**
+			 * Not supported in hyperdeck-connection
+			 *
+			case 'dynamicRange':
+				cmd = new Commands.ConfigurationCommand()
+				cmd.dynamicRange = opt.dynamicRange;
+				break;
+			*/
 			case 'remote':
 				cmd = new Commands.RemoteCommand()
 				cmd.enable = opt.remoteEnable;
@@ -1195,6 +1211,9 @@ class instance extends instance_skel {
 			})
 
 			this.hyperDeck.connect(this.config.host, this.config.port)
+			
+			// hyperdeck-connection debug tool
+			// this.hyperDeck.DEBUG = true;
 		}
 	}
 

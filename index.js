@@ -42,6 +42,7 @@ class instance extends instance_skel {
 			"loop":            ''
 		};
 		this.pollTimer    = null;
+		this.formatToken  = null;
 
 		// v1.0.* -> v1.1.0 (combine old play actions)
 		this.addUpgradeScript(function (config, actions, releaseActions, feedbacks) {
@@ -268,6 +269,11 @@ class instance extends instance_skel {
 			{ id: 'jog',     label: 'Jog'     },
 			{ id: 'shuttle', label: 'Shuttle' },
 			{ id: 'record',  label: 'Record'  }
+		]
+		
+		this.CHOICES_FILESYSTEM = [
+			{ id: 'HFS+',  label: 'HFS+'  },
+			{ id: 'exFAT', label: 'exFAT' }
 		]
 
 		if (this.config.modelID !== undefined){
@@ -556,6 +562,23 @@ class instance extends instance_skel {
 			};
 		}
 		*/
+		
+		actions['formatPrepare'] = {
+			label: 'Format prepare',
+			options: [
+				{
+					type:    'dropdown',
+					label:   'Filesystem',
+					id:      'filesystem',
+					default: "HFS+",
+					choices: this.CHOICES_FILESYSTEM
+				}
+			]
+		}
+
+		actions['formatConfirm'] = {
+			label: 'Format confirm'
+		}
 
 		actions['remote'] = {
 			label: 'Remote Control (enable/disable)',
@@ -580,7 +603,7 @@ class instance extends instance_skel {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	action(action) {
+	async action(action) {
 		var cmd;
 		var opt = action.options;
 
@@ -675,6 +698,17 @@ class instance extends instance_skel {
 				cmd.dynamicRange = opt.dynamicRange;
 				break;
 			*/
+			case 'formatPrepare':
+				cmd = new Commands.FormatCommand()
+				cmd.filesystem = opt.filesystem;
+				break;
+			case 'formatConfirm':
+				if (this.formatToken !== null) {
+					cmd = new Commands.FormatConfirmCommand()
+					cmd.code = this.formatToken;
+					this.formatToken = null;
+				}
+				break;
 			case 'remote':
 				cmd = new Commands.RemoteCommand()
 				cmd.enable = opt.remoteEnable;
@@ -684,14 +718,26 @@ class instance extends instance_skel {
 		if (cmd !== undefined) {
 
 			if (this.hyperDeck !== undefined && this.hyperDeck.connected) {
-				this.hyperDeck.sendCommand(cmd).catch(e => {
+				let response;
+				try {
+					response = await this.hyperDeck.sendCommand(cmd);
+				} catch (e) {
 					if (e.code) {
 						this.log('error', e.code + ' ' + e.name)
 					}
-				});
+				};
+				// Handle any return values
+				switch (action.action) {
+					case 'formatPrepare':
+						this.log('debug', 'Format token: ' + response.code);
+						if (response.code) {
+							this.formatToken = response.code;
+						}
+				}
+				this.checkFeedbacks()
 			}
 			else {
-				this.debug('Socket not connected :(');
+				this.log('debug', 'Socket not connected :(');
 			}
 		}
 	}
@@ -898,7 +944,10 @@ class instance extends instance_skel {
 			callback: ({ options }, bank) => {
 				const slot = this.slotInfo[options.slotId]
 				if (slot && slot.status === options.status) {
-					return { color: options.fg, bgcolor: options.bg };
+					return {
+						color:   options.fg,
+						bgcolor: options.bg
+					};
 				}
 			}
 		}
@@ -929,7 +978,7 @@ class instance extends instance_skel {
 			callback: ({ options }, bank) => {
 				if (options.setting == this.transportInfo.slotId) {
 					return {
-						color: options.fg,
+						color:   options.fg,
 						bgcolor: options.bg
 					};
 				}
@@ -961,7 +1010,7 @@ class instance extends instance_skel {
 			callback: ({ options }, bank) => {
 				if (options.setting === String(this.transportInfo.loop)) {
 					return {
-						color: options.fg,
+						color:   options.fg,
 						bgcolor: options.bg
 					};
 				}
@@ -993,9 +1042,35 @@ class instance extends instance_skel {
 			callback: ({ options }, bank) => {
 				if (options.setting === String(this.transportInfo.singleClip)) {
 					return {
-						color: options.fg,
+						color:   options.fg,
 						bgcolor: options.bg
 					};
+				}
+			}
+		}
+		feedbacks['format_ready'] = {
+			label: 'Format prepared',
+			description: 'Set the colour of the button based on a successful Format Prepare action',
+			options: [
+				{
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
+					default: this.rgb(255,0,0)
+				}
+			],
+			callback: ({ options }, bank) => {
+				if (this.formatToken !== null) {
+					return {
+						color:   options.fg,
+						bgcolor: options.bg
+					}
 				}
 			}
 		}
@@ -1213,7 +1288,7 @@ class instance extends instance_skel {
 			this.hyperDeck.connect(this.config.host, this.config.port)
 			
 			// hyperdeck-connection debug tool
-			// this.hyperDeck.DEBUG = true;
+			//this.hyperDeck.DEBUG = true;
 		}
 	}
 

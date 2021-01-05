@@ -564,7 +564,7 @@ class instance extends instance_skel {
 		*/
 		
 		actions['formatPrepare'] = {
-			label: 'Format prepare',
+			label: 'Format drive/card (prepare)',
 			options: [
 				{
 					type:    'dropdown',
@@ -577,7 +577,7 @@ class instance extends instance_skel {
 		}
 
 		actions['formatConfirm'] = {
-			label: 'Format confirm'
+			label: 'Format drive/card (confirm)'
 		}
 
 		actions['remote'] = {

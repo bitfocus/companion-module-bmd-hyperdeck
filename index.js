@@ -1336,7 +1336,7 @@ class instance extends instance_skel {
 			this.hyperDeck.connect(this.config.host, this.config.port)
 			
 			// hyperdeck-connection debug tool
-			this.hyperDeck.DEBUG = true;
+			//this.hyperDeck.DEBUG = true;
 		}
 	}
 

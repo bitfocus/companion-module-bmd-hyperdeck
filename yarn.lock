@@ -2,19 +2,24 @@
 # yarn lockfile v1
 
 
-hyperdeck-connection@^0.4.4:
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/hyperdeck-connection/-/hyperdeck-connection-0.4.4.tgz#ed569d1a6002311a27f9e8fbccc2c443acd61416"
-  integrity sha512-2+ezP4Gz5CvF/cdyAlU0coN4aRU/wesjUHjeJMN6Yex9jDrqvYmnOuB1soWY5LaetYShTO34MK2wPyYF50YOvg==
+hyperdeck-connection@0.4.4-nightly-feat-v1-11-support-20210216-214339-7c9f73f.0:
+  version "0.4.4-nightly-feat-v1-11-support-20210216-214339-7c9f73f.0"
+  resolved "https://registry.yarnpkg.com/hyperdeck-connection/-/hyperdeck-connection-0.4.4-nightly-feat-v1-11-support-20210216-214339-7c9f73f.0.tgz#131f548ffab192f0b2409704816846c5f0e78595"
+  integrity sha512-mERXyduv3kYYRhcz4onL55IgOn8eaSbnbNedaZq5c/2OR1tQAEcEGsb8OiEvhArO9Lxsy2GM8TvlyVdUQruyKQ==
   dependencies:
-    tslib "^1.9.0"
+    tslib "^2.0.3"
     underscore "^1.9.1"
     underscore-deep-extend "^1.1.5"
 
-tslib@^1.9.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
-  integrity sha512-qOebF53frne81cf0S9B41ByenJ3/IuH8yJKngAX35CmiZySA0khhkovshKK+jGCaMnVomla7gVlIcc3EvKPbTQ==
+smpte-timecode@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/smpte-timecode/-/smpte-timecode-1.2.3.tgz#272ac8826724ce793d956109cfd3982b2f6b1893"
+  integrity sha512-6U+vdStmprzmpzEWS+9pw8GfiChBcMmJOdJxBjaXlGJhB9U/jcQhvh0buxJzEfhuX8E0OfYJy4hayBgAO92dBg==
+
+tslib@^2.0.3:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
+  integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
 
 underscore-deep-extend@^1.1.5:
   version "1.1.5"

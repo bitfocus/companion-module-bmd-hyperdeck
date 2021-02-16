@@ -948,8 +948,6 @@ class instance extends instance_skel {
 				}
 			],
 			callback: ({ options }, bank) => {
-				console.log('Clip: %O - Clip %O', options.clipID, this.transportInfo.clipId)
-				console.log('Slot: %O - Slot %O', options.slotID, this.transportInfo.slotId)
 				if ((options.slotID == 'either' && options.clipID == this.transportInfo.clipId) ||
 						(options.slotID == this.transportInfo.slotId && options.clipID == this.transportInfo.clipId)) {
 					return {

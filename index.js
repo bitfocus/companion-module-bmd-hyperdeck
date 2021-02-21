@@ -1,6 +1,6 @@
 const instance_skel = require('../../instance_skel');
-const { Hyperdeck, Commands, SlotStatus, TransportStatus } = require('hyperdeck-connection')
-const { initVariables, updateTransportInfoVariables, updateTimecodeVariables } = require('./variables')
+const { Hyperdeck, Commands, SlotStatus, TransportStatus } = require('hyperdeck-connection');
+const { initVariables, updateTransportInfoVariables, updateTimecodeVariables } = require('./variables');
 
 var debug;
 
@@ -30,6 +30,7 @@ class instance extends instance_skel {
 		this.command       = null;
 		this.selected      = 0;
 		this.deviceName    = '';
+		this.protocolVersion = 0.0;
 		this.slotInfo      = [];
 		this.clipsList = [];
 		this.transportInfo = {
@@ -121,6 +122,22 @@ class instance extends instance_skel {
 
 			for (var k in releaseActions) {
 				changed = upgradePass(releaseActions[k], changed);
+			}
+
+			return changed;
+		});
+		// v1.1.0 -> v1.2.0 (timecode notifications)
+		this.addUpgradeScript(function (config, actions, releaseActions, feedbacks) {
+			let changed = false;
+
+			if (config.pollingOn !== undefined) {
+				if (config.pollingOn) {
+					config.timecodeVariables = 'polling';
+				} else {
+					config.timecodeVariables = 'disabled';
+				}
+				delete config.pollingOn;
+				changed = true;
 			}
 
 			return changed;
@@ -795,21 +812,19 @@ class instance extends instance_skel {
 				id:       'info',
 				width:    12,
 				label:    'Displaying Timecode Variable',
-				value:    'If you want to use the timecode variable, you will either have to use Firmware V7  or later and enable "Timecode Notifcations" or you will need to enable "Timecode Polling" to retrieve the current timecode, and set the Polling Interval to an appropriate value.'
+				value:    'Timecode variables have to be explicitly enabled by selecting "Notifications" or "Polling". Note that timecode notifications are not supported before hyperdeck firmware V7!'
 			},
 			{
-				type:     'checkbox',
-				id:       'tcNotifications',
-				label:    'Timecode Notifcations',
+				type:     'dropdown',
+				id:       'timecodeVariables',
+				label:    'Timecode Variables',
 				width:    6,
-				default:  false
-			},
-			{
-				type:     'checkbox',
-				id:       'pollingOn',
-				label:    'Enable Timecode Polling?',
-				width:    6,
-				default:  false
+				choices:  [
+					{ id: 'disabled', label: 'Disabled' },
+					{ id: 'notifications', label: 'Notifications' },
+					{ id: 'polling', label: 'Polling' },
+				],
+				default:  'disabled'
 			},
 			{
 				type:     'number',
@@ -1177,12 +1192,15 @@ class instance extends instance_skel {
 				this.updateDevice(c)
 				this.actions()
 
+				this.protocolVersion = c.protocolVersion
+
 				// set notification:
 				const notify = new Commands.NotifySetCommand()
 				// notify.configuration = true // @todo: not implemented in hyperdeck-connection
 				notify.transport = true
 				notify.slot = true
-				if (this.config.tcNotifications) notify.displayTimecode = true
+				// if (isMinimumVersion(1, 11) && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
+				if (this.protocolVersion >= 1.11 && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
 				await this.hyperDeck.sendCommand(notify)
 
 				let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
@@ -1204,7 +1222,7 @@ class instance extends instance_skel {
 				this.checkFeedbacks()
 
 				// If polling is enabled, setup interval command
-				if (this.config.pollingOn === true) {
+				if (this.config.timecodeVariables === 'polling') {
 					this.pollTimer = setInterval(
 						this.sendPollCommand.bind(this),
 						(this.config.pollingInterval)
@@ -1252,7 +1270,7 @@ class instance extends instance_skel {
 				// this.initVariables();
 			})
 
-			if (this.config.tcNotifications) {
+			if (this.config.timecodeVariables === 'notifications') {
 				this.hyperDeck.on('notify.displayTimecode', res => {
 					this.transportInfo.displayTimecode = res.displayTimecode
 					updateTimecodeVariables(this)
@@ -1309,7 +1327,6 @@ class instance extends instance_skel {
 			this.log('error', 'Timecode polling failed')
 			clearInterval(this.pollTimer);
 		});
-		// this.initVariables();
 		updateTimecodeVariables(this)
 	}
 
@@ -1328,6 +1345,18 @@ class instance extends instance_skel {
 			resetConnection = true;
 		}
 
+		if (this.protocolVersion >= 1.11 && this.config.timecodeVariables !== config.timecodeVariables && !resetConnection) {
+			if (this.config.timecodeVariables === 'notifications') {
+				const notify = new Commands.NotifySetCommand()
+				notify.displayTimecode = false
+				this.hyperDeck.sendCommand(notify)
+			} else if (config.timecodeVariables === 'notifications') {
+				const notify = new Commands.NotifySetCommand()
+				notify.displayTimecode = true
+				this.hyperDeck.sendCommand(notify)
+			}
+		}
+
 		this.config = config;
 
 		this.actions();
@@ -1339,7 +1368,7 @@ class instance extends instance_skel {
 		if (this.pollTimer !== undefined) {
 			clearInterval(this.pollTimer);
 		}
-		if (this.config.pollingOn === true) {
+		if (this.config.timecodeVariables === 'polling') {
 			this.pollTimer = setInterval(
 				this.sendPollCommand.bind(this),
 				(this.config.pollingInterval)

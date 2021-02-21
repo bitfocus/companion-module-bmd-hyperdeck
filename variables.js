@@ -47,22 +47,22 @@ module.exports.updateTransportInfoVariables = function(instance) {
 }
 
 module.exports.updateTimecodeVariables = function(instance) {
-    const tb = frameRates[instance.transportInfo['video format']] || 25
+    const tb = frameRates[instance.transportInfo['videoFormat']]
     const countUp = {
-        tcH    : '',
-        tcM    : '',
-        tcS    : '',
-        tcF    : '',
-        tcHMS  : '',
-        tcHMSF : '',
+        tcH    : '--',
+        tcM    : '--',
+        tcS    : '--',
+        tcF    : '--',
+        tcHMS  : '--:--:--',
+        tcHMSF : '--:--:--:--',
     }
     let countDown = {
-        tcH    : '',
-        tcM    : '',
-        tcS    : '',
-        tcF    : '',
-        tcHMS  : '',
-        tcHMSF : '',
+        tcH    : '--',
+        tcM    : '--',
+        tcS    : '--',
+        tcF    : '--',
+        tcHMS  : '--:--:--',
+        tcHMSF : '--:--:--:--',
     }
 
     const pad = (n) => ('00' + n).substr(-2)
@@ -77,29 +77,42 @@ module.exports.updateTimecodeVariables = function(instance) {
     }
 
     if (instance.transportInfo['displayTimecode']) {
-        let tc = Timecode(instance.transportInfo['displayTimecode'], tb)
-        countUp.tcH    = tc.hours;
-        countUp.tcM    = tc.minutes;
-        countUp.tcS    = tc.seconds;
-        countUp.tcF    = tc.frames;
-        countUp.tcHMS  = tc.toString().substr(0, 8);
-        countUp.tcHMSF = tc.toString();
+        if (tb) {
+            let tc = Timecode(instance.transportInfo['displayTimecode'], tb)
+            countUp.tcH    = tc.hours;
+            countUp.tcM    = tc.minutes;
+            countUp.tcS    = tc.seconds;
+            countUp.tcF    = tc.frames;
+            countUp.tcHMS  = tc.toString().substr(0, 8);
+            countUp.tcHMSF = tc.toString();
 
-        if (instance.transportInfo['slotId'] !== undefined) {
-            const clip = instance.clipsList[instance.transportInfo['slotId']].find(({ clipId }) => clipId == instance.transportInfo['clipId'])
-            if (clip && clip.duration) {
-                const tcTot = Timecode(clip.duration, tb)
-                const tcStart = Timecode(clip.startTime, tb)
-                const left = tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1
-                const tcLeft = Timecode(left, tb) // todo - unhardcode
+            if (instance.transportInfo['slotId'] !== undefined && instance.clipsList[instance.transportInfo['slotId']] !== undefined) {
+                const clip = instance.clipsList[instance.transportInfo['slotId']].find(({ clipId }) => clipId == instance.transportInfo['clipId'])
+                if (clip && clip.duration) {
+                    const tcTot = Timecode(clip.duration, tb)
+                    const tcStart = Timecode(clip.startTime, tb)
+                    const left = Math.max(0, tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1)
+                    const tcLeft = Timecode(left, tb) // todo - unhardcode
 
-                countDown.tcH    = tcLeft.hours;
-                countDown.tcM    = tcLeft.minutes;
-                countDown.tcS    = tcLeft.seconds;
-                countDown.tcF    = tcLeft.frames;
-                countDown.tcHMS  = tcLeft.toString().substr(0, 8);
-                countDown.tcHMSF = tcLeft.toString();
+                    countDown.tcH    = tcLeft.hours;
+                    countDown.tcM    = tcLeft.minutes;
+                    countDown.tcS    = tcLeft.seconds;
+                    countDown.tcF    = tcLeft.frames;
+                    countDown.tcHMS  = tcLeft.toString().substr(0, 8);
+                    countDown.tcHMSF = tcLeft.toString();
+                }
             }
+        } else {
+            // no timebase implies we can't use smpte-timecode lib
+            let tc = instance.transportInfo['displayTimecode'].match(/^(?<HMS>(?<H>\d{2}):(?<M>\d{2}):(?<S>\d{2})):(?<F>\d{2})$/)
+            if (tc && tc.groups) {
+                countUp.tcH    = tc.groups.H;
+                countUp.tcM    = tc.groups.M;
+                countUp.tcS    = tc.groups.S;
+                countUp.tcF    = tc.groups.F;
+                countUp.tcHMS  = tc.groups.HMS;
+            }
+            countUp.tcHMSF = instance.transportInfo['displayTimecode'];
         }
     }
 

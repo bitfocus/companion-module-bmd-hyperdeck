@@ -42,6 +42,7 @@ class instance extends instance_skel {
 			"loop":            ''
 		};
 		this.pollTimer    = null;
+		this.formatToken  = null;
 
 		// v1.0.* -> v1.1.0 (combine old play actions)
 		this.addUpgradeScript(function (config, actions, releaseActions, feedbacks) {
@@ -129,7 +130,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Studio',
 				videoInputs: ['SDI','HDMI'],
 				audioInputs: ['embedded'],
-				formats:     ['uncompressed','prores','proxy','DNxHD220'],
+				fileFormats: ['uncompressed','prores','proxy','DNxHD220'],
 				maxShuttle:  1600
 			},
 			hdStudioPro: {
@@ -137,7 +138,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Studio Pro',
 				videoInputs: ['SDI','HDMI','component'],
 				audioInputs: ['embedded','XLR','RCA'],
-				formats:     ['uncompressed','prores','proxy','DNxHD220'],
+				fileFormats: ['uncompressed','prores','proxy','DNxHD220'],
 				maxShuttle:  1600
 			},
 			hdStudio12G: {
@@ -145,7 +146,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Studio 12G',
 				videoInputs: ['SDI','HDMI'],
 				audioInputs: ['embedded'],
-				formats:     ['uncompressed','prores','proxy','DNx','DNxHD220','DNxHR_HQX'],
+				fileFormats: ['uncompressed','prores','proxy','DNx','DNxHD220','DNxHR_HQX'],
 				maxShuttle:  1600
 			},
 			bmdDup4K: {
@@ -153,7 +154,7 @@ class instance extends instance_skel {
 				label:       'Blackmagic Duplicator 4K',
 				videoInputs: ['SDI','optical'],
 				audioInputs: ['embedded'],
-				formats:     ['H.264','H.265'],
+				fileFormats: ['H.264','H.265'],
 				maxShuttle:  100
 			},
 			hdStudioMini: {
@@ -161,7 +162,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Studio Mini',
 				videoInputs: ['SDI'],
 				audioInputs: ['embedded'],
-				formats:     ['uncompressed','prores','proxy','DNx','DNxHD220','DNxHR_HQX','H.264'],
+				fileFormats: ['prores','proxy','DNx','DNxHD220','DNxHR_HQX','H.264'],
 				maxShuttle:  1600
 			},
 			hdExtreme8K: {
@@ -169,7 +170,7 @@ class instance extends instance_skel {
 				label:       'HyperDeck Extreme 8K',
 				videoInputs: ['SDI','HDMI','component','composite','optical'],
 				audioInputs: ['embedded','XLR','RCA'],
-				formats:     ['prores','H.265'],
+				fileFormats: ['prores','H.265'],
 				maxShuttle:  5000
 			}
 		};
@@ -209,7 +210,7 @@ class instance extends instance_skel {
 			{ id: 'H.264Low',              label: 'H.264 Low',              family: 'H.264'        },
 			{ id: 'H.264Medium',           label: 'H.264 Medium',           family: 'H.264'        },
 			{ id: 'H.264High',             label: 'H.264 High',             family: 'H.264'        },
-			{ id: 'H.265Low',              label: 'H.265 Low',              family: 'H.264'        },
+			{ id: 'H.265Low',              label: 'H.265 Low',              family: 'H.265'        },
 			{ id: 'H.265Medium',           label: 'H.265 Medium',           family: 'H.265'        },
 			{ id: 'H.265High',             label: 'H.265 High',             family: 'H.265'        }
 		];
@@ -268,6 +269,11 @@ class instance extends instance_skel {
 			{ id: 'jog',     label: 'Jog'     },
 			{ id: 'shuttle', label: 'Shuttle' },
 			{ id: 'record',  label: 'Record'  }
+		]
+		
+		this.CHOICES_FILESYSTEM = [
+			{ id: 'HFS+',  label: 'HFS+'  },
+			{ id: 'exFAT', label: 'exFAT' }
 		]
 
 		if (this.config.modelID !== undefined){
@@ -483,7 +489,7 @@ class instance extends instance_skel {
 						type: 'dropdown',
 						label: 'Slot (1/2)',
 						id: 'slot',
-						default: "1",
+						default: 1,
 						choices: [
 							{ id: 1, label: 'Slot 1' },
 							{ id: 2, label: 'Slot 2' }
@@ -495,7 +501,7 @@ class instance extends instance_skel {
 
 		if (this.CHOICES_VIDEOINPUTS.length > 1) {
 			actions['videoSrc'] = {
-				label: 'video source',
+				label: 'Video source',
 				options: [
 					{
 						type: 'dropdown',
@@ -530,7 +536,7 @@ class instance extends instance_skel {
 					{
 						type: 'dropdown',
 						label: 'Format',
-						id: 'format',
+						id: 'fileFormat',
 						default: 'QuickTimeProRes',
 						choices: this.CHOICES_FILEFORMATS
 					}
@@ -538,6 +544,9 @@ class instance extends instance_skel {
 			};
 		}
 
+		/**
+		 * Not currently implemented
+		 *
 		if (this.config.modelID == 'hdExtreme8K') {
 			actions['dynamicRange'] = {
 				label: 'Set playback dyanmic range',
@@ -545,12 +554,30 @@ class instance extends instance_skel {
 					{
 						type: 'dropdown',
 						label: 'Dynamic Range',
-						id: 'format',
+						id: 'dynamicRange',
 						default: 'auto',
 						choices: this.CHOICES_DYNAMICRANGE
 					}
 				]
 			};
+		}
+		*/
+		
+		actions['formatPrepare'] = {
+			label: 'Format drive/card (prepare)',
+			options: [
+				{
+					type:    'dropdown',
+					label:   'Filesystem',
+					id:      'filesystem',
+					default: "HFS+",
+					choices: this.CHOICES_FILESYSTEM
+				}
+			]
+		}
+
+		actions['formatConfirm'] = {
+			label: 'Format drive/card (confirm)'
 		}
 
 		actions['remote'] = {
@@ -576,7 +603,7 @@ class instance extends instance_skel {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	action(action) {
+	async action(action) {
 		var cmd;
 		var opt = action.options;
 
@@ -659,6 +686,29 @@ class instance extends instance_skel {
 				cmd = new Commands.ConfigurationCommand()
 				cmd.audioInput = opt.audioSrc;
 				break;
+			case 'fileFormat':
+				cmd = new Commands.ConfigurationCommand()
+				cmd.fileFormat = opt.fileFormat;
+				break;
+			/**
+			 * Not supported in hyperdeck-connection
+			 *
+			case 'dynamicRange':
+				cmd = new Commands.ConfigurationCommand()
+				cmd.dynamicRange = opt.dynamicRange;
+				break;
+			*/
+			case 'formatPrepare':
+				cmd = new Commands.FormatCommand()
+				cmd.filesystem = opt.filesystem;
+				break;
+			case 'formatConfirm':
+				if (this.formatToken !== null) {
+					cmd = new Commands.FormatConfirmCommand()
+					cmd.code = this.formatToken;
+					this.formatToken = null;
+				}
+				break;
 			case 'remote':
 				cmd = new Commands.RemoteCommand()
 				cmd.enable = opt.remoteEnable;
@@ -668,14 +718,26 @@ class instance extends instance_skel {
 		if (cmd !== undefined) {
 
 			if (this.hyperDeck !== undefined && this.hyperDeck.connected) {
-				this.hyperDeck.sendCommand(cmd).catch(e => {
+				let response;
+				try {
+					response = await this.hyperDeck.sendCommand(cmd);
+				} catch (e) {
 					if (e.code) {
 						this.log('error', e.code + ' ' + e.name)
 					}
-				});
+				};
+				// Handle any return values
+				switch (action.action) {
+					case 'formatPrepare':
+						this.log('debug', 'Format token: ' + response.code);
+						if (response.code) {
+							this.formatToken = response.code;
+						}
+				}
+				this.checkFeedbacks()
 			}
 			else {
-				this.debug('Socket not connected :(');
+				this.log('debug', 'Socket not connected :(');
 			}
 		}
 	}
@@ -849,6 +911,85 @@ class instance extends instance_skel {
 				}
 			}
 		}
+		feedbacks['transport_clip'] = {
+			label: 'Active clip',
+			description: 'Set the colour based on the which clip is active',
+			options: [
+				{
+					type:    'textinput',
+					label:   'Clip Id',
+					id:      'clipID',
+					default: 1,
+					regex:   this.REGEX_SIGNED_NUMBER
+				},
+				{
+					type:    'dropdown',
+					label:   'Slot Id',
+					id:      'slotID',
+					choices: [
+						{ id: 'either',  label: 'Either'  },
+						{ id: 1 , label: 'Slot 1' },
+						{ id: 2 , label: 'Slot 2' }
+					],
+					default: 'either',
+					regex:   this.REGEX_SOMETHING
+				},
+				{
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
+					default: this.rgb(0,0,0)
+				}
+			],
+			callback: ({ options }, bank) => {
+				if ((options.slotID == 'either' && options.clipID == this.transportInfo.clipId) ||
+						(options.slotID == this.transportInfo.slotId && options.clipID == this.transportInfo.clipId)) {
+					return {
+						color:   options.fg,
+						bgcolor: options.bg
+					};
+				}
+			}
+		}
+		feedbacks['transport_slot'] = {
+			label: 'Active slot',
+			description: 'Set the colour based on the which slot is active',
+			options: [
+				{
+					type:    'textinput',
+					label:   'Slot Id',
+					id:      'setting',
+					default: 1,
+					regex:   this.REGEX_SIGNED_NUMBER
+				},
+				{
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
+					default: this.rgb(0,0,0)
+				}
+			],
+			callback: ({ options }, bank) => {
+				if (options.setting == this.transportInfo.slotId) {
+					return {
+						color:   options.fg,
+						bgcolor: options.bg
+					};
+				}
+			}
+		}
 		feedbacks['slot_status'] = {
 			label: 'Slot/disk status',
 			description: 'Based on disk status, change colors of the bank',
@@ -882,38 +1023,8 @@ class instance extends instance_skel {
 			callback: ({ options }, bank) => {
 				const slot = this.slotInfo[options.slotId]
 				if (slot && slot.status === options.status) {
-					return { color: options.fg, bgcolor: options.bg };
-				}
-			}
-		}
-		feedbacks['transport_slot'] = {
-			label: 'Active slot',
-			description: 'Set the colour based on the which slot is active',
-			options: [
-				{
-					type:    'textinput',
-					label:   'Slot Id',
-					id:      'setting',
-					default: 1,
-					regex:   this.REGEX_SIGNED_NUMBER
-				},
-				{
-					type:    'colorpicker',
-					label:   'Foreground color',
-					id:      'fg',
-					default: this.rgb(255,255,255)
-				},
-				{
-					type:    'colorpicker',
-					label:   'Background color',
-					id:      'bg',
-					default: this.rgb(0,0,0)
-				}
-			],
-			callback: ({ options }, bank) => {
-				if (options.setting == this.transportInfo.slotId) {
 					return {
-						color: options.fg,
+						color:   options.fg,
 						bgcolor: options.bg
 					};
 				}
@@ -945,7 +1056,7 @@ class instance extends instance_skel {
 			callback: ({ options }, bank) => {
 				if (options.setting === String(this.transportInfo.loop)) {
 					return {
-						color: options.fg,
+						color:   options.fg,
 						bgcolor: options.bg
 					};
 				}
@@ -977,9 +1088,35 @@ class instance extends instance_skel {
 			callback: ({ options }, bank) => {
 				if (options.setting === String(this.transportInfo.singleClip)) {
 					return {
-						color: options.fg,
+						color:   options.fg,
 						bgcolor: options.bg
 					};
+				}
+			}
+		}
+		feedbacks['format_ready'] = {
+			label: 'Format prepared',
+			description: 'Set the colour of the button based on a successful Format Prepare action',
+			options: [
+				{
+					type:    'colorpicker',
+					label:   'Foreground color',
+					id:      'fg',
+					default: this.rgb(255,255,255)
+				},
+				{
+					type:    'colorpicker',
+					label:   'Background color',
+					id:      'bg',
+					default: this.rgb(255,0,0)
+				}
+			],
+			callback: ({ options }, bank) => {
+				if (this.formatToken !== null) {
+					return {
+						color:   options.fg,
+						bgcolor: options.bg
+					}
 				}
 			}
 		}
@@ -1183,7 +1320,7 @@ class instance extends instance_skel {
 				this.initVariables();
 			})
 
-			this.hyperDeck.on('notify.transport', res => {
+			this.hyperDeck.on('notify.transport', async res => {
 				this.log('debug', 'Transport Status Changed')
 				for (var id in res) {
 					if (res[id] !== undefined) {
@@ -1195,6 +1332,9 @@ class instance extends instance_skel {
 			})
 
 			this.hyperDeck.connect(this.config.host, this.config.port)
+			
+			// hyperdeck-connection debug tool
+			//this.hyperDeck.DEBUG = true;
 		}
 	}
 

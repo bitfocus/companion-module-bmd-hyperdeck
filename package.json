@@ -3,7 +3,7 @@
 	"legacy": [
 		"hyperdeck"
 	],
-	"version": "1.1.2",
+	"version": "1.1.5",
 	"api_version": "1.0.0",
 	"keywords": [
 		"Recording",
@@ -27,6 +27,6 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"hyperdeck-connection": "^0.4.3"
+		"hyperdeck-connection": "^0.4.4"
 	}
 }

@@ -1246,7 +1246,9 @@ class instance extends instance_skel {
 			})
 
 			this.hyperDeck.on('notify.slot', async res => {
+				if (this.config.modelID != 'hdStudioMini') {
 				this.log('debug', 'Slot Status Changed')
+				}
 				this.slotInfo[res.slotId] = {
 					...this.slotInfo[res.slotId],
 					...res

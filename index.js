@@ -301,6 +301,10 @@ class instance extends instance_skel {
 			{ id: 'exFAT', label: 'exFAT' }
 		]
 
+		this.CHOICES_CLIPS = [
+
+		]
+
 		if (this.config.modelID !== undefined){
 			this.model = this.CONFIG_MODEL[this.config.modelID];
 		}
@@ -423,6 +427,19 @@ class instance extends instance_skel {
 						max: 999,
 						required: true,
 						range: false
+					}
+				]
+			};
+			actions['gotoName'] = {
+				label: 'Goto Clip (name)',
+				options: [
+					{
+						type: 'dropdown',
+						label: 'Clip Name',
+						id: 'clip',
+						default: '1',
+						required: true,
+						choices: this.CHOICES_CLIPS
 					}
 				]
 			};
@@ -569,6 +586,8 @@ class instance extends instance_skel {
 			};
 		}
 
+		actions['fetchClips'] = { label: 'Fetch Clips' }
+
 		/**
 		 * Not currently implemented
 		 *
@@ -675,6 +694,10 @@ class instance extends instance_skel {
 				cmd = new Commands.GoToCommand()
 				cmd.clipId = opt.clip;
 				break;
+			case 'gotoName':
+				cmd = new Commands.GoToCommand()
+				cmd.clipId = opt.clip;
+				break;
 			case 'goFwd':
 				cmd = new Commands.GoToCommand()
 				cmd.clipId = '+' + opt.clip;
@@ -737,6 +760,9 @@ class instance extends instance_skel {
 			case 'remote':
 				cmd = new Commands.RemoteCommand()
 				cmd.enable = opt.remoteEnable;
+				break;
+			case 'fetchClips':
+				this.updateClips(this.transportInfo.slotId)
 				break;
 		}
 
@@ -1437,6 +1463,14 @@ class instance extends instance_skel {
 
 		this.clipsList[currentSlot] = queryClips.clips
 		// console.log(currentSlot, this.clipsList[currentSlot])
+
+		// reset clip choices
+		this.CHOICES_CLIPS.length = 0
+		queryClips.clips.forEach(({ clipId, name }) => {
+			this.CHOICES_CLIPS.push({ id: clipId, label: name })
+		})
+
+		this.actions() // reinit actions to update list
 	}
 }
 

@@ -234,6 +234,12 @@ class instance extends instance_skel {
 			{ id: 'H.265High',             label: 'H.265 High',             family: 'H.265'        }
 		];
 
+		this.CONFIG_NOTIFICATION_METHOD = [
+			{ id: 'disabled', label: 'Disabled' },
+			{ id: 'notifications', label: 'Notifications' },
+			{ id: 'polling', label: 'Polling' },
+		]
+
 		this.CHOICES_MODEL = Object.values(this.CONFIG_MODEL);
 		// Sort alphabetical
 		this.CHOICES_MODEL.sort(function(a, b){
@@ -819,11 +825,7 @@ class instance extends instance_skel {
 				id:       'timecodeVariables',
 				label:    'Timecode Variables',
 				width:    6,
-				choices:  [
-					{ id: 'disabled', label: 'Disabled' },
-					{ id: 'notifications', label: 'Notifications' },
-					{ id: 'polling', label: 'Polling' },
-				],
+				choices:  this.CONFIG_NOTIFICATION_METHOD,
 				default:  'disabled'
 			},
 			{
@@ -1347,10 +1349,12 @@ class instance extends instance_skel {
 
 		if (this.protocolVersion >= 1.11 && this.config.timecodeVariables !== config.timecodeVariables && !resetConnection) {
 			if (this.config.timecodeVariables === 'notifications') {
+				// old config had notifications and new config does not
 				const notify = new Commands.NotifySetCommand()
 				notify.displayTimecode = false
 				this.hyperDeck.sendCommand(notify)
 			} else if (config.timecodeVariables === 'notifications') {
+				// old config had no notifications and new config does have them
 				const notify = new Commands.NotifySetCommand()
 				notify.displayTimecode = true
 				this.hyperDeck.sendCommand(notify)

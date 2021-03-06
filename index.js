@@ -1,5 +1,6 @@
 const instance_skel = require('../../instance_skel');
-const { Hyperdeck, Commands, SlotStatus, TransportStatus } = require('hyperdeck-connection')
+const { Hyperdeck, Commands, SlotStatus, TransportStatus } = require('hyperdeck-connection');
+const { initVariables, updateTransportInfoVariables, updateTimecodeVariables } = require('./variables');
 
 var debug;
 
@@ -29,7 +30,9 @@ class instance extends instance_skel {
 		this.command       = null;
 		this.selected      = 0;
 		this.deviceName    = '';
+		this.protocolVersion = 0.0;
 		this.slotInfo      = [];
+		this.clipsList = [];
 		this.transportInfo = {
 			"status":          '',
 			"speed":           '',
@@ -119,6 +122,22 @@ class instance extends instance_skel {
 
 			for (var k in releaseActions) {
 				changed = upgradePass(releaseActions[k], changed);
+			}
+
+			return changed;
+		});
+		// v1.1.0 -> v1.2.0 (timecode notifications)
+		this.addUpgradeScript(function (config, actions, releaseActions, feedbacks) {
+			let changed = false;
+
+			if (config.pollingOn !== undefined) {
+				if (config.pollingOn) {
+					config.timecodeVariables = 'polling';
+				} else {
+					config.timecodeVariables = 'disabled';
+				}
+				delete config.pollingOn;
+				changed = true;
 			}
 
 			return changed;
@@ -214,6 +233,12 @@ class instance extends instance_skel {
 			{ id: 'H.265Medium',           label: 'H.265 Medium',           family: 'H.265'        },
 			{ id: 'H.265High',             label: 'H.265 High',             family: 'H.265'        }
 		];
+
+		this.CONFIG_NOTIFICATION_METHOD = [
+			{ id: 'disabled', label: 'Disabled' },
+			{ id: 'notifications', label: 'Notifications' },
+			{ id: 'polling', label: 'Polling' },
+		]
 
 		this.CHOICES_MODEL = Object.values(this.CONFIG_MODEL);
 		// Sort alphabetical
@@ -733,6 +758,11 @@ class instance extends instance_skel {
 						if (response.code) {
 							this.formatToken = response.code;
 						}
+						break
+					case 'select':
+						// select will update internal cliplist so we should fetch those
+						this.updateClips()
+						break
 				}
 				this.checkFeedbacks()
 			}
@@ -793,14 +823,15 @@ class instance extends instance_skel {
 				id:       'info',
 				width:    12,
 				label:    'Displaying Timecode Variable',
-				value:    'If you want to use the timecode variable, you will need to enable this to retrieve the current timecode, and set the Polling Interval to an appropriate value.'
+				value:    'Timecode variables have to be explicitly enabled by selecting "Notifications" or "Polling". Note that timecode notifications are not supported before hyperdeck firmware V7!'
 			},
 			{
-				type:     'checkbox',
-				id:       'pollingOn',
-				label:    'Enable Timecode Polling?',
+				type:     'dropdown',
+				id:       'timecodeVariables',
+				label:    'Timecode Variables',
 				width:    6,
-				default:  false
+				choices:  this.CONFIG_NOTIFICATION_METHOD,
+				default:  'disabled'
 			},
 			{
 				type:     'number',
@@ -1131,104 +1162,7 @@ class instance extends instance_skel {
 	 * @since 1.1.0
 	 */
 	initVariables() {
-		var variables = [];
-
-		variables.push({
-			label: 'Transport status',
-			name:  'status'
-		});
-		this.setVariable('status', this.transportInfo['status']);
-
-		variables.push({
-			label: 'Play speed',
-			name:  'speed'
-		});
-		this.setVariable('speed', this.transportInfo['speed']);
-
-		//Clip ID and Slot ID  null exceptions
-
-		let clipIdVariable = '—';
-		if (this.transportInfo['clipId'] != null) {
-			clipIdVariable = this.transportInfo['clipId'];
-		}
-
-		let slotIdVariable = '—';
-		if (this.transportInfo['slotId'] != null) {
-			slotIdVariable = this.transportInfo['slotId'];
-		}
-
-		variables.push({
-			label: 'Clip ID',
-			name:  'clipId'
-		});
-		this.setVariable('clipId', clipIdVariable);
-
-		variables.push({
-			label: 'Slot ID',
-			name:  'slotId'
-		});
-		this.setVariable('slotId', slotIdVariable);
-
-		variables.push({
-			label: 'Video format',
-			name:  'videoFormat'
-		});
-		this.setVariable('videoFormat', this.transportInfo['videoFormat']);
-
-		// Timecode variables
-		let tcH    = '';
-		let tcM    = '';
-		let tcS    = '';
-		let tcF    = '';
-		let tcHMS  = '';
-		let tcHMSF = '';
-
-		let tc = this.transportInfo['displayTimecode'].match(/((\d\d):(\d\d):(\d\d))[:;](\d\d)/) || [];
-		if (tc.length >= 6) {
-			tcH    = tc[2];
-			tcM    = tc[3];
-			tcS    = tc[4];
-			tcF    = tc[5];
-			tcHMS  = tc[1];
-			tcHMSF = tc[0];
-		}
-		variables.push({
-			label: 'Timecode (HH:MM:SS)',
-			name:  'timecodeHMS'
-		});
-		this.setVariable('timecodeHMS', tcHMS);
-
-		variables.push({
-			label: 'Timecode (HH:MM:SS:FF)',
-			name:  'timecodeHMSF'
-		});
-		this.setVariable('timecodeHMSF', tcHMSF);
-
-		variables.push({
-			label: 'Timecode (HH)',
-			name:  'timecodeH'
-		});
-		this.setVariable('timecodeH', tcH);
-
-		variables.push({
-			label: 'Timecode (MM)',
-			name:  'timecodeM'
-		});
-		this.setVariable('timecodeM', tcM);
-
-		variables.push({
-			label: 'Timecode (SS)',
-			name:  'timecodeS'
-		});
-		this.setVariable('timecodeS', tcS);
-
-		variables.push({
-			label: 'Timecode (FF)',
-			name:  'timecodeF'
-		});
-		this.setVariable('timecodeF', tcF);
-
-		this.setVariableDefinitions(variables);
+		initVariables(this)
 	}
 
 	/**
@@ -1265,11 +1199,15 @@ class instance extends instance_skel {
 				this.updateDevice(c)
 				this.actions()
 
+				this.protocolVersion = c.protocolVersion
+
 				// set notification:
 				const notify = new Commands.NotifySetCommand()
 				// notify.configuration = true // @todo: not implemented in hyperdeck-connection
 				notify.transport = true
 				notify.slot = true
+				// if (isMinimumVersion(1, 11) && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
+				if (this.protocolVersion >= 1.11 && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
 				await this.hyperDeck.sendCommand(notify)
 
 				let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
@@ -1284,13 +1222,14 @@ class instance extends instance_skel {
 
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
+				await this.updateClips(this.transportInfo.slotId)
 				this.status(this.STATUS_OK,'Connected')
 
 				this.initVariables()
 				this.checkFeedbacks()
 
 				// If polling is enabled, setup interval command
-				if (this.config.pollingOn === true) {
+				if (this.config.timecodeVariables === 'polling') {
 					this.pollTimer = setInterval(
 						this.sendPollCommand.bind(this),
 						(this.config.pollingInterval)
@@ -1317,7 +1256,12 @@ class instance extends instance_skel {
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand());
 				this.checkFeedbacks('slot_status');
 				this.checkFeedbacks('transport_slot');
-				this.initVariables();
+				// TODO - I don't think below is necessary?
+				// this.initVariables();
+
+				// Update the disk list to catch changes in clip
+				// TODO - not sure when the hyperdeck informs of us new clips being added...
+				this.updateClips(res.slotId);
 			})
 
 			this.hyperDeck.on('notify.transport', async res => {
@@ -1328,8 +1272,17 @@ class instance extends instance_skel {
 					}
 				}
 				this.checkFeedbacks();
-				this.initVariables();
+				updateTransportInfoVariables(this)
+				updateTimecodeVariables(this)
+				// this.initVariables();
 			})
+
+			if (this.config.timecodeVariables === 'notifications') {
+				this.hyperDeck.on('notify.displayTimecode', res => {
+					this.transportInfo.displayTimecode = res.displayTimecode
+					updateTimecodeVariables(this)
+				})
+			}
 
 			this.hyperDeck.connect(this.config.host, this.config.port)
 			
@@ -1381,7 +1334,7 @@ class instance extends instance_skel {
 			this.log('error', 'Timecode polling failed')
 			clearInterval(this.pollTimer);
 		});
-		this.initVariables();
+		updateTimecodeVariables(this)
 	}
 
 	/**
@@ -1399,6 +1352,20 @@ class instance extends instance_skel {
 			resetConnection = true;
 		}
 
+		if (this.protocolVersion >= 1.11 && this.config.timecodeVariables !== config.timecodeVariables && !resetConnection) {
+			if (this.config.timecodeVariables === 'notifications') {
+				// old config had notifications and new config does not
+				const notify = new Commands.NotifySetCommand()
+				notify.displayTimecode = false
+				this.hyperDeck.sendCommand(notify)
+			} else if (config.timecodeVariables === 'notifications') {
+				// old config had no notifications and new config does have them
+				const notify = new Commands.NotifySetCommand()
+				notify.displayTimecode = true
+				this.hyperDeck.sendCommand(notify)
+			}
+		}
+
 		this.config = config;
 
 		this.actions();
@@ -1410,7 +1377,7 @@ class instance extends instance_skel {
 		if (this.pollTimer !== undefined) {
 			clearInterval(this.pollTimer);
 		}
-		if (this.config.pollingOn === true) {
+		if (this.config.timecodeVariables === 'polling') {
 			this.pollTimer = setInterval(
 				this.sendPollCommand.bind(this),
 				(this.config.pollingInterval)
@@ -1456,6 +1423,20 @@ class instance extends instance_skel {
 		this.log('info', 'Connected to a ' + this.deviceName);
 
 		this.saveConfig();
+	}
+
+	/**
+	 * INTERNAL: Get clip list from the hyperdeck
+	 * 
+	 * @param {number} currentSlot hyperdeck slot id
+	 * @access protected
+	 */
+	async updateClips (currentSlot) {
+		const clips = new Commands.ClipsGetCommand()
+		const queryClips = await this.hyperDeck.sendCommand(clips)
+
+		this.clipsList[currentSlot] = queryClips.clips
+		// console.log(currentSlot, this.clipsList[currentSlot])
 	}
 }
 

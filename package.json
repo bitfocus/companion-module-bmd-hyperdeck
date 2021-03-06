@@ -3,7 +3,7 @@
 	"legacy": [
 		"hyperdeck"
 	],
-	"version": "1.1.5",
+	"version": "1.2.0",
 	"api_version": "1.0.0",
 	"keywords": [
 		"Recording",
@@ -27,6 +27,7 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"hyperdeck-connection": "^0.4.4"
+		"hyperdeck-connection": "0.4.4-nightly-feat-v1-11-support-20210216-214339-7c9f73f.0",
+		"smpte-timecode": "^1.2.3"
 	}
 }

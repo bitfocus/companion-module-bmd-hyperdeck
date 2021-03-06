@@ -758,6 +758,11 @@ class instance extends instance_skel {
 						if (response.code) {
 							this.formatToken = response.code;
 						}
+						break
+					case 'select':
+						// select will update internal cliplist so we should fetch those
+						this.updateClips()
+						break
 				}
 				this.checkFeedbacks()
 			}
@@ -1213,11 +1218,11 @@ class instance extends instance_skel {
 
 				for (let i = 0; i < slots; i++) {
 					this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
-					await this.updateClips(i + 1)
 				}
 
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
+				await this.updateClips(this.transportInfo.slotId)
 				this.status(this.STATUS_OK,'Connected')
 
 				this.initVariables()
@@ -1431,7 +1436,7 @@ class instance extends instance_skel {
 		const queryClips = await this.hyperDeck.sendCommand(clips)
 
 		this.clipsList[currentSlot] = queryClips.clips
-		console.log(queryClips.slotId, this.clipsList[queryClips.slotId])
+		// console.log(currentSlot, this.clipsList[currentSlot])
 	}
 }
 

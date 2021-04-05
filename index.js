@@ -787,8 +787,9 @@ class instance extends instance_skel {
 						}
 						break
 					case 'select':
+						this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand());
 						// select will update internal cliplist so we should fetch those
-						this.updateClips()
+						this.updateClips(this.transportInfo.slotId)
 						break
 				}
 				this.checkFeedbacks()

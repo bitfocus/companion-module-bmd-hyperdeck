@@ -1009,9 +1009,9 @@ class instance extends instance_skel {
 
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
-				await this.updateClips(this.transportInfo.slotId)
 				this.status(this.STATUS_OK,'Connected')
-
+				
+				this.updateClips(this.transportInfo.slotId)
 				this.initVariables()
 				this.checkFeedbacks()
 

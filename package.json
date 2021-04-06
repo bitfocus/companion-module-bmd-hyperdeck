@@ -27,7 +27,7 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"hyperdeck-connection": "0.4.4-nightly-feat-v1-11-support-20210216-214339-7c9f73f.0",
+		"hyperdeck-connection": "0.4.4-nightly-hack-v1-11-support-node8-20210406-163523-e4239ed.0",
 		"smpte-timecode": "^1.2.3"
 	}
 }

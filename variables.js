@@ -46,6 +46,22 @@ module.exports.updateTransportInfoVariables = function(instance) {
     instance.setVariable('videoFormat', instance.transportInfo['videoFormat']);
 }
 
+module.exports.updateSlotInfoVariables = function(instance) {
+    let recordingTimes = []
+    if (instance.slotInfo[1] != null) {
+        recordingTimes[1] = new Date(instance.slotInfo[1]['recordingTime'] * 1000).toISOString().substr(11, 8)
+        instance.setVariable('slot1_recordingTime', recordingTimes[1])
+    }
+    if (instance.slotInfo[2] != null) {
+        recordingTimes[2] = new Date(instance.slotInfo[2]['recordingTime'] * 1000).toISOString().substr(11, 8)
+        instance.setVariable('slot2_recordingTime', recordingTimes[2])
+    }
+    let activeSlot = instance.transportInfo['slotId']
+    if (instance.slotInfo[activeSlot] != null) {
+        instance.setVariable('recordingTime', recordingTimes[activeSlot])
+    }
+}
+
 module.exports.updateTimecodeVariables = function(instance) {
     const tb = frameRates[instance.transportInfo['videoFormat']]
     const countUp = {
@@ -144,7 +160,20 @@ module.exports.initVariables = function (instance) {
         label: 'Video format',
         name:  'videoFormat'
     });
+    variables.push({
+        label: 'Active slot recording time available',
+        name: 'recordingTime'
+    })
+    variables.push({
+        label: 'Slot 1 recording time available',
+        name: 'slot1_recordingTime'
+    })
+    variables.push({
+        label: 'Slot 2 recording time available',
+        name: 'slot2_recordingTime'
+    })
     module.exports.updateTransportInfoVariables(instance)
+    module.exports.updateSlotInfoVariables(instance)
 
     // Timecode variables
 

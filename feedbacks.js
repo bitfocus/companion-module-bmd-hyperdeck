@@ -213,6 +213,38 @@ exports.initFeedbacks = function () {
 			}
 		}
 	}
+	feedbacks['video_input'] = {
+		label: 'Video input',
+		description: 'Set the colour of the button based on selected video input',
+		options: [
+			{
+				type:    'dropdown',
+				label:   'Input',
+				id:      'setting',
+				choices: this.CHOICES_VIDEOINPUTS
+			},
+			{
+				type:    'colorpicker',
+				label:   'Foreground color',
+				id:      'fg',
+				default: this.rgb(255,255,255)
+			},
+			{
+				type:    'colorpicker',
+				label:   'Background color',
+				id:      'bg',
+				default: this.rgb(0,0,0)
+			}
+		],
+		callback: ({ options }, bank) => {
+			if (options.setting === String(this.deckConfig.videoInput)) {
+				return {
+					color: options.fg,
+					bgcolor: options.bg
+				}
+			}
+		}
+	}
 	feedbacks['format_ready'] = {
 		label: 'Format prepared',
 		description: 'Set the colour of the button based on a successful Format Prepare action',

@@ -1,6 +1,6 @@
 const instance_skel = require('../../instance_skel');
 const { Hyperdeck, Commands, SlotStatus, TransportStatus } = require('hyperdeck-connection');
-const { initVariables, updateTransportInfoVariables, updateTimecodeVariables } = require('./variables');
+const { initVariables, updateTransportInfoVariables, updateSlotInfoVariables, updateTimecodeVariables } = require('./variables');
 const { initFeedbacks } = require('./feedbacks')
 
 var debug;
@@ -44,6 +44,11 @@ class instance extends instance_skel {
 			"displayTimecode": '',
 			"videoFormat":     '',
 			"loop":            ''
+		};
+		this.deckConfig = {
+			"audioInput": '',
+			"videoInput": '',
+			"fileFormat": ''
 		};
 		this.pollTimer    = null;
 		this.formatToken  = null;
@@ -612,11 +617,17 @@ class instance extends instance_skel {
 			label: 'Format drive/card (prepare)',
 			options: [
 				{
-					type:    'dropdown',
-					label:   'Filesystem',
-					id:      'filesystem',
+					type: 'dropdown',
+					label: 'Filesystem',
+					id: 'filesystem',
 					default: "HFS+",
 					choices: this.CHOICES_FILESYSTEM
+				},
+				{
+					type: 'number',
+					label: 'Confirmation timeout (sec)',
+					id: 'timeout',
+					default: 10
 				}
 			]
 		}
@@ -641,6 +652,10 @@ class instance extends instance_skel {
 		this.setActions(actions);
 	}
 
+	cancelFormat() {
+		this.formatToken = null
+	}
+	
 	/**
 	 * Executes the provided action.
 	 *
@@ -750,6 +765,10 @@ class instance extends instance_skel {
 			case 'formatPrepare':
 				cmd = new Commands.FormatCommand()
 				cmd.filesystem = opt.filesystem;
+				let cancel = setTimeout(releaseToken => {
+					this.formatToken = null
+					this.checkFeedbacks('format_ready')
+				}, opt.timeout * 1000)
 				break;
 			case 'formatConfirm':
 				if (this.formatToken !== null) {
@@ -994,6 +1013,7 @@ class instance extends instance_skel {
 				// notify.configuration = true // @todo: not implemented in hyperdeck-connection
 				notify.transport = true
 				notify.slot = true
+				notify.configuration = true
 				// if (isMinimumVersion(1, 11) && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
 				if (this.protocolVersion >= 1.11 && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
 				await this.hyperDeck.sendCommand(notify)
@@ -1046,8 +1066,8 @@ class instance extends instance_skel {
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand());
 				this.checkFeedbacks('slot_status');
 				this.checkFeedbacks('transport_slot');
-				// TODO - I don't think below is necessary?
-				// this.initVariables();
+				// Update slot variables
+				updateSlotInfoVariables(this)
 
 				// Update the disk list to catch changes in clip
 				// TODO - not sure when the hyperdeck informs of us new clips being added...
@@ -1064,7 +1084,17 @@ class instance extends instance_skel {
 				this.checkFeedbacks();
 				updateTransportInfoVariables(this)
 				updateTimecodeVariables(this)
-				// this.initVariables();
+				updateSlotInfoVariables(this)
+			})
+			
+			this.hyperDeck.on('notify.configuration', async res => {
+				this.log('debug', 'Configuration Changed')
+				for (var id in res) {
+					if (res[id] !== undefined) {
+						this.deckConfig[id] = res[id]
+					}
+				}
+				this.checkFeedbacks('video_input');
 			})
 
 			if (this.config.timecodeVariables === 'notifications') {

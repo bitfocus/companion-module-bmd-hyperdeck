@@ -1252,19 +1252,31 @@ class instance extends instance_skel {
 	 * @access protected
 	 */
 	async updateClips (currentSlot) {
-		const clips = new Commands.ClipsGetCommand()
-		const queryClips = await this.hyperDeck.sendCommand(clips)
-
-		this.clipsList[currentSlot] = queryClips.clips
-		// console.log(currentSlot, this.clipsList[currentSlot])
-
-		// reset clip choices
-		this.CHOICES_CLIPS.length = 0
-		queryClips.clips.forEach(({ clipId, name }) => {
-			this.CHOICES_CLIPS.push({ id: clipId, label: name })
-		})
-
-		this.actions() // reinit actions to update list
+		try	{
+			// TODO Add a check for clip count once the command is supported in hyperdeck-connection
+//			const count = new Commands.ClipsCountCommand()
+//			const clipCount = await this.hyperDeck.sendCommand(count)
+			const clipCount = 1
+			if (clipCount > 0) {
+				const clips = new Commands.ClipsGetCommand()
+				const queryClips = await this.hyperDeck.sendCommand(clips)
+				
+				this.clipsList[currentSlot] = queryClips.clips
+				// console.log(currentSlot, this.clipsList[currentSlot])
+				
+				// reset clip choices
+				this.CHOICES_CLIPS.length = 0
+				queryClips.clips.forEach(({ clipId, name }) => {
+					this.CHOICES_CLIPS.push({ id: clipId, label: name })
+				})
+				
+				this.actions() // reinit actions to update list
+			}
+		} catch (e) {
+			if (e.code) {
+				this.log('error', e.code + ' ' + e.name)
+			}
+		}
 	}
 }
 

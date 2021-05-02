@@ -28,7 +28,11 @@ const frameRates = {
 }
 
 module.exports.updateTransportInfoVariables = function(instance) {
-    instance.setVariable('status', instance.transportInfo['status']);
+    const capitalise = (s) => {
+        if (typeof s !== 'string') return ''
+        return s.charAt(0).toUpperCase() + s.slice(1)
+    }
+    instance.setVariable('status', capitalise(instance.transportInfo['status']));
     instance.setVariable('speed', instance.transportInfo['speed']);
 
     //Clip ID and Slot ID  null exceptions

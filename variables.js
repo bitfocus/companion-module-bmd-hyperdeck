@@ -50,6 +50,10 @@ module.exports.updateTransportInfoVariables = function (instance) {
 	instance.setVariable('videoFormat', instance.transportInfo['videoFormat'])
 }
 
+module.exports.updateClipVariables = function (instance) {
+	instance.setVariable('clipCount', instance.clipCount)
+}
+
 module.exports.updateSlotInfoVariables = function (instance) {
 	let recordingTimes = []
 	if (instance.slotInfo[1] != null) {
@@ -185,8 +189,14 @@ module.exports.initVariables = function (instance) {
 	module.exports.updateTransportInfoVariables(instance)
 	module.exports.updateSlotInfoVariables(instance)
 
-	// Timecode variables
+	// Clip variables
+	variables.push({
+		label: 'Clip count',
+		name: 'clipCount'
+	})
+	module.exports.updateClipVariables(instance)
 
+	// Timecode variables
 	const initTcVariable = (isCountdown) => {
 		variables.push({
 			label: (isCountdown ? 'Countdown ' : '') + 'Timecode (HH:MM:SS)',

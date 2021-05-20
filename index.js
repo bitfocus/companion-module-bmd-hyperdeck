@@ -5,6 +5,7 @@ const {
 	updateTransportInfoVariables,
 	updateSlotInfoVariables,
 	updateTimecodeVariables,
+	updateClipVariables,
 } = require('./variables')
 const { initFeedbacks } = require('./feedbacks')
 
@@ -37,6 +38,7 @@ class instance extends instance_skel {
 		this.deviceName = ''
 		this.protocolVersion = 0.0
 		this.slotInfo = []
+		this.clipCount = 0
 		this.clipsList = []
 		this.transportInfo = {
 			status: '',
@@ -1250,15 +1252,16 @@ class instance extends instance_skel {
 	async updateClips(currentSlot) {
 		try {
 			// TODO Add a check for clip count once the command is supported in hyperdeck-connection
-			//			const count = new Commands.ClipsCountCommand()
-			//			const clipCount = await this.hyperDeck.sendCommand(count)
-			const clipCount = 1
-			if (clipCount > 0) {
+			const count = new Commands.ClipsCountCommand()
+			const clipCount = await this.hyperDeck.sendCommand(count)
+			this.clipCount = clipCount.count
+			//const clipCount = 1
+			if (this.clipCount > 0) {
 				const clips = new Commands.ClipsGetCommand()
 				const queryClips = await this.hyperDeck.sendCommand(clips)
 
 				this.clipsList[currentSlot] = queryClips.clips
-				// console.log(currentSlot, this.clipsList[currentSlot])
+				console.log(currentSlot, this.clipsList[currentSlot])
 
 				// reset clip choices
 				this.CHOICES_CLIPS.length = 0
@@ -1268,6 +1271,7 @@ class instance extends instance_skel {
 
 				this.actions() // reinit actions to update list
 			}
+			updateClipVariables(this)
 		} catch (e) {
 			if (e.code) {
 				this.log('error', e.code + ' ' + e.name)

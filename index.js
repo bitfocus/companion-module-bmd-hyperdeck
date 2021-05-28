@@ -1014,27 +1014,32 @@ class instance extends instance_skel {
 
 				// set notification:
 				const notify = new Commands.NotifySetCommand()
-				// notify.configuration = true // @todo: not implemented in hyperdeck-connection
+				notify.configuration = true
 				notify.transport = true
 				notify.slot = true
-				notify.configuration = true
 				// if (isMinimumVersion(1, 11) && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
 				if (this.protocolVersion >= 1.11 && this.config.timecodeVariables === 'notifications')
 					notify.displayTimecode = true
 				await this.hyperDeck.sendCommand(notify)
 
-				let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
-
-				if (slots === undefined) {
-					slots = 2
+				try {
+					let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
+					if (slots === undefined) {
+						slots = 2
+					}
+					for (let i = 0; i < slots; i++) {
+						this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
+					}
+	
+					this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
+					
+					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
+				} catch (e) {
+					if (e.code) {
+						this.log('error', `Connection error - ${e.code} ${e.name}`)
+					}
 				}
-
-				for (let i = 0; i < slots; i++) {
-					this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
-				}
-
-				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
-
+				
 				this.status(this.STATUS_OK, 'Connected')
 
 				this.updateClips(this.transportInfo.slotId)
@@ -1096,6 +1101,7 @@ class instance extends instance_skel {
 						this.deckConfig[id] = res[id]
 					}
 				}
+				this.debug('Config:', this.deckConfig)
 				this.checkFeedbacks('video_input')
 			})
 
@@ -1261,7 +1267,7 @@ class instance extends instance_skel {
 				const queryClips = await this.hyperDeck.sendCommand(clips)
 
 				this.clipsList[currentSlot] = queryClips.clips
-				console.log(currentSlot, this.clipsList[currentSlot])
+				//console.log(currentSlot, this.clipsList[currentSlot])
 
 				// reset clip choices
 				this.CHOICES_CLIPS.length = 0

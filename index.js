@@ -1199,8 +1199,13 @@ class instance extends instance_skel {
 			}
 		}
 
+		if ( this.config.modelID != config.modelID) {
+			this.model = this.CONFIG_MODEL[config.modelID]
+		}
+		
 		this.config = config
 
+		this.setupChoices()
 		this.actions()
 		this.initFeedbacks()
 		//this.initPresets();

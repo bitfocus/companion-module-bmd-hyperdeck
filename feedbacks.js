@@ -247,6 +247,39 @@ exports.initFeedbacks = function () {
 			}
 		},
 	}
+	feedbacks['audio_input'] = {
+		label: 'Audio input',
+		description: 'Set the colour of the button based on selected audio input',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Input',
+				id: 'setting',
+				choices: this.CHOICES_AUDIOINPUTS,
+				default: 'embedded'
+			},
+			{
+				type: 'colorpicker',
+				label: 'Foreground color',
+				id: 'fg',
+				default: this.rgb(255, 255, 255),
+			},
+			{
+				type: 'colorpicker',
+				label: 'Background color',
+				id: 'bg',
+				default: this.rgb(0, 0, 0),
+			},
+		],
+		callback: ({ options }, bank) => {
+			if (options.setting === String(this.deckConfig.audioInput)) {
+				return {
+					color: options.fg,
+					bgcolor: options.bg,
+				}
+			}
+		},
+	}
 	feedbacks['format_ready'] = {
 		label: 'Format prepared',
 		description: 'Set the colour of the button based on a successful Format Prepare action',

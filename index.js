@@ -8,8 +8,7 @@ const {
 	updateClipVariables,
 } = require('./variables')
 const { initFeedbacks } = require('./feedbacks')
-
-var debug
+const { upgradeCombineOldPlayActions, upgradeTimecodeNotifications } = require('./upgrades')
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -58,102 +57,6 @@ class instance extends instance_skel {
 		}
 		this.pollTimer = null
 		this.formatToken = null
-
-		// v1.0.* -> v1.1.0 (combine old play actions)
-		this.addUpgradeScript(function (config, actions, releaseActions, feedbacks) {
-			var changed = false
-
-			let upgradePass = function (action, changed) {
-				if (action.options === undefined) {
-					action.options = {}
-				}
-
-				switch (action.action) {
-					case 'vplay':
-						action.options.speed = opt.speed
-						action.options.loop = false
-						action.options.single = false
-						action.action = 'play'
-						action.label = this.id + ':' + action.action
-						changed = true
-						break
-					case 'vplaysingle':
-						action.options.speed = opt.speed
-						action.options.loop = false
-						action.options.single = true
-						action.action = 'play'
-						action.label = this.id + ':' + action.action
-						changed = true
-						break
-					case 'vplayloop':
-						action.options.speed = opt.speed
-						action.options.loop = true
-						action.options.single = false
-						action.action = 'play'
-						action.label = this.id + ':' + action.action
-						changed = true
-						break
-					case 'playSingle':
-						action.options.speed = 100
-						action.options.loop = false
-						action.options.single = true
-						action.action = 'play'
-						action.label = this.id + ':' + action.action
-						changed = true
-						break
-					case 'playLoop':
-						action.options.speed = 100
-						action.options.loop = true
-						action.options.single = false
-						action.action = 'play'
-						action.label = this.id + ':' + action.action
-						changed = true
-						break
-					case 'play':
-						if (action.options.speed === undefined) {
-							action.options.speed = 100
-							changed = true
-						}
-						if (action.options.loop === undefined) {
-							action.options.loop = false
-							changed = true
-						}
-						if (action.options.single === undefined) {
-							action.options.single = false
-							changed = true
-						}
-						break
-				}
-
-				return changed
-			}
-
-			for (var k in actions) {
-				changed = upgradePass(actions[k], changed)
-			}
-
-			for (var k in releaseActions) {
-				changed = upgradePass(releaseActions[k], changed)
-			}
-
-			return changed
-		})
-		// v1.1.0 -> v1.2.0 (timecode notifications)
-		this.addUpgradeScript(function (config, actions, releaseActions, feedbacks) {
-			let changed = false
-
-			if (config.pollingOn !== undefined) {
-				if (config.pollingOn) {
-					config.timecodeVariables = 'polling'
-				} else {
-					config.timecodeVariables = 'disabled'
-				}
-				delete config.pollingOn
-				changed = true
-			}
-
-			return changed
-		})
 
 		this.CONFIG_MODEL = {
 			hdStudio: {
@@ -327,6 +230,13 @@ class instance extends instance_skel {
 		}
 
 		this.actions() // export actions
+	}
+
+	static GetUpgradeScripts() {
+		return [
+			upgradeCombineOldPlayActions,
+			upgradeTimecodeNotifications
+		]
 	}
 
 	/**
@@ -916,7 +826,7 @@ class instance extends instance_skel {
 			clearInterval(this.pollTimer)
 		}
 
-		debug('destroy', this.id)
+		self.debug('destroy', this.id)
 	}
 
 	/**
@@ -946,8 +856,6 @@ class instance extends instance_skel {
 	 * @since 1.0.0
 	 */
 	init() {
-		debug = this.debug
-
 		this.status(this.STATUS_WARNING, 'Connecting') // status ok!
 		this.initFeedbacks()
 		//this.initPresets();

@@ -9,7 +9,7 @@ const frameRates = {
 	[VideoFormat._720p50]: 50,
 	[VideoFormat._720p5994]: 59.94,
 	[VideoFormat._720p60]: 60,
-	[VideoFormat._1080p23976]: 23.897,
+	// [VideoFormat._1080p23976]: 23.976, // not supported by smpte-timecode lib
 	[VideoFormat._1080p24]: 24,
 	[VideoFormat._1080p25]: 25,
 	[VideoFormat._1080p2997]: 29.97,
@@ -17,7 +17,10 @@ const frameRates = {
 	[VideoFormat._1080i50]: 25,
 	[VideoFormat._1080i5994]: 29.97,
 	[VideoFormat._1080i60]: 30,
-	[VideoFormat._4Kp23976]: 23.976,
+	[VideoFormat._1080p50]: 50,
+	[VideoFormat._1080p5994]: 59.94,
+	[VideoFormat._1080p60]: 60,
+	// [VideoFormat._4Kp23976]: 23.976, // not supported by smpte-timecode lib
 	[VideoFormat._4Kp24]: 24,
 	[VideoFormat._4Kp25]: 25,
 	[VideoFormat._4Kp2997]: 29.97,
@@ -102,39 +105,43 @@ module.exports.updateTimecodeVariables = function (instance) {
 
 	if (instance.transportInfo['displayTimecode']) {
 		if (tb) {
-			let tc = Timecode(instance.transportInfo['displayTimecode'], tb)
-			countUp.tcH = tc.hours
-			countUp.tcM = tc.minutes
-			countUp.tcS = tc.seconds
-			countUp.tcF = tc.frames
-			countUp.tcHMS = tc.toString().substr(0, 8)
-			countUp.tcHMSF = tc.toString()
+			try {
+				let tc = Timecode(instance.transportInfo['displayTimecode'], tb)
+				countUp.tcH = tc.hours
+				countUp.tcM = tc.minutes
+				countUp.tcS = tc.seconds
+				countUp.tcF = tc.frames
+				countUp.tcHMS = tc.toString().substr(0, 8)
+				countUp.tcHMSF = tc.toString()
 
-			if (
-				instance.transportInfo['slotId'] !== undefined &&
-				instance.clipsList[instance.transportInfo['slotId']] !== undefined
-			) {
-				const clip = instance.clipsList[instance.transportInfo['slotId']].find(
-					({ clipId }) => clipId == instance.transportInfo['clipId']
-				)
-				if (clip && clip.duration) {
-					const tcTot = Timecode(clip.duration, tb)
-					const tcStart = Timecode(clip.startTime, tb)
-					const left = Math.max(0, tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1)
-					const tcLeft = Timecode(left, tb) // todo - unhardcode
-
-					countDown.tcH = tcLeft.hours
-					countDown.tcM = tcLeft.minutes
-					countDown.tcS = tcLeft.seconds
-					countDown.tcF = tcLeft.frames
-					countDown.tcHMS = tcLeft.toString().substr(0, 8)
-					countDown.tcHMSF = tcLeft.toString()
+				if (
+					instance.transportInfo['slotId'] !== undefined &&
+					instance.clipsList[instance.transportInfo['slotId']] !== undefined
+				) {
+					const clip = instance.clipsList[instance.transportInfo['slotId']].find(
+						({ clipId }) => clipId == instance.transportInfo['clipId']
+					)
+					if (clip && clip.duration) {
+						const tcTot = Timecode(clip.duration, tb)
+						const tcStart = Timecode(clip.startTime, tb)
+						const left = Math.max(0, tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1)
+						const tcLeft = Timecode(left, tb) // todo - unhardcode
+	
+						countDown.tcH = tcLeft.hours
+						countDown.tcM = tcLeft.minutes
+						countDown.tcS = tcLeft.seconds
+						countDown.tcF = tcLeft.frames
+						countDown.tcHMS = tcLeft.toString().substr(0, 8)
+						countDown.tcHMSF = tcLeft.toString()
+					}
 				}
+			} catch (err) {
+				this.log('error', 'Timecode error:' + JSON.stringify(err))
 			}
 		} else {
 			// no timebase implies we can't use smpte-timecode lib
 			let tc = instance.transportInfo['displayTimecode'].match(
-				/^(?<HMS>(?<H>\d{2}):(?<M>\d{2}):(?<S>\d{2})):(?<F>\d{2})$/
+				/^(?<HMS>(?<H>\d{2}):(?<M>\d{2}):(?<S>\d{2}))[:;](?<F>\d{2})$/
 			)
 			if (tc && tc.groups) {
 				countUp.tcH = tc.groups.H

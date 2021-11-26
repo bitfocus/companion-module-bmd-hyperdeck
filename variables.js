@@ -104,13 +104,13 @@ module.exports.updateTimecodeVariables = function(instance) {
             }
         } else {
             // no timebase implies we can't use smpte-timecode lib
-            let tc = instance.transportInfo['displayTimecode'].match(/^(?<HMS>(?<H>\d{2}):(?<M>\d{2}):(?<S>\d{2})):(?<F>\d{2})$/)
+            let tc = instance.transportInfo['displayTimecode'].match(/^((\d{2}):(\d{2}):(\d{2})):(\d{2})$/)
             if (tc && tc.groups) {
-                countUp.tcH    = tc.groups.H;
-                countUp.tcM    = tc.groups.M;
-                countUp.tcS    = tc.groups.S;
-                countUp.tcF    = tc.groups.F;
-                countUp.tcHMS  = tc.groups.HMS;
+                countUp.tcH    = tc[2];
+                countUp.tcM    = tc[3];
+                countUp.tcS    = tc[4];
+                countUp.tcF    = tc[5];
+                countUp.tcHMS  = tc[1];
             }
             countUp.tcHMSF = instance.transportInfo['displayTimecode'];
         }

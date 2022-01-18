@@ -59,13 +59,21 @@ module.exports.updateClipVariables = function (instance) {
 
 module.exports.updateSlotInfoVariables = function (instance) {
 	let recordingTimes = []
-	if (instance.slotInfo[1] != null) {
-		recordingTimes[1] = new Date(instance.slotInfo[1]['recordingTime'] * 1000).toISOString().substr(11, 8)
-		instance.setVariable('slot1_recordingTime', recordingTimes[1])
+	try {
+		if (instance.slotInfo[1] != null) {
+			recordingTimes[1] = new Date(instance.slotInfo[1]['recordingTime'] * 1000).toISOString().substr(11, 8)
+			instance.setVariable('slot1_recordingTime', recordingTimes[1])
+		}
+	} catch (e) {
+		instance.debug(`Slot 1 recording time parse error: ${e}`)
 	}
-	if (instance.slotInfo[2] != null) {
-		recordingTimes[2] = new Date(instance.slotInfo[2]['recordingTime'] * 1000).toISOString().substr(11, 8)
-		instance.setVariable('slot2_recordingTime', recordingTimes[2])
+	try {
+		if (instance.slotInfo[2] != null) {
+			recordingTimes[2] = new Date(instance.slotInfo[2]['recordingTime'] * 1000).toISOString().substr(11, 8)
+			instance.setVariable('slot2_recordingTime', recordingTimes[2])
+		}
+	} catch (e) {
+		instance.debug(`Slot 2 recording time parse error: ${e}`)
 	}
 	let activeSlot = instance.transportInfo['slotId']
 	if (instance.slotInfo[activeSlot] != null) {
@@ -126,7 +134,7 @@ module.exports.updateTimecodeVariables = function (instance) {
 						const tcStart = Timecode(clip.startTime, tb)
 						const left = Math.max(0, tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1)
 						const tcLeft = Timecode(left, tb) // todo - unhardcode
-	
+
 						countDown.tcH = tcLeft.hours
 						countDown.tcM = tcLeft.minutes
 						countDown.tcS = tcLeft.seconds
@@ -199,7 +207,7 @@ module.exports.initVariables = function (instance) {
 	// Clip variables
 	variables.push({
 		label: 'Clip count',
-		name: 'clipCount'
+		name: 'clipCount',
 	})
 	module.exports.updateClipVariables(instance)
 

@@ -233,10 +233,7 @@ class instance extends instance_skel {
 	}
 
 	static GetUpgradeScripts() {
-		return [
-			upgradeCombineOldPlayActions,
-			upgradeTimecodeNotifications
-		]
+		return [upgradeCombineOldPlayActions, upgradeTimecodeNotifications]
 	}
 
 	/**
@@ -714,8 +711,8 @@ class instance extends instance_skel {
 				// Handle any return values
 				switch (action.action) {
 					case 'formatPrepare':
-						this.log('debug', 'Format token: ' + response.code)
 						if (response.code) {
+							this.log('debug', 'Format token: ' + response.code)
 							this.formatToken = response.code
 						}
 						break
@@ -938,16 +935,16 @@ class instance extends instance_skel {
 					for (let i = 0; i < slots; i++) {
 						this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
 					}
-	
+
 					this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
-					
+
 					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
 				} catch (e) {
 					if (e.code) {
 						this.log('error', `Connection error - ${e.code} ${e.name}`)
 					}
 				}
-				
+
 				this.status(this.STATUS_OK, 'Connected')
 
 				this.updateClips(this.transportInfo.slotId)
@@ -1038,20 +1035,22 @@ class instance extends instance_skel {
 		this.CHOICES_FILEFORMATS = []
 		this.CHOICES_VIDEOINPUTS = []
 
-		for (var id in this.model.audioInputs) {
-			this.CHOICES_AUDIOINPUTS.push(this.CONFIG_AUDIOINPUTS[this.model.audioInputs[id]])
-		}
+		if (this.model !== undeinfed) {
+			for (var id in this.model.audioInputs) {
+				this.CHOICES_AUDIOINPUTS.push(this.CONFIG_AUDIOINPUTS[this.model.audioInputs[id]])
+			}
 
-		for (var id in this.model.fileFormats) {
-			for (var frmt in this.CONFIG_FILEFORMATS) {
-				if (this.CONFIG_FILEFORMATS[frmt].family == this.model.fileFormats[id]) {
-					this.CHOICES_FILEFORMATS.push(this.CONFIG_FILEFORMATS[frmt])
+			for (var id in this.model.fileFormats) {
+				for (var frmt in this.CONFIG_FILEFORMATS) {
+					if (this.CONFIG_FILEFORMATS[frmt].family == this.model.fileFormats[id]) {
+						this.CHOICES_FILEFORMATS.push(this.CONFIG_FILEFORMATS[frmt])
+					}
 				}
 			}
-		}
 
-		for (var id in this.model.videoInputs) {
-			this.CHOICES_VIDEOINPUTS.push(this.CONFIG_VIDEOINPUTS[this.model.videoInputs[id]])
+			for (var id in this.model.videoInputs) {
+				this.CHOICES_VIDEOINPUTS.push(this.CONFIG_VIDEOINPUTS[this.model.videoInputs[id]])
+			}
 		}
 	}
 
@@ -1094,23 +1093,25 @@ class instance extends instance_skel {
 			this.config.timecodeVariables !== config.timecodeVariables &&
 			!resetConnection
 		) {
-			if (this.config.timecodeVariables === 'notifications') {
-				// old config had notifications and new config does not
-				const notify = new Commands.NotifySetCommand()
-				notify.displayTimecode = false
-				this.hyperDeck.sendCommand(notify)
-			} else if (config.timecodeVariables === 'notifications') {
-				// old config had no notifications and new config does have them
-				const notify = new Commands.NotifySetCommand()
-				notify.displayTimecode = true
-				this.hyperDeck.sendCommand(notify)
+			if (this.hyperDeck !== undefined && this.hyperDeck.connected) {
+				if (this.config.timecodeVariables === 'notifications') {
+					// old config had notifications and new config does not
+					const notify = new Commands.NotifySetCommand()
+					notify.displayTimecode = false
+					this.hyperDeck.sendCommand(notify)
+				} else if (config.timecodeVariables === 'notifications') {
+					// old config had no notifications and new config does have them
+					const notify = new Commands.NotifySetCommand()
+					notify.displayTimecode = true
+					this.hyperDeck.sendCommand(notify)
+				}
 			}
 		}
 
-		if ( this.config.modelID != config.modelID) {
+		if (this.config.modelID != config.modelID) {
 			this.model = this.CONFIG_MODEL[config.modelID]
 		}
-		
+
 		this.config = config
 
 		this.setupChoices()

@@ -1035,7 +1035,7 @@ class instance extends instance_skel {
 		this.CHOICES_FILEFORMATS = []
 		this.CHOICES_VIDEOINPUTS = []
 
-		if (this.model !== undeinfed) {
+		if (this.model !== undefined) {
 			for (var id in this.model.audioInputs) {
 				this.CHOICES_AUDIOINPUTS.push(this.CONFIG_AUDIOINPUTS[this.model.audioInputs[id]])
 			}

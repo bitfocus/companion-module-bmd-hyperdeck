@@ -360,7 +360,7 @@ class instance extends instance_skel {
 					label: 'Record (with name)',
 					options: [
 						{
-							type: 'textinput',
+							type: 'textwithvariables',
 							label: 'Filename (without extension)',
 							id: 'name',
 							default: '',
@@ -372,7 +372,7 @@ class instance extends instance_skel {
 					label: 'Record (with name and current date/time)',
 					options: [
 						{
-							type: 'textinput',
+							type: 'textwithvariables',
 							label: 'Filename (optional)',
 							id: 'prefix',
 							default: '',
@@ -674,13 +674,17 @@ class instance extends instance_skel {
 				break
 			case 'recName':
 				cmd = new Commands.RecordCommand()
-				cmd.filename = opt.name
+				this.parseVariables(opt.name, function (name) {
+					cmd.filename = name
+				})
 				break
 			case 'recTimestamp':
 				cmd = new Commands.RecordCommand()
 				var timeStamp = this.getTimestamp()
 				if (opt.prefix !== '') {
-					cmd.filename = opt.prefix + '-' + timeStamp + '-'
+					this.parseVariables(opt.prefix, function (name) {
+						cmd.filename = name + '-' + timeStamp + '-'
+					})
 				} else {
 					cmd.filename = timeStamp + '-'
 				}

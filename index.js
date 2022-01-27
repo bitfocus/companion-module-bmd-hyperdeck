@@ -55,6 +55,7 @@ class instance extends instance_skel {
 			videoInput: '',
 			fileFormat: '',
 		}
+		this.remoteInfo = null
 		this.pollTimer = null
 		this.formatToken = null
 
@@ -259,8 +260,8 @@ class instance extends instance_skel {
 		]
 
 		this.CHOICES_ENABLEDISABLE = [
-			{ id: 'true', label: 'Enable' },
-			{ id: 'false', label: 'Disable' },
+			{ id: true, label: 'Enable' },
+			{ id: false, label: 'Disable' },
 		]
 
 		this.CHOICES_STARTEND = [
@@ -792,6 +793,7 @@ class instance extends instance_skel {
 			case 'remote':
 				cmd = new Commands.RemoteCommand()
 				cmd.enable = opt.remoteEnable
+				this.debug('Remote enable is: ', opt.remoteEnable)
 				break
 			case 'fetchClips':
 				this.updateClips(this.transportInfo.slotId)
@@ -1022,6 +1024,7 @@ class instance extends instance_skel {
 				notify.configuration = true
 				notify.transport = true
 				notify.slot = true
+				notify.remote = true
 				// if (isMinimumVersion(1, 11) && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
 				if (this.protocolVersion >= 1.11 && this.config.timecodeVariables === 'notifications')
 					notify.displayTimecode = true
@@ -1036,10 +1039,12 @@ class instance extends instance_skel {
 						this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
 					}
 //				this.debug('Slot info:', this.slotInfo)
-
+					
 					this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
 					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
+
+					this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteCommand())
 				} catch (e) {
 					if (e.code) {
 						this.log('error', `Connection error - ${e.code} ${e.name}`)
@@ -1098,6 +1103,13 @@ class instance extends instance_skel {
 				updateTransportInfoVariables(this)
 				updateTimecodeVariables(this)
 				updateSlotInfoVariables(this)
+			})
+			
+			this.hyperDeck.on('notify.remote', async (res) => {
+				this.log('debug', 'Remote Status Changed')
+				if (res !== undefined) {
+					this.remoteInfo = res
+				}
 			})
 
 			this.hyperDeck.on('notify.configuration', async (res) => {

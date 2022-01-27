@@ -274,6 +274,11 @@ class instance extends instance_skel {
 			{ id: 'mounted', label: 'Mounted' },
 			{ id: 'mounting', label: 'Mounting' },
 		]
+		
+		this.CHOICES_PREVIEWMODE = [
+			{ id: 'true', label: 'Preview' },
+			{ id: 'false', label: 'Output' },
+		]
 
 		this.CHOICES_TRANSPORTSTATUS = [
 			{ id: 'preview', label: 'Preview' },
@@ -527,7 +532,19 @@ class instance extends instance_skel {
 						},
 					],
 				}
-			}
+				actions['preview'] = {
+					label: 'Preview',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Set preview/output mode',
+							id: 'enable',
+							default: 'true',
+							choices: this.CHOICES_PREVIEWMODE,
+						},
+					],
+				}
+			} // endif (!= bmdDup4K)
 	
 			if (this.CHOICES_VIDEOINPUTS.length > 1) {
 				actions['videoSrc'] = {
@@ -732,6 +749,10 @@ class instance extends instance_skel {
 			case 'select':
 				cmd = new Commands.SlotSelectCommand()
 				cmd.slotId = opt.slot
+				break
+			case 'preview':
+				cmd = new Commands.PreviewCommand()
+				cmd.enable = opt.enable
 				break
 			case 'videoSrc':
 				cmd = new Commands.ConfigurationCommand()
@@ -1100,7 +1121,7 @@ class instance extends instance_skel {
 			this.hyperDeck.connect(this.config.host, this.config.port)
 
 			// hyperdeck-connection debug tool
-//		this.hyperDeck.DEBUG = true;
+			// this.hyperDeck.DEBUG = true;
 		}
 	}
 

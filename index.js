@@ -65,6 +65,7 @@ class instance extends instance_skel {
 				videoInputs: ['SDI', 'HDMI'],
 				audioInputs: ['embedded'],
 				fileFormats: ['uncompressed', 'prores', 'proxy', 'DNxHD220'],
+				slotLabels: 'SSD2',
 				maxShuttle: 1600,
 			},
 			hdStudioPro: {
@@ -73,6 +74,7 @@ class instance extends instance_skel {
 				videoInputs: ['SDI', 'HDMI', 'component'],
 				audioInputs: ['embedded', 'XLR', 'RCA'],
 				fileFormats: ['uncompressed', 'prores', 'proxy', 'DNxHD220'],
+				slotLabels: 'SSD2',
 				maxShuttle: 1600,
 			},
 			hdStudio12G: {
@@ -80,7 +82,8 @@ class instance extends instance_skel {
 				label: 'HyperDeck Studio 12G',
 				videoInputs: ['SDI', 'HDMI'],
 				audioInputs: ['embedded'],
-				fileFormats: ['uncompressed', 'prores', 'proxy', 'DNx', 'DNxHD220', 'DNxHR_HQX'],
+				fileFormats: ['uncompressed', 'prores', 'proxy', 'DNx', 'DNxHD220', 'DNxHR_HQX', 'DNxHR_SQ', 'DNxHR_LB'],
+				slotLabels: 'SSD2',
 				maxShuttle: 1600,
 			},
 			bmdDup4K: {
@@ -89,6 +92,7 @@ class instance extends instance_skel {
 				videoInputs: ['SDI', 'optical'],
 				audioInputs: ['embedded'],
 				fileFormats: ['H.264', 'H.265'],
+				slotLabels: 'SSD2', //TODO work out correct slots
 				maxShuttle: 100,
 			},
 			hdStudioMini: {
@@ -96,8 +100,45 @@ class instance extends instance_skel {
 				label: 'HyperDeck Studio Mini',
 				videoInputs: ['SDI'],
 				audioInputs: ['embedded'],
-				fileFormats: ['prores', 'proxy', 'DNx', 'DNxHD220', 'DNxHR_HQX', 'H.264'],
+				fileFormats: ['prores', 'proxy', 'DNx', 'DNxHD220', 'DNxHR_HQX', 'DNxHR_SQ', 'DNxHR_LB', 'H.264'],
+				slotLabels: 'SD2',
 				maxShuttle: 1600,
+			},
+			hdStudioHDMini: {
+				id: 'hdStudioHDMini',
+				label: 'HyperDeck Studio HD Mini',
+				videoInputs: ['SDI', 'HDMI'],
+				audioInputs: ['embedded'],
+				fileFormats: ['prores', 'proxy', 'DNx', 'DNxHD220', 'H.264'],
+				slotLabels: 'SD2_USB',
+				maxShuttle: 5000,
+			},
+			hdStudioHDPlus: {
+				id: 'hdStudioHDPlus',
+				label: 'HyperDeck Studio HD Plus',
+				videoInputs: ['SDI', 'HDMI'],
+				audioInputs: ['embedded'],
+				fileFormats: ['prores', 'proxy', 'DNxHR_HQX', 'DNxHR_SQ', 'DNxHR_LB', 'H.264_SDI', 'H.264'],
+				slotLabels: 'SD2_USB',
+				maxShuttle: 5000,
+			},
+			hdStudioHDPro: {
+				id: 'hdStudioHDPro',
+				label: 'HyperDeck Studio HD Pro',
+				videoInputs: ['SDI', 'HDMI'],
+				audioInputs: ['embedded'],
+				fileFormats: ['prores', 'proxy', 'DNxHR_HQX', 'DNxHR_SQ', 'DNxHR_LB', 'H.264_SDI', 'H.264'],
+				slotLabels: 'SSD2_SD2_USB',
+				maxShuttle: 5000,
+			},
+			hdStudio4KPro: {
+				id: 'hdStudio4KPro',
+				label: 'HyperDeck Studio 4K Pro',
+				videoInputs: ['SDI', 'HDMI'],
+				audioInputs: ['embedded'],
+				fileFormats: ['prores', 'proxy', 'DNxHR_HQX', 'DNxHR_SQ', 'DNxHR_LB', 'H.264/5'],
+				slotLabels: 'SSD2_SD2_USB',
+				maxShuttle: 5000,
 			},
 			hdExtreme8K: {
 				id: 'hdExtreme8K',
@@ -105,6 +146,7 @@ class instance extends instance_skel {
 				videoInputs: ['SDI', 'HDMI', 'component', 'composite', 'optical'],
 				audioInputs: ['embedded', 'XLR', 'RCA'],
 				fileFormats: ['prores', 'H.265'],
+				slotLabels: 'SSD2_SD2_USB', //TODO work out correct slots
 				maxShuttle: 5000,
 			},
 		}
@@ -129,24 +171,29 @@ class instance extends instance_skel {
 			{ id: 'QuickTimeProRes', label: 'QuickTime ProRes', family: 'prores' },
 			{ id: 'QuickTimeProResLT', label: 'QuickTime ProRes LT', family: 'prores' },
 			{ id: 'QuickTimeProResProxy', label: 'QuickTime ProRes Proxy', family: 'proxy' },
-			{ id: 'QuickTimeDNxHD45', label: 'QuickTime DNxHD 45', family: 'DNx' },
-			{ id: 'DNxHD45', label: 'MXF DNxHD 45', family: 'DNx' },
-			{ id: 'QuickTimeDNxHR_LB', label: 'QuickTime DNxHR LB', family: 'DNx' },
-			{ id: 'DNxHR_LB', label: 'MXF DNxHR LB', family: 'DNx' },
-			{ id: 'QuickTimeDNxHD145', label: 'QuickTime DNxHD 145', family: 'DNx' },
-			{ id: 'DNxHD145', label: 'MXF DNxHD 145', family: 'DNx' },
-			{ id: 'QuickTimeDNxHR_SQ', label: 'QuickTime DNxHR SQ', family: 'DNx' },
-			{ id: 'DNxHR_SQ', label: 'MXF DNxHR SQ', family: 'DNx' },
-			{ id: 'QuickTimeDNxHD220', label: 'QuickTime DNxHD 220', family: 'DNxHD220' },
+			{ id: 'QuickTimeDNxHD45', label: 'DNxHD 45 QT', family: 'DNx' },
+			{ id: 'DNxHD45', label: 'DNxHD 45 MXF', family: 'DNx' },
+			{ id: 'QuickTimeDNxHD145', label: 'DNxHD 145 QT', family: 'DNx' },
+			{ id: 'DNxHD145', label: 'DNxHD 145 MXF', family: 'DNx' },
+			{ id: 'QuickTimeDNxHD220', label: 'DNxHD 220 QT', family: 'DNxHD220' },
 			{ id: 'DNxHD220', label: 'MXF DNxHD 220', family: 'DNxHD220' },
-			{ id: 'QuickTimeDNxHR_HQX', label: 'QuickTime DNxHR HQX', family: 'DNxHR_HQX' },
-			{ id: 'DNxHR_HQX', label: 'MXF DNxHR HQX', family: 'DNxHR_HQX' },
-			{ id: 'H.264Low', label: 'H.264 Low', family: 'H.264' },
-			{ id: 'H.264Medium', label: 'H.264 Medium', family: 'H.264' },
+			{ id: 'QuickTimeDNxHR_HQX', label: 'DNxHR HQX QT', family: 'DNxHR_HQX' },
+			{ id: 'DNxHR_HQX', label: 'DNxHR HQX MXF', family: 'DNxHR_HQX' },
+			{ id: 'QuickTimeDNxHR_SQ', label: 'DNxHR SQ QT', family: 'DNxHR_SQ' },
+			{ id: 'DNxHR_SQ', label: 'DNxHR SQ MXF', family: 'DNxHR_SQ' },
+			{ id: 'QuickTimeDNxHR_LB', label: 'DNxHR LB QT', family: 'DNxHR_LB' },
+			{ id: 'DNxHR_LB', label: 'DNxHR LB MXF', family: 'DNxHR_LB' },
+			{ id: "H.264High10_422", label: 'H.264 SDI', family: 'H.264_SDI' },
 			{ id: 'H.264High', label: 'H.264 High', family: 'H.264' },
-			{ id: 'H.265Low', label: 'H.265 Low', family: 'H.265' },
-			{ id: 'H.265Medium', label: 'H.265 Medium', family: 'H.265' },
+			{ id: 'H.264Medium', label: 'H.264 Medium', family: 'H.264' },
+			{ id: 'H.264Low', label: 'H.264 Low', family: 'H.264' },
 			{ id: 'H.265High', label: 'H.265 High', family: 'H.265' },
+			{ id: 'H.265Medium', label: 'H.265 Medium', family: 'H.265' },
+			{ id: 'H.265Low', label: 'H.265 Low', family: 'H.265' },
+			{ id: "H.264High10_422", label: 'H.264/5 SDI', family: 'H.264/5' },
+			{ id: 'H.264High', label: 'H.264/5 High', family: 'H.264/5' },
+			{ id: 'H.264Medium', label: 'H.264 Medium', family: 'H.264/5' },
+			{ id: 'H.264Low', label: 'H.264/5 Low', family: 'H.264/5' },
 		]
 
 		this.CONFIG_NOTIFICATION_METHOD = [
@@ -154,6 +201,29 @@ class instance extends instance_skel {
 			{ id: 'notifications', label: 'Notifications' },
 			{ id: 'polling', label: 'Polling' },
 		]
+		
+		this.CONFIG_SLOT_LABELS = {
+			SSD2: [
+				{ id: 1, label: '1: SSD 1' },
+				{ id: 2, label: '2: SSD 2' },
+			],
+			SD2: [
+				{ id: 1, label: '1: SD 1' },
+				{ id: 2, label: '2: SD 2' },
+			],
+			SD2_USB: [
+				{ id: 1, label: '1: SD 1' },
+				{ id: 2, label: '2: SD 2' },
+				{ id: 3, label: '3: USB-C' },
+			],
+			SSD2_SD2_USB: [
+				{ id: 1, label: '1: SSD 1' },
+				{ id: 2, label: '2: SSD 2' },
+				{ id: 3, label: '3: USB-C' },
+				{ id: 4, label: '4: SD 1' },
+				{ id: 5, label: '5: SD 2' },
+			],
+		}
 
 		this.CHOICES_MODEL = Object.values(this.CONFIG_MODEL)
 		// Sort alphabetical
@@ -172,6 +242,7 @@ class instance extends instance_skel {
 		this.CHOICES_AUDIOINPUTS = []
 		this.CHOICES_FILEFORMATS = []
 		this.CHOICES_VIDEOINPUTS = []
+		this.CHOICES_SLOTS = []
 
 		this.CHOICES_DYNAMICRANGE = [
 			{ id: 'auto', label: 'Auto' },
@@ -247,322 +318,326 @@ class instance extends instance_skel {
 		this.setupChoices()
 		var actions = {}
 
-		if (this.config.modelID != 'bmdDup4K') {
-			actions['play'] = {
-				label: 'Play',
+		try {
+			if (this.config.modelID != 'bmdDup4K') {
+				actions['play'] = {
+					label: 'Play',
+					options: [
+						{
+							type: 'number',
+							label: 'Speed %',
+							id: 'speed',
+							default: 100,
+							min: 0 - this.model.maxShuttle,
+							max: this.model.maxShuttle,
+							required: true,
+							range: true,
+						},
+						{
+							type: 'checkbox',
+							label: 'Loop clip',
+							id: 'loop',
+							default: false,
+						},
+						{
+							type: 'checkbox',
+							label: 'Single clip playback',
+							id: 'single',
+							default: false,
+						},
+					],
+				}
+			}
+	
+			actions['rec'] = { label: 'Record' }
+	
+			if (this.config.modelID == 'bmdDup4K') {
+				actions['recAppend'] = { label: 'Append Record' }
+			}
+	
+			if (this.config.modelID != 'bmdDup4K') {
+				actions['recName'] = {
+					label: 'Record (with name)',
+					options: [
+						{
+							type: 'textinput',
+							label: 'Filename (without extension)',
+							id: 'name',
+							default: '',
+							regex: this.REGEX_SOMETHING,
+						},
+					],
+				}
+				actions['recTimestamp'] = {
+					label: 'Record (with name and current date/time)',
+					options: [
+						{
+							type: 'textinput',
+							label: 'Filename (optional)',
+							id: 'prefix',
+							default: '',
+						},
+					],
+				}
+				actions['recCustom'] = {
+					label: 'Record (with custom reel)',
+					options: [
+						{
+							type: 'text',
+							id: 'info',
+							label: "Set 'Reel' in instance config",
+						},
+					],
+				}
+			}
+	
+			actions['stop'] = { label: 'Stop' }
+	
+			if (this.config.modelID != 'bmdDup4K') {
+				actions['goto'] = {
+					label: 'Goto (TC)',
+					options: [
+						{
+							type: 'textinput',
+							label: 'Timecode hh:mm:ss:ff',
+							id: 'tc',
+							default: '00:00:01:00',
+							regex: this.REGEX_TIMECODE,
+						},
+					],
+				}
+				actions['gotoN'] = {
+					label: 'Goto Clip (n)',
+					options: [
+						{
+							type: 'textinput',
+							label: 'Clip Number',
+							id: 'clip',
+							default: 1,
+							min: 1,
+							max: 999,
+							required: true,
+							range: false,
+						},
+					],
+				}
+				actions['gotoName'] = {
+					label: 'Goto Clip (name)',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Clip Name',
+							id: 'clip',
+							default: '1',
+							required: true,
+							choices: this.CHOICES_CLIPS,
+						},
+					],
+				}
+				actions['goFwd'] = {
+					label: 'Go forward (n) clips',
+					options: [
+						{
+							type: 'number',
+							label: 'Number of clips',
+							id: 'clip',
+							default: 1,
+							min: 1,
+							max: 999,
+							required: true,
+							range: false,
+						},
+					],
+				}
+				actions['goRew'] = {
+					label: 'Go backward (n) clips',
+					options: [
+						{
+							type: 'number',
+							label: 'Number of clips',
+							id: 'clip',
+							default: 1,
+							min: 1,
+							max: 999,
+							required: true,
+							range: false,
+						},
+					],
+				}
+				actions['goStartEnd'] = {
+					label: 'Go to (start|end) of clip',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Go to',
+							id: 'startEnd',
+							default: 'start',
+							choices: this.CHOICES_STARTEND,
+						},
+					],
+				}
+				actions['jogFwd'] = {
+					label: 'Jog forward (TC) duration',
+					options: [
+						{
+							type: 'textinput',
+							label: 'Timecode hh:mm:ss:ff',
+							id: 'jogFwdTc',
+							default: '00:00:00:01',
+							regex: this.REGEX_TIMECODE,
+						},
+					],
+				}
+				actions['jogRew'] = {
+					label: 'Jog backward (TC) duration',
+					options: [
+						{
+							type: 'textinput',
+							label: 'Timecode hh:mm:ss:ff',
+							id: 'jogRewTc',
+							default: '00:00:00:01',
+							regex: this.REGEX_TIMECODE,
+						},
+					],
+				}
+				actions['shuttle'] = {
+					label: 'Shuttle with speed',
+					options: [
+						{
+							type: 'number',
+							label: 'Speed %',
+							id: 'speed',
+							default: 100,
+							min: 0 - this.model.maxShuttle,
+							max: this.model.maxShuttle,
+							required: true,
+							range: true,
+						},
+					],
+				}
+				actions['select'] = {
+					label: 'Select (slot)',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Slot',
+							id: 'slot',
+							default: 1,
+							choices: this.CHOICES_SLOTS,
+						},
+					],
+				}
+			}
+	
+			if (this.CHOICES_VIDEOINPUTS.length > 1) {
+				actions['videoSrc'] = {
+					label: 'Video source',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Input',
+							id: 'videoSrc',
+							default: 'SDI',
+							choices: this.CHOICES_VIDEOINPUTS,
+						},
+					],
+				}
+			}
+	
+			if (this.CHOICES_AUDIOINPUTS.length > 1) {
+				actions['audioSrc'] = {
+					label: 'Audio source',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Input',
+							id: 'audioSrc',
+							default: 'embedded',
+							choices: this.CHOICES_AUDIOINPUTS,
+						},
+					],
+				}
+			}
+	
+			if (this.CHOICES_FILEFORMATS.length > 1) {
+				actions['fileFormat'] = {
+					label: 'File format',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Format',
+							id: 'fileFormat',
+							default: 'QuickTimeProRes',
+							choices: this.CHOICES_FILEFORMATS,
+						},
+					],
+				}
+			}
+	
+			actions['fetchClips'] = { label: 'Fetch Clips' }
+	
+			/**
+				* Not currently implemented
+				*
+			if (this.config.modelID == 'hdExtreme8K') {
+				actions['dynamicRange'] = {
+					label: 'Set playback dyanmic range',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Dynamic Range',
+							id: 'dynamicRange',
+							default: 'auto',
+							choices: this.CHOICES_DYNAMICRANGE
+						}
+					]
+				};
+			}
+			*/
+	
+			actions['formatPrepare'] = {
+				label: 'Format drive/card (prepare)',
 				options: [
+					{
+						type: 'dropdown',
+						label: 'Filesystem',
+						id: 'filesystem',
+						default: 'HFS+',
+						choices: this.CHOICES_FILESYSTEM,
+					},
 					{
 						type: 'number',
-						label: 'Speed %',
-						id: 'speed',
-						default: 100,
-						min: 0 - this.model.maxShuttle,
-						max: this.model.maxShuttle,
-						required: true,
-						range: true,
-					},
-					{
-						type: 'checkbox',
-						label: 'Loop clip',
-						id: 'loop',
-						default: false,
-					},
-					{
-						type: 'checkbox',
-						label: 'Single clip playback',
-						id: 'single',
-						default: false,
+						label: 'Confirmation timeout (sec)',
+						id: 'timeout',
+						default: 10,
 					},
 				],
 			}
-		}
-
-		actions['rec'] = { label: 'Record' }
-
-		if (this.config.modelID == 'bmdDup4K') {
-			actions['recAppend'] = { label: 'Append Record' }
-		}
-
-		if (this.config.modelID != 'bmdDup4K') {
-			actions['recName'] = {
-				label: 'Record (with name)',
-				options: [
-					{
-						type: 'textinput',
-						label: 'Filename (without extension)',
-						id: 'name',
-						default: '',
-						regex: this.REGEX_SOMETHING,
-					},
-				],
+	
+			actions['formatConfirm'] = {
+				label: 'Format drive/card (confirm)',
 			}
-			actions['recTimestamp'] = {
-				label: 'Record (with name and current date/time)',
-				options: [
-					{
-						type: 'textinput',
-						label: 'Filename (optional)',
-						id: 'prefix',
-						default: '',
-					},
-				],
-			}
-			actions['recCustom'] = {
-				label: 'Record (with custom reel)',
-				options: [
-					{
-						type: 'text',
-						id: 'info',
-						label: "Set 'Reel' in instance config",
-					},
-				],
-			}
-		}
-
-		actions['stop'] = { label: 'Stop' }
-
-		if (this.config.modelID != 'bmdDup4K') {
-			actions['goto'] = {
-				label: 'Goto (TC)',
-				options: [
-					{
-						type: 'textinput',
-						label: 'Timecode hh:mm:ss:ff',
-						id: 'tc',
-						default: '00:00:01:00',
-						regex: this.REGEX_TIMECODE,
-					},
-				],
-			}
-			actions['gotoN'] = {
-				label: 'Goto Clip (n)',
-				options: [
-					{
-						type: 'textinput',
-						label: 'Clip Number',
-						id: 'clip',
-						default: 1,
-						min: 1,
-						max: 999,
-						required: true,
-						range: false,
-					},
-				],
-			}
-			actions['gotoName'] = {
-				label: 'Goto Clip (name)',
+	
+			actions['remote'] = {
+				label: 'Remote Control (enable/disable)',
 				options: [
 					{
 						type: 'dropdown',
-						label: 'Clip Name',
-						id: 'clip',
-						default: '1',
-						required: true,
-						choices: this.CHOICES_CLIPS,
+						label: 'Enable/Disable',
+						id: 'remoteEnable',
+						default: 'true',
+						choices: this.CHOICES_ENABLEDISABLE,
 					},
 				],
 			}
-			actions['goFwd'] = {
-				label: 'Go forward (n) clips',
-				options: [
-					{
-						type: 'number',
-						label: 'Number of clips',
-						id: 'clip',
-						default: 1,
-						min: 1,
-						max: 999,
-						required: true,
-						range: false,
-					},
-				],
-			}
-			actions['goRew'] = {
-				label: 'Go backward (n) clips',
-				options: [
-					{
-						type: 'number',
-						label: 'Number of clips',
-						id: 'clip',
-						default: 1,
-						min: 1,
-						max: 999,
-						required: true,
-						range: false,
-					},
-				],
-			}
-			actions['goStartEnd'] = {
-				label: 'Go to (start|end) of clip',
-				options: [
-					{
-						type: 'dropdown',
-						label: 'Go to',
-						id: 'startEnd',
-						default: 'start',
-						choices: this.CHOICES_STARTEND,
-					},
-				],
-			}
-			actions['jogFwd'] = {
-				label: 'Jog forward (TC) duration',
-				options: [
-					{
-						type: 'textinput',
-						label: 'Timecode hh:mm:ss:ff',
-						id: 'jogFwdTc',
-						default: '00:00:00:01',
-						regex: this.REGEX_TIMECODE,
-					},
-				],
-			}
-			actions['jogRew'] = {
-				label: 'Jog backward (TC) duration',
-				options: [
-					{
-						type: 'textinput',
-						label: 'Timecode hh:mm:ss:ff',
-						id: 'jogRewTc',
-						default: '00:00:00:01',
-						regex: this.REGEX_TIMECODE,
-					},
-				],
-			}
-			actions['shuttle'] = {
-				label: 'Shuttle with speed',
-				options: [
-					{
-						type: 'number',
-						label: 'Speed %',
-						id: 'speed',
-						default: 100,
-						min: 0 - this.model.maxShuttle,
-						max: this.model.maxShuttle,
-						required: true,
-						range: true,
-					},
-				],
-			}
-			actions['select'] = {
-				label: 'Select (slot)',
-				options: [
-					{
-						type: 'dropdown',
-						label: 'Slot (1/2)',
-						id: 'slot',
-						default: 1,
-						choices: [
-							{ id: 1, label: 'Slot 1' },
-							{ id: 2, label: 'Slot 2' },
-						],
-					},
-				],
+	
+			this.setActions(actions)
+			
+		} catch (e) {
+			if (e.code) {
+				this.log('error', e.code + ' ' + e.name)
 			}
 		}
-
-		if (this.CHOICES_VIDEOINPUTS.length > 1) {
-			actions['videoSrc'] = {
-				label: 'Video source',
-				options: [
-					{
-						type: 'dropdown',
-						label: 'Input',
-						id: 'videoSrc',
-						default: 'SDI',
-						choices: this.CHOICES_VIDEOINPUTS,
-					},
-				],
-			}
-		}
-
-		if (this.CHOICES_AUDIOINPUTS.length > 1) {
-			actions['audioSrc'] = {
-				label: 'Audio source',
-				options: [
-					{
-						type: 'dropdown',
-						label: 'Input',
-						id: 'audioSrc',
-						default: 'embedded',
-						choices: this.CHOICES_AUDIOINPUTS,
-					},
-				],
-			}
-		}
-
-		if (this.CHOICES_FILEFORMATS.length > 1) {
-			actions['fileFormat'] = {
-				label: 'File format',
-				options: [
-					{
-						type: 'dropdown',
-						label: 'Format',
-						id: 'fileFormat',
-						default: 'QuickTimeProRes',
-						choices: this.CHOICES_FILEFORMATS,
-					},
-				],
-			}
-		}
-
-		actions['fetchClips'] = { label: 'Fetch Clips' }
-
-		/**
-		 * Not currently implemented
-		 *
-		if (this.config.modelID == 'hdExtreme8K') {
-			actions['dynamicRange'] = {
-				label: 'Set playback dyanmic range',
-				options: [
-					{
-						type: 'dropdown',
-						label: 'Dynamic Range',
-						id: 'dynamicRange',
-						default: 'auto',
-						choices: this.CHOICES_DYNAMICRANGE
-					}
-				]
-			};
-		}
-		*/
-
-		actions['formatPrepare'] = {
-			label: 'Format drive/card (prepare)',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Filesystem',
-					id: 'filesystem',
-					default: 'HFS+',
-					choices: this.CHOICES_FILESYSTEM,
-				},
-				{
-					type: 'number',
-					label: 'Confirmation timeout (sec)',
-					id: 'timeout',
-					default: 10,
-				},
-			],
-		}
-
-		actions['formatConfirm'] = {
-			label: 'Format drive/card (confirm)',
-		}
-
-		actions['remote'] = {
-			label: 'Remote Control (enable/disable)',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Enable/Disable',
-					id: 'remoteEnable',
-					default: 'true',
-					choices: this.CHOICES_ENABLEDISABLE,
-				},
-			],
-		}
-
-		this.setActions(actions)
 	}
 
 	cancelFormat() {
@@ -935,6 +1010,7 @@ class instance extends instance_skel {
 					for (let i = 0; i < slots; i++) {
 						this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
 					}
+//				this.debug('Slot info:', this.slotInfo)
 
 					this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
@@ -1006,7 +1082,7 @@ class instance extends instance_skel {
 						this.deckConfig[id] = res[id]
 					}
 				}
-				this.debug('Config:', this.deckConfig)
+//			this.debug('Config:', this.deckConfig)
 				this.checkFeedbacks('video_input')
 			})
 
@@ -1020,7 +1096,7 @@ class instance extends instance_skel {
 			this.hyperDeck.connect(this.config.host, this.config.port)
 
 			// hyperdeck-connection debug tool
-			//this.hyperDeck.DEBUG = true;
+//		this.hyperDeck.DEBUG = true;
 		}
 	}
 
@@ -1034,6 +1110,7 @@ class instance extends instance_skel {
 		this.CHOICES_AUDIOINPUTS = []
 		this.CHOICES_FILEFORMATS = []
 		this.CHOICES_VIDEOINPUTS = []
+		this.CHOICES_SLOTS = []
 
 		if (this.model !== undefined) {
 			for (var id in this.model.audioInputs) {
@@ -1051,6 +1128,9 @@ class instance extends instance_skel {
 			for (var id in this.model.videoInputs) {
 				this.CHOICES_VIDEOINPUTS.push(this.CONFIG_VIDEOINPUTS[this.model.videoInputs[id]])
 			}
+			
+			//TODO define CHOICES_SLOTS based on model
+			this.CHOICES_SLOTS = this.CONFIG_SLOT_LABELS[this.model.slotLabels]
 		}
 	}
 
@@ -1143,16 +1223,25 @@ class instance extends instance_skel {
 	updateDevice(object) {
 		const value = object.model
 
+//	this.debug('Model value:', value)
 		if (value.match(/Extreme/)) {
 			this.config.modelID = 'hdExtreme8K'
-		} else if (value.match(/Mini/)) {
+		} else if (value.match(/Studio Mini/)) {
 			this.config.modelID = 'hdStudioMini'
 		} else if (value.match(/Duplicator/)) {
 			this.config.modelID = 'bmdDup4K'
 		} else if (value.match(/12G/)) {
 			this.config.modelID = 'hdStudio12G'
-		} else if (value.match(/Pro/)) {
+		} else if (value.match(/Studio Pro/)) {
 			this.config.modelID = 'hdStudioPro'
+		} else if (value.match(/HD Mini/)) {
+			this.config.modelID = 'hdStudioHDMini'
+		} else if (value.match(/HD Plus/)) {
+			this.config.modelID = 'hdStudioHDPlus'
+		} else if (value.match(/HD Pro/)) {
+			this.config.modelID = 'hdStudioHDPro'
+		} else if (value.match(/4K Pro/)) {
+			this.config.modelID = 'hdStudio4KPro'
 		} else {
 			this.config.modelID = 'hdStudio'
 		}

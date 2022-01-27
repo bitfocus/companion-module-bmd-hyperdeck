@@ -165,6 +165,15 @@ module.exports.updateTimecodeVariables = function (instance) {
 	setTcVariable(false, countUp), setTcVariable(true, countDown)
 }
 
+module.exports.updateConfigurationVariables = function (instance) {
+	if (instance.deckConfig.fileFormat !== '') {
+		const format = instance.CONFIG_FILEFORMATS.find(({id}) => id === instance.deckConfig['fileFormat'])
+		if (format !== undefined) {
+			instance.setVariable('fileFormat', format.label)
+		}
+	}
+}
+
 module.exports.initVariables = function (instance) {
 	var variables = []
 
@@ -243,6 +252,13 @@ module.exports.initVariables = function (instance) {
 			name: (isCountdown ? 'countdownT' : 't') + 'imecodeF',
 		})
 	}
+	
+	// Configuration variables
+	variables.push({
+		label: 'File format',
+		name: 'fileFormat',
+	})
+	module.exports.updateConfigurationVariables(instance)
 
 	initTcVariable(false)
 	initTcVariable(true)

@@ -1044,7 +1044,8 @@ class instance extends instance_skel {
 
 					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
 
-					this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteCommand())
+					// TODO Requires support from hyperdeck-connection
+					// this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteCommand())
 				} catch (e) {
 					if (e.code) {
 						this.log('error', `Connection error - ${e.code} ${e.name}`)

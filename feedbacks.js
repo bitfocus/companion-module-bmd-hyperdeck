@@ -45,11 +45,7 @@ exports.initFeedbacks = function () {
 				type: 'dropdown',
 				label: 'Slot Id',
 				id: 'slotID',
-				choices: [
-					{ id: 'either', label: 'Either' },
-					{ id: 1, label: 'Slot 1' },
-					{ id: 2, label: 'Slot 2' },
-				],
+				choices: [{ id: 'either', label: 'Any' },].concat(this.CHOICES_SLOTS),
 				default: 'either',
 				regex: this.REGEX_SOMETHING,
 			},

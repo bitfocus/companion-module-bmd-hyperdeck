@@ -93,7 +93,7 @@ class instance extends instance_skel {
 				videoInputs: ['SDI', 'optical'],
 				audioInputs: ['embedded'],
 				fileFormats: ['H.264', 'H.265'],
-				slotLabels: 'SSD2', //TODO work out correct slots
+				slotLabels: 'SD25', //TODO check correct slots
 				maxShuttle: 100,
 			},
 			hdStudioMini: {
@@ -147,7 +147,7 @@ class instance extends instance_skel {
 				videoInputs: ['SDI', 'HDMI', 'component', 'composite', 'optical'],
 				audioInputs: ['embedded', 'XLR', 'RCA'],
 				fileFormats: ['prores', 'H.265'],
-				slotLabels: 'SSD2_SD2_USB', //TODO work out correct slots
+				slotLabels: 'SD2_USB', //TODO check correct slots
 				maxShuttle: 5000,
 			},
 		}
@@ -223,6 +223,33 @@ class instance extends instance_skel {
 				{ id: 3, label: '3: USB-C' },
 				{ id: 4, label: '4: SD 1' },
 				{ id: 5, label: '5: SD 2' },
+			],
+			SD25: [
+				{ id: 1, label: '1: SD 1' },
+				{ id: 2, label: '2: SD 2' },
+				{ id: 3, label: '3: SD 3' },
+				{ id: 4, label: '4: SD 4' },
+				{ id: 5, label: '5: SD 5' },
+				{ id: 6, label: '6: SD 6' },
+				{ id: 7, label: '7: SD 7' },
+				{ id: 8, label: '8: SD 8' },
+				{ id: 9, label: '9: SD 9' },
+				{ id: 10, label: '10: SD 10' },
+				{ id: 11, label: '11: SD 11' },
+				{ id: 12, label: '12: SD 12' },
+				{ id: 13, label: '13: SD 13' },
+				{ id: 14, label: '14: SD 14' },
+				{ id: 15, label: '15: SD 15' },
+				{ id: 16, label: '16: SD 16' },
+				{ id: 17, label: '17: SD 17' },
+				{ id: 18, label: '18: SD 18' },
+				{ id: 19, label: '19: SD 19' },
+				{ id: 20, label: '20: SD 20' },
+				{ id: 21, label: '21: SD 21' },
+				{ id: 22, label: '22: SD 22' },
+				{ id: 23, label: '23: SD 23' },
+				{ id: 24, label: '24: SD 24' },
+				{ id: 25, label: '25: SD 25' },
 			],
 		}
 

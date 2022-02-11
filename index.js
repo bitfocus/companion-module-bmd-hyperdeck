@@ -193,7 +193,7 @@ class instance extends instance_skel {
 			{ id: 'H.265Low', label: 'H.265 Low', family: 'H.265' },
 			{ id: "H.264High10_422", label: 'H.264/5 SDI', family: 'H.264/5' },
 			{ id: 'H.264High', label: 'H.264/5 High', family: 'H.264/5' },
-			{ id: 'H.264Medium', label: 'H.264 Medium', family: 'H.264/5' },
+			{ id: 'H.264Medium', label: 'H.264/5 Medium', family: 'H.264/5' },
 			{ id: 'H.264Low', label: 'H.264/5 Low', family: 'H.264/5' },
 		]
 

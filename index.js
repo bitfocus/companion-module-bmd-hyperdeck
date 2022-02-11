@@ -459,11 +459,13 @@ class instance extends instance_skel {
 					options: [
 						{
 							type: 'dropdown',
-							label: 'Clip Name',
+							label: 'Clip Name - select from list or enter text (variables supported)',
 							id: 'clip',
-							default: '1',
+							default: '',
 							required: true,
 							choices: this.CHOICES_CLIPS,
+							minChoicesForSearch: 0,
+							allowCustom: true,
 						},
 					],
 				}
@@ -747,8 +749,18 @@ class instance extends instance_skel {
 				cmd.clipId = opt.clip
 				break
 			case 'gotoName':
-				cmd = new Commands.GoToCommand()
-				cmd.clipId = opt.clip
+				this.updateClips(this.transportInfo.slotId)
+				this.parseVariables(opt.clip, (parsed) => {
+					const clip = this.CHOICES_CLIPS.find(
+						({ label }) => label == parsed
+					)
+					if (clip === undefined) {
+						this.log('info', `Clip "${parsed}" does not exist`)
+					} else {
+						cmd = new Commands.GoToCommand()
+						cmd.clipId = clip.clipId
+					}
+				})
 				break
 			case 'goFwd':
 				cmd = new Commands.GoToCommand()
@@ -1340,7 +1352,7 @@ class instance extends instance_skel {
 				// reset clip choices
 				this.CHOICES_CLIPS.length = 0
 				queryClips.clips.forEach(({ clipId, name }) => {
-					this.CHOICES_CLIPS.push({ id: clipId, label: name })
+					this.CHOICES_CLIPS.push({ id: name, label: name, clipId: clipId })
 				})
 
 				this.actions() // reinit actions to update list

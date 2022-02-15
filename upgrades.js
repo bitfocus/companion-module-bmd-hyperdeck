@@ -88,3 +88,21 @@ module.exports.upgradeTimecodeNotifications = function (context, config, actions
 
     return changed
 }
+
+// v1.2.6 -> 1.2.7 (gotoClip (n) bug fix)
+module.exports.upgrade126to127 = function (context, config, actions, feedbacks) {
+    let changed = false
+
+    actions.forEach((action) => {
+        if (action.options === undefined) {
+            action.options = {}
+        }
+        // If the clip is not a number, return early as we don't need to change it
+        if (action.action === 'gotoName' && !isNaN(action.options.clip)) {
+            action.action = 'gotoN'
+            changed = true
+        }
+    })
+    
+    return changed
+}

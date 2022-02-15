@@ -8,7 +8,7 @@ const {
 	updateClipVariables,
 } = require('./variables')
 const { initFeedbacks } = require('./feedbacks')
-const { upgradeCombineOldPlayActions, upgradeTimecodeNotifications } = require('./upgrades')
+const { upgradeCombineOldPlayActions, upgradeTimecodeNotifications, upgrade126to127 } = require('./upgrades')
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -337,7 +337,11 @@ class instance extends instance_skel {
 	}
 
 	static GetUpgradeScripts() {
-		return [upgradeCombineOldPlayActions, upgradeTimecodeNotifications]
+		return [
+			upgradeCombineOldPlayActions,
+			upgradeTimecodeNotifications,
+			upgrade126to127,
+		]
 	}
 
 	/**

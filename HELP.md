@@ -15,12 +15,15 @@ The Hyperdeck can **only be connected to one controller at a time.** This includ
 - Stop
 - Goto (timecode)
 - Goto Clip (n)
+- Goto Clip (name)
 - Go Fwd (n) clips
 - Go Back (n) clips
 - Goto Start/End of clip
 - Jog forward (timecode) duration
 - Jog backward (timecode) duration
+- Shuttle (with speed)
 - Select (slot)
+- Set preview/output mode
 - Select video input
 - Select audio input
 - Select file format
@@ -36,6 +39,8 @@ The Hyperdeck can **only be connected to one controller at a time.** This includ
 - Slot/Disk Status
 - Loop Playback Status
 - Single Clip Playback Status
+- Video Input
+- Audio Input
 - Format Prepared
 
 **Supported button variables**
@@ -45,4 +50,7 @@ The Hyperdeck can **only be connected to one controller at a time.** This includ
 - Clip ID
 - Slot ID
 - Video Format
+- Recording time available
+- Clip count
 - Timecode
+- File Format

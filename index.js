@@ -836,7 +836,7 @@ class instance extends instance_skel {
 			case 'remote':
 				cmd = new Commands.RemoteCommand()
 				cmd.enable = opt.remoteEnable
-				this.debug('Remote enable is: ', opt.remoteEnable)
+//			this.debug('Remote enable is: ', opt.remoteEnable)
 				break
 			case 'fetchClips':
 				this.updateClips(this.transportInfo.slotId)
@@ -1341,6 +1341,7 @@ class instance extends instance_skel {
 	 */
 	async updateClips(currentSlot) {
 		try {
+//		this.debug("Slot info:", this.slotInfo)
 			// TODO Add a check for clip count once the command is supported in hyperdeck-connection
 			const count = new Commands.ClipsCountCommand()
 			const clipCount = await this.hyperDeck.sendCommand(count)
@@ -1351,7 +1352,7 @@ class instance extends instance_skel {
 				const queryClips = await this.hyperDeck.sendCommand(clips)
 
 				this.clipsList[currentSlot] = queryClips.clips
-				//console.log(currentSlot, this.clipsList[currentSlot])
+//			console.log(currentSlot, this.clipsList[currentSlot])
 
 				// reset clip choices
 				this.CHOICES_CLIPS.length = 0

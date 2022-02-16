@@ -55,30 +55,30 @@ module.exports.updateTransportInfoVariables = function (instance) {
 
 module.exports.updateClipVariables = function (instance) {
 	instance.setVariable('clipCount', instance.clipCount)
+//instance.debug('ClipList:', instance.clipsList)
 }
 
 module.exports.updateSlotInfoVariables = function (instance) {
 	let recordingTimes = []
-	try {
-		if (instance.slotInfo[1] != null) {
-			recordingTimes[1] = new Date(instance.slotInfo[1]['recordingTime'] * 1000).toISOString().substr(11, 8)
-			instance.setVariable('slot1_recordingTime', recordingTimes[1])
+	instance.slotInfo.forEach((slot, index) => {
+		try {
+			if (slot != null) {
+				recordingTimes[index] = '--:--:--'
+				if (slot['recordingTime'] !== undefined) {
+					recordingTimes[index] = new Date(slot['recordingTime'] * 1000).toISOString().substr(11, 8)
+				}
+				instance.setVariable(`slot${index}_recordingTime`, recordingTimes[index])
+			}
+		} catch (e) {
+			instance.log('error', `Slot ${index} recording time parse error: ${e}`)
 		}
-	} catch (e) {
-		instance.debug(`Slot 1 recording time parse error: ${e}`)
-	}
-	try {
-		if (instance.slotInfo[2] != null) {
-			recordingTimes[2] = new Date(instance.slotInfo[2]['recordingTime'] * 1000).toISOString().substr(11, 8)
-			instance.setVariable('slot2_recordingTime', recordingTimes[2])
-		}
-	} catch (e) {
-		instance.debug(`Slot 2 recording time parse error: ${e}`)
-	}
+	})
+	recordingTimes[0] = '--:--:--'
 	let activeSlot = instance.transportInfo['slotId']
-	if (instance.slotInfo[activeSlot] != null) {
-		instance.setVariable('recordingTime', recordingTimes[activeSlot])
+	if (instance.slotInfo[activeSlot] != null && instance.slotInfo[activeSlot].recordingTime !== undefined) {
+		recordingTimes[0] = recordingTimes[activeSlot]
 	}
+	instance.setVariable('recordingTime', recordingTimes[0])
 }
 
 module.exports.updateTimecodeVariables = function (instance) {
@@ -129,7 +129,9 @@ module.exports.updateTimecodeVariables = function (instance) {
 					const clip = instance.clipsList[instance.transportInfo['slotId']].find(
 						({ clipId }) => clipId == instance.transportInfo['clipId']
 					)
-					if (clip && clip.duration) {
+//				instance.debug('Clip duration: ', clip.duration)
+					const modesWhereCountdownMakesNoSense = new Set(['preview', 'record'])
+					if (clip && clip.duration && !(modesWhereCountdownMakesNoSense.has(instance.transportInfo['status']))) {
 						const tcTot = Timecode(clip.duration, tb)
 						const tcStart = Timecode(clip.startTime, tb)
 						const left = Math.max(0, tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1)
@@ -144,7 +146,7 @@ module.exports.updateTimecodeVariables = function (instance) {
 					}
 				}
 			} catch (err) {
-				this.log('error', 'Timecode error:' + JSON.stringify(err))
+				instance.log('error', 'Timecode error:' + JSON.stringify(err))
 			}
 		} else {
 			// no timebase implies we can't use smpte-timecode lib
@@ -198,19 +200,21 @@ module.exports.initVariables = function (instance) {
 		label: 'Video format',
 		name: 'videoFormat',
 	})
+	module.exports.updateTransportInfoVariables(instance)
+	
+	// Slot variables
 	variables.push({
 		label: 'Active slot recording time available',
 		name: 'recordingTime',
 	})
-	variables.push({
-		label: 'Slot 1 recording time available',
-		name: 'slot1_recordingTime',
+	instance.slotInfo.forEach((slot, index) => {
+		if (slot != null) {
+			variables.push({
+				label: `Slot ${index} recording time available`,
+				name: `slot${index}_recordingTime`,
+			})
+		}
 	})
-	variables.push({
-		label: 'Slot 2 recording time available',
-		name: 'slot2_recordingTime',
-	})
-	module.exports.updateTransportInfoVariables(instance)
 	module.exports.updateSlotInfoVariables(instance)
 
 	// Clip variables
@@ -218,6 +222,7 @@ module.exports.initVariables = function (instance) {
 		label: 'Clip count',
 		name: 'clipCount',
 	})
+//instance.clips.forEach()
 	module.exports.updateClipVariables(instance)
 
 	// Timecode variables

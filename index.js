@@ -856,7 +856,7 @@ class instance extends instance_skel {
 				// Handle any return values
 				switch (action.action) {
 					case 'formatPrepare':
-						if (response.code) {
+						if (response && response.code) {
 							this.log('debug', 'Format token: ' + response.code)
 							this.formatToken = response.code
 						}
@@ -1222,8 +1222,9 @@ class instance extends instance_skel {
 	 * @since 1.1.0
 	 */
 	sendPollCommand() {
-		let that = this
-		this.hyperDeck
+		if (this.hyperDeck) {
+			let that = this
+			this.hyperDeck
 			.sendCommand(new Commands.TransportInfoCommand())
 			.then((transportInfo) => {
 				that.transportInfo = transportInfo
@@ -1232,7 +1233,8 @@ class instance extends instance_skel {
 				this.log('error', 'Timecode polling failed')
 				clearInterval(this.pollTimer)
 			})
-		updateTimecodeVariables(this)
+			updateTimecodeVariables(this)
+		}
 	}
 
 	/**

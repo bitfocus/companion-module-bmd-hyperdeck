@@ -174,6 +174,12 @@ module.exports.updateConfigurationVariables = function (instance) {
 			instance.setVariable('fileFormat', format.label)
 		}
 	}
+	if (instance.deckConfig.audioCodec !== '') {
+		instance.setVariable('audioCodec', instance.deckConfig.audioCodec)
+	}
+	if (instance.deckConfig.audioInputChannels !== '') {
+		instance.setVariable('audioChannels', instance.deckConfig.audioInputChannels)
+	}
 }
 
 module.exports.initVariables = function (instance) {
@@ -262,6 +268,14 @@ module.exports.initVariables = function (instance) {
 	variables.push({
 		label: 'File format',
 		name: 'fileFormat',
+	})
+	variables.push({
+		label: 'Audio codec',
+		name: 'audioCodec',
+	})
+	variables.push({
+		label: 'Audio channels',
+		name: 'audioChannels',
 	})
 	module.exports.updateConfigurationVariables(instance)
 

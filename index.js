@@ -6,6 +6,7 @@ const {
 	updateSlotInfoVariables,
 	updateTimecodeVariables,
 	updateClipVariables,
+	updateConfigurationVariables,
 } = require('./variables')
 const { initFeedbacks } = require('./feedbacks')
 const { upgradeCombineOldPlayActions, upgradeTimecodeNotifications, upgrade126to127 } = require('./upgrades')
@@ -54,6 +55,8 @@ class instance extends instance_skel {
 			audioInput: '',
 			videoInput: '',
 			fileFormat: '',
+			audioCodec: '',
+			audioInputChannels: '',
 		}
 		this.remoteInfo = null
 		this.pollTimer = null
@@ -268,6 +271,18 @@ class instance extends instance_skel {
 		})
 
 		this.CHOICES_AUDIOINPUTS = []
+		this.CHOICES_AUDIOCODEC = [
+			{ id: 'PCM', label: 'PCM' },
+			{ id: 'AAC', label: 'AAC (2 channels only)' },
+		]
+		this.CHOICES_AUDIOCHANNELS = [
+			{ id: '2', label: '2 Channels' },
+			{ id: '4', label: '4 Channels' },
+			{ id: '8', label: '8 Channels' },
+			{ id: '16', label: '16 Channels' },
+			{ id: 'cycle', label: 'Cycle' },
+		]
+		
 		this.CHOICES_FILEFORMATS = []
 		this.CHOICES_VIDEOINPUTS = []
 		this.CHOICES_SLOTS = []
@@ -609,6 +624,30 @@ class instance extends instance_skel {
 					],
 				}
 			}
+			
+			this.debug('Stored protocol version:', this.protocolVersion)
+			if (this.protocolVersion >= 1.11) {
+				actions['audioChannels'] = {
+					label: 'Audio channels',
+					options: [
+						{
+							type: 'dropdown',
+							label: 'Codec',
+							id: 'audioCodec',
+							default: this.CHOICES_AUDIOCODEC[0].id,
+							choices: this.CHOICES_AUDIOCODEC,
+						},
+						{
+							type: 'dropdown',
+							label: 'Channels',
+							id: 'audioChannels',
+							default: '2',
+							choices: this.CHOICES_AUDIOCHANNELS,
+							isVisible: (action) => action.options.audioCodec === 'PCM',
+						},
+					],
+				}
+			}
 	
 			if (this.CHOICES_FILEFORMATS.length > 1) {
 				actions['fileFormat'] = {
@@ -805,6 +844,18 @@ class instance extends instance_skel {
 			case 'audioSrc':
 				cmd = new Commands.ConfigurationCommand()
 				cmd.audioInput = opt.audioSrc
+				break
+			case 'audioChannels': 
+				cmd = new Commands.ConfigurationCommand()
+				cmd.audioCodec = opt.audioCodec
+				cmd.audioInputChannels = 2
+				if (opt.audioCodec == 'PCM') {
+					let channels = opt.audioChannels
+					if (channels == 'cycle') {
+						channels = this.deckConfig.audioInputChannels == 16 ? 2 : this.deckConfig.audioInputChannels * 2
+					}
+					cmd.audioInputChannels = channels
+				}
 				break
 			case 'fileFormat':
 				cmd = new Commands.ConfigurationCommand()
@@ -1057,10 +1108,10 @@ class instance extends instance_skel {
 
 			this.hyperDeck.on('connected', async (c) => {
 				// c contains the result of 500 connection info
+				this.protocolVersion = c.protocolVersion
+
 				this.updateDevice(c)
 				this.actions()
-
-				this.protocolVersion = c.protocolVersion
 
 				// set notification:
 				const notify = new Commands.NotifySetCommand()
@@ -1086,7 +1137,7 @@ class instance extends instance_skel {
 					this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
 					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
-
+					// this.debug('Initial config:', this.deckConfig)
 					// TODO Requires support from hyperdeck-connection
 					// this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteCommand())
 				} catch (e) {
@@ -1157,14 +1208,15 @@ class instance extends instance_skel {
 			})
 
 			this.hyperDeck.on('notify.configuration', async (res) => {
-				this.log('debug', 'Configuration Changed')
+				this.log('debug', `Configuration Changed: ${JSON.stringify(res)}`)
 				for (var id in res) {
 					if (res[id] !== undefined) {
 						this.deckConfig[id] = res[id]
 					}
 				}
-//			this.debug('Config:', this.deckConfig)
+				// this.debug('Config:', this.deckConfig)
 				this.checkFeedbacks('video_input')
+				updateConfigurationVariables(this)
 			})
 
 			if (this.config.timecodeVariables === 'notifications') {

@@ -27,8 +27,8 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"hyperdeck-connection": "^0.5.0-nightly-latest-20220216-192753-87348bf.0",
-		"smpte-timecode": "^1.2.3"
+		"hyperdeck-connection": "0.5.0-nightly-latest-20220422-103424-8749727.0",
+		"smpte-timecode": "1.2.3"
 	},
 	"homepage": "https://github.com/bitfocus/companion-module-bmd-hyperdeck#readme",
 	"bugs": {

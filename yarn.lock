@@ -2,14 +2,14 @@
 # yarn lockfile v1
 
 
-hyperdeck-connection@^0.5.0-nightly-latest-20220216-192753-87348bf.0:
-  version "0.5.0-nightly-latest-20220216-192753-87348bf.0"
-  resolved "https://registry.yarnpkg.com/hyperdeck-connection/-/hyperdeck-connection-0.5.0-nightly-latest-20220216-192753-87348bf.0.tgz#2c2cdad5f6146975af4e4ccb8da3381ae0841f97"
-  integrity sha512-krc36PLCVcwuYV4c2EbWA8FsgV1DI7QZrFx0z6SUdsIJv6WAStUH5Vr44H/guDvZI/e1cZ04akfIkitwY5sPBQ==
+hyperdeck-connection@0.5.0-nightly-latest-20220422-103424-8749727.0:
+  version "0.5.0-nightly-latest-20220422-103424-8749727.0"
+  resolved "https://registry.yarnpkg.com/hyperdeck-connection/-/hyperdeck-connection-0.5.0-nightly-latest-20220422-103424-8749727.0.tgz#868c3e33b8f068f8b653d820af1dae846592d136"
+  integrity sha512-fMOJKCqL3R/R2Tp0kZar1LaEzk8fAw3aq8McWec8a9VH9vQlC1xgL3TyrPiX+WJ1hjFe/A7IyVGGWlyG0X55Jw==
   dependencies:
     tslib "^2.3.1"
 
-smpte-timecode@^1.2.3:
+smpte-timecode@1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/smpte-timecode/-/smpte-timecode-1.2.3.tgz#272ac8826724ce793d956109cfd3982b2f6b1893"
   integrity sha512-6U+vdStmprzmpzEWS+9pw8GfiChBcMmJOdJxBjaXlGJhB9U/jcQhvh0buxJzEfhuX8E0OfYJy4hayBgAO92dBg==

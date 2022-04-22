@@ -356,6 +356,17 @@ class instance extends instance_skel {
 			upgradeCombineOldPlayActions,
 			upgradeTimecodeNotifications,
 			upgrade126to127,
+			instance_skel.CreateConvertToBooleanFeedbackUpgradeScript({
+				'transport_status': true,
+				'transport_clip': true,
+				'transport_slot': true,
+				'slot_status': true,
+				'transport_loop': true,
+				'transport_singleClip': true,
+				'video_input': true,
+				'audio_input': true,
+				'format_ready': true,
+			})
 		]
 	}
 

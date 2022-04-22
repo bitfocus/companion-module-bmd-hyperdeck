@@ -197,6 +197,44 @@ exports.initFeedbacks = function () {
 			},
 		}
 	}
+	feedbacks['audio_channels'] = {
+		type: 'boolean',
+		label: 'Audio channels',
+		description: 'Set feedback based on configured audio channels',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Codec',
+				id: 'audioCodec',
+				default: this.CHOICES_AUDIOCODEC[0].id,
+				choices: this.CHOICES_AUDIOCODEC,
+			},
+			{
+				type: 'dropdown',
+				label: 'Channels',
+				id: 'audioChannels',
+				default: '2',
+				choices: this.CHOICES_AUDIOCHANNELS,
+				isVisible: (action) => action.options.audioCodec === 'PCM',
+			},
+		],
+		style: {
+			color: this.rgb(255,255,255),
+			bgcolor: this.rgb(0,0,255),
+		},
+		callback: ({ options }, bank) => {
+			if (options.audioCodec === 'AAC' || this.deckConfig.audioCodec === 'AAC') {
+				if (options.audioCodec === this.deckConfig.audioCodec) {
+					return true
+				}
+				return false
+			}
+			if (options.audioChannels === String(this.deckConfig.audioInputChannels)) {
+				return true
+			}
+			return false
+		}
+	}
 	feedbacks['format_ready'] = {
 		type: 'boolean',
 		label: 'Format prepared',

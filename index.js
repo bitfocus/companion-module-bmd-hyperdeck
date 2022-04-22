@@ -1227,6 +1227,8 @@ class instance extends instance_skel {
 				}
 				// this.debug('Config:', this.deckConfig)
 				this.checkFeedbacks('video_input')
+				this.checkFeedbacks('audio_input')
+				this.checkFeedbacks('audio_channels')
 				updateConfigurationVariables(this)
 			})
 

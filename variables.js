@@ -40,15 +40,30 @@ module.exports.updateTransportInfoVariables = function (instance) {
 
 	//Clip ID and Slot ID  null exceptions
 	let clipIdVariable = '—'
+	let clipNameVariable = '-'
 	if (instance.transportInfo['clipId'] != null) {
 		clipIdVariable = instance.transportInfo['clipId']
-	}
+	
+		try {
+			let clipObj = instance.CHOICES_CLIPS.find(
+				({ clipId }) => clipId == instance.transportInfo['clipId']
+			)
+	
+			if (clipObj) {
+				clipNameVariable = clipObj.label
+			}
+		}
+		catch(error) {
+			//some uncaught error
+		}		
+	}	
 
 	let slotIdVariable = '—'
 	if (instance.transportInfo['slotId'] != null) {
 		slotIdVariable = instance.transportInfo['slotId']
 	}
 	instance.setVariable('clipId', clipIdVariable)
+	instance.setVariable('clipName', clipNameVariable)
 	instance.setVariable('slotId', slotIdVariable)
 	instance.setVariable('videoFormat', instance.transportInfo['videoFormat'])
 }
@@ -197,6 +212,10 @@ module.exports.initVariables = function (instance) {
 	variables.push({
 		label: 'Clip ID',
 		name: 'clipId',
+	})
+	variables.push({
+		label: 'Clip Name',
+		name: 'clipName',
 	})
 	variables.push({
 		label: 'Slot ID',

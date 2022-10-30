@@ -57,6 +57,47 @@ exports.initFeedbacks = function () {
 			return false
 		},
 	}
+	feedbacks['transport_clip_name'] = {
+		type: 'boolean',
+		label: 'Active Clip (name)',
+		description: 'Set feedback based on the name of the active clip',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Clip Name - select from list or enter text (variables supported)',
+				id: 'clipName',
+				default: '',
+				required: true,
+				choices: this.CHOICES_CLIPS,
+				minChoicesForSearch: 0,
+				allowCustom: true,
+			},
+			{
+				type: 'dropdown',
+				label: 'Slot Id',
+				id: 'slotID',
+				choices: [{ id: 'either', label: 'Any' },].concat(this.CHOICES_SLOTS),
+				default: 'either',
+				regex: this.REGEX_SOMETHING,
+			},
+		],
+		style: {
+			color: this.rgb(255, 255, 255),
+			bgcolor: this.rgb(255, 0, 0),
+		},
+		callback: ({ options }, bank) => {
+			let match = false
+			this.parseVariables(options.clipName, (parsed) => {
+				if (
+					(options.slotID == 'either' && parsed == this.transportInfo.clipName) ||
+					(options.slotID == this.transportInfo.slotId && parsed == this.transportInfo.clipName)
+				) {
+					match = true
+				}
+			})
+			return match
+		},
+	}
 	feedbacks['transport_slot'] = {
 		type: 'boolean',
 		label: 'Active slot',

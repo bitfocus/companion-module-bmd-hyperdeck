@@ -64,6 +64,7 @@ module.exports.updateTransportInfoVariables = function (instance) {
 	}
 	instance.setVariable('clipId', clipIdVariable)
 	instance.setVariable('clipName', clipNameVariable)
+	instance.setVariable('clipCount', instance.clipCount)
 	instance.setVariable('slotId', slotIdVariable)
 	instance.setVariable('videoFormat', instance.transportInfo['videoFormat'])
 }

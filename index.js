@@ -45,6 +45,7 @@ class instance extends instance_skel {
 			speed: '',
 			slotId: '',
 			clipId: '',
+			clipName: '',
 			singleClip: '',
 			timecode: '',
 			displayTimecode: '',
@@ -286,7 +287,8 @@ class instance extends instance_skel {
 		this.CHOICES_FILEFORMATS = []
 		this.CHOICES_VIDEOINPUTS = []
 		this.CHOICES_SLOTS = []
-
+		this.CHOICES_CLIPS = []
+		
 		this.CHOICES_DYNAMICRANGE = [
 			{ id: 'auto', label: 'Auto' },
 			{ id: 'Rec709', label: 'Rec.709' },
@@ -338,8 +340,6 @@ class instance extends instance_skel {
 			{ id: 'HFS+', label: 'HFS+' },
 			{ id: 'exFAT', label: 'exFAT' },
 		]
-
-		this.CHOICES_CLIPS = []
 
 		if (this.config.modelID !== undefined) {
 			this.model = this.CONFIG_MODEL[this.config.modelID]
@@ -1205,10 +1205,11 @@ class instance extends instance_skel {
 						this.transportInfo[id] = res[id]
 					}
 				}
-				this.checkFeedbacks()
+				this.updateTransportInfo()
 				updateTransportInfoVariables(this)
 				updateTimecodeVariables(this)
 				updateSlotInfoVariables(this)
+				this.checkFeedbacks()
 			})
 			
 			this.hyperDeck.on('notify.remote', async (res) => {
@@ -1242,7 +1243,7 @@ class instance extends instance_skel {
 			this.hyperDeck.connect(this.config.host, this.config.port)
 
 			// hyperdeck-connection debug tool
-			// this.hyperDeck.DEBUG = true;
+			 this.hyperDeck.DEBUG = true;
 		}
 	}
 
@@ -1428,14 +1429,42 @@ class instance extends instance_skel {
 				})
 
 				this.actions() // reinit actions to update list
+				this.initFeedbacks() // update feedback definitions
 			}
-			updateClipVariables(this)
+			updateTransportInfoVariables(this)
 		} catch (e) {
 			if (e.code) {
 				this.log('error', e.code + ' ' + e.name)
 			}
 		}
 	}
-}
 
+	/**
+	 * INTERNAL: Update transportInfo object
+	 *
+	 * @access protected
+	 */
+	updateTransportInfo() {
+		if (this.transportInfo['clipId'] != null) {
+//		clipIdVariable = this.transportInfo['clipId']
+			
+			try {
+				let clipObj = this.CHOICES_CLIPS.find(
+					({ clipId }) => clipId == this.transportInfo['clipId']
+				)
+				
+				if (clipObj) {
+					this.transportInfo.clipName = clipObj.label
+				}
+			}
+			catch(error) {
+				if (error.code) {
+					this.log('error', error.code + ' ' + error.name)
+				}
+			}
+			this.debug('Stored clip name:', this.transportInfo.clipName)
+		}	
+	}
+	
+}
 exports = module.exports = instance

@@ -39,7 +39,7 @@ module.exports.updateTransportInfoVariables = function (instance) {
 	instance.setVariable('speed', instance.transportInfo['speed'])
 
 	//Clip ID and Slot ID  null exceptions
-	let clipIdVariable = '—'
+	let clipIdVariable = '-'
 	let clipNameVariable = '-'
 	if (instance.transportInfo['clipId'] != null) {
 		clipIdVariable = instance.transportInfo['clipId']
@@ -58,7 +58,7 @@ module.exports.updateTransportInfoVariables = function (instance) {
 		}		
 	}	
 
-	let slotIdVariable = '—'
+	let slotIdVariable = '-'
 	if (instance.transportInfo['slotId'] != null) {
 		slotIdVariable = instance.transportInfo['slotId']
 	}
@@ -71,7 +71,8 @@ module.exports.updateTransportInfoVariables = function (instance) {
 
 module.exports.updateClipVariables = function (instance) {
 	instance.setVariable('clipCount', instance.clipCount)
-//instance.debug('ClipList:', instance.clipsList)
+	// Variables for every clip in the list
+	
 }
 
 module.exports.updateSlotInfoVariables = function (instance) {
@@ -248,6 +249,7 @@ module.exports.initVariables = function (instance) {
 		label: 'Clip count',
 		name: 'clipCount',
 	})
+//instance.debug('Clips:', instance.clipsList)
 //instance.clips.forEach()
 	module.exports.updateClipVariables(instance)
 

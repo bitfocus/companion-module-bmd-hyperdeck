@@ -1188,14 +1188,18 @@ class instance extends instance_skel {
 
 				// Update the transport status to catch slot changes
 				this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
-				this.checkFeedbacks('slot_status')
-				this.checkFeedbacks('transport_slot')
 				// Update slot variables
 				updateSlotInfoVariables(this)
 
 				// Update the disk list to catch changes in clip
 				// TODO - not sure when the hyperdeck informs of us new clips being added...
 				this.updateClips(res.slotId)
+				
+				// Update internals
+				this.actions()
+				this.initFeedbacks()
+				this.checkFeedbacks('slot_status')
+				this.checkFeedbacks('transport_slot')
 			})
 
 			this.hyperDeck.on('notify.transport', async (res) => {
@@ -1243,7 +1247,7 @@ class instance extends instance_skel {
 			this.hyperDeck.connect(this.config.host, this.config.port)
 
 			// hyperdeck-connection debug tool
-			 this.hyperDeck.DEBUG = true;
+			// this.hyperDeck.DEBUG = true;
 		}
 	}
 
@@ -1409,12 +1413,13 @@ class instance extends instance_skel {
 	 */
 	async updateClips(currentSlot) {
 		try {
-//		this.debug("Slot info:", this.slotInfo)
-			// TODO Add a check for clip count once the command is supported in hyperdeck-connection
 			const count = new Commands.ClipsCountCommand()
 			const clipCount = await this.hyperDeck.sendCommand(count)
 			this.clipCount = clipCount.count
-			//const clipCount = 1
+			if (this.clipCount == 0) {
+				this.clipsList[currentSlot] = null
+				this.CHOICES_CLIPS.length = 0
+			}
 			if (this.clipCount > 0) {
 				const clips = new Commands.ClipsGetCommand()
 				const queryClips = await this.hyperDeck.sendCommand(clips)
@@ -1428,9 +1433,9 @@ class instance extends instance_skel {
 					this.CHOICES_CLIPS.push({ id: name, label: name, clipId: clipId })
 				})
 
-				this.actions() // reinit actions to update list
-				this.initFeedbacks() // update feedback definitions
 			}
+			this.actions() // reinit actions to update list
+			this.initFeedbacks() // update feedback definitions
 			updateTransportInfoVariables(this)
 		} catch (e) {
 			if (e.code) {

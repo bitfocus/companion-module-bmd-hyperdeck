@@ -154,6 +154,15 @@ class instance extends instance_skel {
 				slotLabels: 'SD2_USB', //TODO check correct slots
 				maxShuttle: 5000,
 			},
+			hdShuttleHD: {
+				id: 'hdShuttleHD',
+				label: 'HyperDeck Shuttle HD',
+				videoInputs: ['HDMI'],
+				audioInputs: ['embedded'],
+				fileFormats: ['prores', 'proxy', 'DNx', 'DNxHD220', 'H.264', 'teleprompter'],
+				slotLabels: 'SD_USB',
+				maxShuttle: 5000,
+			}
 		}
 
 		this.CONFIG_AUDIOINPUTS = {
@@ -199,6 +208,7 @@ class instance extends instance_skel {
 			{ id: 'H.264High', label: 'H.264/5 High', family: 'H.264/5' },
 			{ id: 'H.264Medium', label: 'H.264/5 Medium', family: 'H.264/5' },
 			{ id: 'H.264Low', label: 'H.264/5 Low', family: 'H.264/5' },
+			{ id: 'Teleprompter', label: 'Teleprompter', family: 'teleprompter' },
 		]
 
 		this.CONFIG_NOTIFICATION_METHOD = [
@@ -215,6 +225,10 @@ class instance extends instance_skel {
 			SD2: [
 				{ id: 1, label: '1: SD 1' },
 				{ id: 2, label: '2: SD 2' },
+			],
+			SD_USB: [
+				{ id: 1, label: '1: SD' },
+				{ id: 2, label: '2: USB-C' },
 			],
 			SD2_USB: [
 				{ id: 1, label: '1: SD 1' },
@@ -1395,6 +1409,8 @@ class instance extends instance_skel {
 			this.config.modelID = 'hdStudioHDPro'
 		} else if (value.match(/4K Pro/)) {
 			this.config.modelID = 'hdStudio4KPro'
+		} else if (value.match(/Shuttle HD/)) {
+			this.config.modelID = 'hdShuttleHD'
 		} else {
 			this.config.modelID = 'hdStudio'
 		}

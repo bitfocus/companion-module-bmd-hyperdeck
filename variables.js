@@ -72,7 +72,11 @@ module.exports.updateTransportInfoVariables = function (instance) {
 module.exports.updateClipVariables = function (instance) {
 	instance.setVariable('clipCount', instance.clipCount)
 	// Variables for every clip in the list
-	
+	if (instance.clipsList !== undefined) {
+		instance.clipsList.forEach(({ clipId, name }) => {
+			instance.setVariable(`clip${clipId}_name`, name)
+		})
+	}
 }
 
 module.exports.updateSlotInfoVariables = function (instance) {
@@ -141,9 +145,9 @@ module.exports.updateTimecodeVariables = function (instance) {
 
 				if (
 					instance.transportInfo['slotId'] !== undefined &&
-					instance.clipsList[instance.transportInfo['slotId']] !== undefined
+					instance.clipsList !== undefined
 				) {
-					const clip = instance.clipsList[instance.transportInfo['slotId']].find(
+					const clip = instance.clipsList.find(
 						({ clipId }) => clipId == instance.transportInfo['clipId']
 					)
 //				instance.debug('Clip duration: ', clip.duration)
@@ -249,8 +253,15 @@ module.exports.initVariables = function (instance) {
 		label: 'Clip count',
 		name: 'clipCount',
 	})
-//instance.debug('Clips:', instance.clipsList)
-//instance.clips.forEach()
+	instance.debug('Clips:', instance.clipsList)
+	if (instance.clipsList !== undefined) {
+		instance.clipsList.forEach(({ clipId }) => {
+			variables.push({
+				label: `Clip ${clipId} Name`,
+				name: `clip${clipId}_name`,
+			})
+		})
+	}
 	module.exports.updateClipVariables(instance)
 
 	// Timecode variables

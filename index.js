@@ -1214,6 +1214,8 @@ class instance extends instance_skel {
 				this.initFeedbacks()
 				this.checkFeedbacks('slot_status')
 				this.checkFeedbacks('transport_slot')
+				// Update clip variables
+				this.updateClips()
 			})
 
 			this.hyperDeck.on('notify.transport', async (res) => {
@@ -1433,15 +1435,23 @@ class instance extends instance_skel {
 			const clipCount = await this.hyperDeck.sendCommand(count)
 			this.clipCount = clipCount.count
 			if (this.clipCount == 0) {
-				this.clipsList[currentSlot] = null
+				this.clipsList = null
 				this.CHOICES_CLIPS.length = 0
 			}
 			if (this.clipCount > 0) {
 				const clips = new Commands.ClipsGetCommand()
 				const queryClips = await this.hyperDeck.sendCommand(clips)
 
-				this.clipsList[currentSlot] = queryClips.clips
-//			console.log(currentSlot, this.clipsList[currentSlot])
+				// Check for a shorter list of clips, and unset variables if so
+				if (queryClips.clips != undefined && this.clipsList != undefined && queryClips.clips.length < this.clipsList.length) {
+					this.clipsList.forEach(clip => {
+						clip.name = '-'
+					})
+					updateClipVariables(this)
+					this.clipsList = null
+				}
+				
+				this.clipsList = queryClips.clips
 
 				// reset clip choices
 				this.CHOICES_CLIPS.length = 0
@@ -1452,7 +1462,9 @@ class instance extends instance_skel {
 			}
 			this.actions() // reinit actions to update list
 			this.initFeedbacks() // update feedback definitions
+			this.initVariables() // update variables list, to build the current clip list
 			updateTransportInfoVariables(this)
+			updateClipVariables(this)
 		} catch (e) {
 			if (e.code) {
 				this.log('error', e.code + ' ' + e.name)

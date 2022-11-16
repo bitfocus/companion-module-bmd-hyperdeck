@@ -203,6 +203,12 @@ module.exports.updateConfigurationVariables = function (instance) {
 	}
 }
 
+module.exports.updateRemoteVariable = function (instance) {
+	if (instance.remoteInfo !== undefined) {
+		instance.setVariable('remoteEnabled', instance.remoteInfo['enabled'])
+	}
+}
+
 module.exports.initVariables = function (instance) {
 	var variables = []
 
@@ -253,7 +259,6 @@ module.exports.initVariables = function (instance) {
 		label: 'Clip count',
 		name: 'clipCount',
 	})
-	instance.debug('Clips:', instance.clipsList)
 	if (instance.clipsList !== undefined) {
 		instance.clipsList.forEach(({ clipId }) => {
 			variables.push({
@@ -311,6 +316,12 @@ module.exports.initVariables = function (instance) {
 		name: 'audioChannels',
 	})
 	module.exports.updateConfigurationVariables(instance)
+	
+	// Remote status
+	variables.push({
+		label: 'Remote enabled',
+		name: 'remoteEnabled',
+	})
 
 	initTcVariable(false)
 	initTcVariable(true)

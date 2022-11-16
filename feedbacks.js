@@ -291,6 +291,28 @@ exports.initFeedbacks = function () {
 			return false
 		},
 	}
+	feedbacks['remote_status'] = {
+		type: 'boolean',
+		label: 'Remote Status',
+		description: 'Set feedback based on the remote control status',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Status',
+				id: 'status',
+				default: true,
+				choices: this.CHOICES_REMOTESTATUS,
+			},
+		],
+		style: {
+			color: this.rgb(255, 255, 255),
+			bgcolor: this.rgb(0, 0, 255),
+		},
+		callback: ({ options }, bank) => {
+			this.debug('FEEDBACK:', options.status, this.remoteInfo)
+			return options.status === this.remoteInfo['enabled'];
+		},
+	}
 
 	return feedbacks
 }

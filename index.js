@@ -7,6 +7,7 @@ const {
 	updateTimecodeVariables,
 	updateClipVariables,
 	updateConfigurationVariables,
+	updateRemoteVariable,
 } = require('./variables')
 const { initFeedbacks } = require('./feedbacks')
 const { upgradeCombineOldPlayActions, upgradeTimecodeNotifications, upgrade126to127 } = require('./upgrades')
@@ -348,6 +349,11 @@ class instance extends instance_skel {
 			{ id: 'jog', label: 'Jog' },
 			{ id: 'shuttle', label: 'Shuttle' },
 			{ id: 'record', label: 'Record' },
+		]
+		
+		this.CHOICES_REMOTESTATUS = [
+			{ id: true, label: 'Enabled' },
+			{ id: false, label: 'Disabled' },
 		]
 
 		this.CHOICES_FILESYSTEM = [
@@ -913,6 +919,8 @@ class instance extends instance_skel {
 				cmd = new Commands.RemoteCommand()
 				cmd.enable = opt.remoteEnable
 //			this.debug('Remote enable is: ', opt.remoteEnable)
+				updateRemoteVariable(this)
+				this.checkFeedbacks('remote_status')
 				break
 			case 'fetchClips':
 				this.updateClips(this.transportInfo.slotId)
@@ -1164,7 +1172,8 @@ class instance extends instance_skel {
 					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
 					// this.debug('Initial config:', this.deckConfig)
 					// TODO Requires support from hyperdeck-connection
-					// this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteCommand())
+					this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteGetCommand())
+					this.debug('Remote:', this.remoteInfo)
 				} catch (e) {
 					if (e.code) {
 						this.log('error', `Connection error - ${e.code} ${e.name}`)
@@ -1236,7 +1245,10 @@ class instance extends instance_skel {
 				this.log('debug', 'Remote Status Changed')
 				if (res !== undefined) {
 					this.remoteInfo = res
+					updateRemoteVariable(this)
+					this.debug(this.remoteInfo)
 				}
+				this.checkFeedbacks('remote_status')
 			})
 
 			this.hyperDeck.on('notify.configuration', async (res) => {

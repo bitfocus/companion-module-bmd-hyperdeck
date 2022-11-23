@@ -351,6 +351,12 @@ class instance extends instance_skel {
 			{ id: 'record', label: 'Record' },
 		]
 		
+		this.CHOICES_REMOTECONTROL = [
+			{ id: 'toggle', label: 'Toggle' },
+			{ id: true, label: 'Enable' },
+			{ id: false, label: 'Disable' },
+		]
+		
 		this.CHOICES_REMOTESTATUS = [
 			{ id: true, label: 'Enabled' },
 			{ id: false, label: 'Disabled' },
@@ -746,8 +752,8 @@ class instance extends instance_skel {
 						type: 'dropdown',
 						label: 'Enable/Disable',
 						id: 'remoteEnable',
-						default: 'true',
-						choices: this.CHOICES_ENABLEDISABLE,
+						default: 'toggle',
+						choices: this.CHOICES_REMOTECONTROL,
 					},
 				],
 			}
@@ -916,9 +922,12 @@ class instance extends instance_skel {
 				}
 				break
 			case 'remote':
+				let setRemote = opt.remoteEnable
+				if (opt.remoteEnable == 'toggle') {
+					setRemote = !this.remoteInfo['enabled']
+				}
 				cmd = new Commands.RemoteCommand()
-				cmd.enable = opt.remoteEnable
-//			this.debug('Remote enable is: ', opt.remoteEnable)
+				cmd.enable = setRemote
 				updateRemoteVariable(this)
 				this.checkFeedbacks('remote_status')
 				break
@@ -1171,9 +1180,7 @@ class instance extends instance_skel {
 
 					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
 					// this.debug('Initial config:', this.deckConfig)
-					// TODO Requires support from hyperdeck-connection
 					this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteGetCommand())
-					this.debug('Remote:', this.remoteInfo)
 				} catch (e) {
 					if (e.code) {
 						this.log('error', `Connection error - ${e.code} ${e.name}`)
@@ -1246,7 +1253,6 @@ class instance extends instance_skel {
 				if (res !== undefined) {
 					this.remoteInfo = res
 					updateRemoteVariable(this)
-					this.debug(this.remoteInfo)
 				}
 				this.checkFeedbacks('remote_status')
 			})
@@ -1507,7 +1513,7 @@ class instance extends instance_skel {
 					this.log('error', error.code + ' ' + error.name)
 				}
 			}
-			this.debug('Stored clip name:', this.transportInfo.clipName)
+			// this.debug('Stored clip name:', this.transportInfo.clipName)
 		}	
 	}
 	

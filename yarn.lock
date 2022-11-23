@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-hyperdeck-connection@0.5.0-nightly-latest-20220422-103424-8749727.0:
-  version "0.5.0-nightly-latest-20220422-103424-8749727.0"
-  resolved "https://registry.yarnpkg.com/hyperdeck-connection/-/hyperdeck-connection-0.5.0-nightly-latest-20220422-103424-8749727.0.tgz#868c3e33b8f068f8b653d820af1dae846592d136"
-  integrity sha512-fMOJKCqL3R/R2Tp0kZar1LaEzk8fAw3aq8McWec8a9VH9vQlC1xgL3TyrPiX+WJ1hjFe/A7IyVGGWlyG0X55Jw==
+hyperdeck-connection@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/hyperdeck-connection/-/hyperdeck-connection-1.0.0.tgz#7f3dfaf4fcd27137e0e2367c90a858630871962a"
+  integrity sha512-Q1OsWivSCroaGga2Qh8Xtw8A5bOmkTiCp58iNTjrSsnJHAOMAuufD268MiiVj8jpx+crg28Z9Rpvy7UyzaQceg==
   dependencies:
     tslib "^2.3.1"
 

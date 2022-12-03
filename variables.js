@@ -74,7 +74,7 @@ module.exports.updateClipVariables = function (instance) {
 	// Variables for every clip in the list
 	if (instance.clipsList !== undefined) {
 		instance.clipsList.forEach(({ clipId, name }) => {
-			instance.setVariable(`clip${clipId}_name`, name)
+			instance.setVariable(`clip${clipId}_name`, instance._stripExtension(name))
 		})
 	}
 }

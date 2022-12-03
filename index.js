@@ -832,7 +832,7 @@ class instance extends instance_skel {
 				this.updateClips(this.transportInfo.slotId)
 				this.parseVariables(opt.clip, (parsed) => {
 					const clip = this.CHOICES_CLIPS.find(
-						({ label }) => label == parsed
+						({ label }) => label == this._stripExtension(parsed)
 					)
 					if (clip === undefined) {
 						this.log('info', `Clip "${parsed}" does not exist`)
@@ -1474,9 +1474,8 @@ class instance extends instance_skel {
 				// reset clip choices
 				this.CHOICES_CLIPS.length = 0
 				queryClips.clips.forEach(({ clipId, name }) => {
-					this.CHOICES_CLIPS.push({ id: name, label: name, clipId: clipId })
+					this.CHOICES_CLIPS.push({ id: name, label: this._stripExtension(name), clipId: clipId })
 				})
-
 			}
 			this.actions() // reinit actions to update list
 			this.initFeedbacks() // update feedback definitions
@@ -1487,6 +1486,18 @@ class instance extends instance_skel {
 			if (e.code) {
 				this.log('error', e.code + ' ' + e.name)
 			}
+		}
+	}
+	
+	/**
+	 * INTERNAL: Strip file extensions from clip names
+	 *
+	 * @access protected
+	 */
+	_stripExtension(fileName) {
+		if (fileName != undefined) {
+			const re = /(.*?)(\.([a-z]|\d){3})?$/
+			return fileName.replace(re, '$1')
 		}
 	}
 

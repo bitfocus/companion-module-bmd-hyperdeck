@@ -1,41 +1,21 @@
 {
 	"name": "bmd-hyperdeck",
-	"legacy": [
-		"hyperdeck"
-	],
-	"version": "1.3.4",
-	"api_version": "1.0.0",
-	"keywords": [
-		"Recording",
-		"Video",
-		"Media"
-	],
-	"manufacturer": "Blackmagic Design",
-	"product": "Hyperdeck",
-	"shortname": "hyperdeck",
-	"description": "Module to control Hyperdeck",
+	"version": "2.0.0",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "Per Roine <per.roine@gmail.com>",
-	"contributors": [
-		"Stephen Harrison <stephen@redleopard.org>",
-		"Keith Rocheck",
-		"Jeffrey Davidsz",
-		"Balte de Wit <contact@balte.nl>"
-	],
 	"license": "MIT",
 	"dependencies": {
+		"@companion-module/base": "~1.0.0",
 		"hyperdeck-connection": "1.0.0",
 		"smpte-timecode": "1.2.3"
-	},
-	"homepage": "https://github.com/bitfocus/companion-module-bmd-hyperdeck#readme",
-	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-bmd-hyperdeck/issues"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-bmd-hyperdeck.git"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^0.5.1"
 	}
 }

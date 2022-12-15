@@ -407,7 +407,9 @@ class HyperdeckInstance extends InstanceBase {
 				this.log('debug', 'Remote Status Changed')
 				if (res !== undefined) {
 					this.remoteInfo = res
-					updateRemoteVariable(this)
+					const newVariables = {}
+					updateRemoteVariable(this, newVariables)
+					this.setVariableValues(newVariables)
 				}
 				this.checkFeedbacks('remote_status')
 			})

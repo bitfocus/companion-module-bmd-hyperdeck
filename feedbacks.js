@@ -294,7 +294,7 @@ exports.initFeedbacks = function () {
 		},
 		callback: ({ options }) => {
 			this.log('debug', `FEEDBACK: ${options.status} ${this.remoteInfo}`)
-			return options.status === this.remoteInfo['enabled']
+			return options.status === this.remoteInfo?.['enabled']
 		},
 	}
 

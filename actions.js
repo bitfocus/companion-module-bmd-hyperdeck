@@ -568,7 +568,9 @@ exports.initActions = function () {
 			const cmd = new Commands.RemoteCommand()
 			cmd.enable = setRemote
 
-			updateRemoteVariable(this)
+			const newVariables = {}
+			updateRemoteVariable(this, newVariables)
+			this.setVariableValues(newVariables)
 			this.checkFeedbacks('remote_status')
 
 			await sendCommand(cmd)

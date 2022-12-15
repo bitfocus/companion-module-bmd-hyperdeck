@@ -1,32 +1,39 @@
+const { Regex, combineRgb } = require('@companion-module/base')
+const {
+	CHOICES_AUDIOCODEC,
+	CHOICES_AUDIOCHANNELS,
+	CHOICES_TRANSPORTSTATUS,
+	CHOICES_SLOTSTATUS,
+	CHOICES_ENABLEDISABLE,
+	CHOICES_REMOTESTATUS,
+} = require('./choices')
+
 exports.initFeedbacks = function () {
 	const feedbacks = {}
 
 	feedbacks['transport_status'] = {
 		type: 'boolean',
-		label: 'Transport status',
+		name: 'Transport status',
 		description: 'Set feedback based on transport status',
 		options: [
 			{
 				type: 'dropdown',
 				label: 'Transport Status',
 				id: 'status',
-				choices: this.CHOICES_TRANSPORTSTATUS,
+				choices: CHOICES_TRANSPORTSTATUS,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 0),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }, bank) => {
-			if (options.status === this.transportInfo.status) {
-				return true
-			}
-			return false
+		callback: ({ options }) => {
+			return options.status === this.transportInfo.status
 		},
 	}
 	feedbacks['transport_clip'] = {
 		type: 'boolean',
-		label: 'Active clip',
+		name: 'Active clip',
 		description: 'Set feedback based on the which clip is active',
 		options: [
 			{
@@ -34,7 +41,7 @@ exports.initFeedbacks = function () {
 				label: 'Clip Id',
 				id: 'clipID',
 				default: 1,
-				regex: this.REGEX_SIGNED_NUMBER,
+				regex: Regex.SIGNED_NUMBER,
 			},
 			{
 				type: 'dropdown',
@@ -42,31 +49,28 @@ exports.initFeedbacks = function () {
 				id: 'slotID',
 				choices: [{ id: 'either', label: 'Any' }].concat(this.CHOICES_SLOTS),
 				default: 'either',
-				regex: this.REGEX_SOMETHING,
+				regex: Regex.SOMETHING,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 0),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }, bank) => {
-			if (
+		callback: ({ options }) => {
+			return (
 				(options.slotID == 'either' && options.clipID == this.transportInfo.clipId) ||
 				(options.slotID == this.transportInfo.slotId && options.clipID == this.transportInfo.clipId)
-			) {
-				return true
-			}
-			return false
+			)
 		},
 	}
 	feedbacks['transport_clip_name'] = {
 		type: 'boolean',
-		label: 'Active Clip (name)',
+		name: 'Active Clip (name)',
 		description: 'Set feedback based on the name of the active clip',
 		options: [
 			{
 				type: 'dropdown',
-				label: 'Clip Name - select from list or enter text (variables supported)',
+				label: 'Clip Name - select from list or enter text',
 				id: 'clipName',
 				default: '',
 				required: true,
@@ -80,29 +84,23 @@ exports.initFeedbacks = function () {
 				id: 'slotID',
 				choices: [{ id: 'either', label: 'Any' }].concat(this.CHOICES_SLOTS),
 				default: 'either',
-				regex: this.REGEX_SOMETHING,
+				regex: Regex.SOMETHING,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(255, 0, 0),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(255, 0, 0),
 		},
-		callback: ({ options }, bank) => {
-			let match = false
-			this.parseVariables(options.clipName, (parsed) => {
-				if (
-					(options.slotID == 'either' && parsed == this.transportInfo.clipName) ||
-					(options.slotID == this.transportInfo.slotId && parsed == this.transportInfo.clipName)
-				) {
-					match = true
-				}
-			})
-			return match
+		callback: ({ options }) => {
+			return (
+				(options.slotID == 'either' && options.clipName == this.transportInfo.clipName) ||
+				(options.slotID == this.transportInfo.slotId && options.clipName == this.transportInfo.clipName)
+			)
 		},
 	}
 	feedbacks['transport_slot'] = {
 		type: 'boolean',
-		label: 'Active slot',
+		name: 'Active slot',
 		description: 'Set feedback based on the which slot is active',
 		options: [
 			{
@@ -110,100 +108,88 @@ exports.initFeedbacks = function () {
 				label: 'Slot Id',
 				id: 'setting',
 				default: 1,
-				regex: this.REGEX_SIGNED_NUMBER,
+				regex: Regex.SIGNED_NUMBER,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 0),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }, bank) => {
-			if (options.setting == this.transportInfo.slotId) {
-				return true
-			}
-			return false
+		callback: ({ options }) => {
+			return options.setting == this.transportInfo.slotId
 		},
 	}
 	feedbacks['slot_status'] = {
 		type: 'boolean',
-		label: 'Slot/disk status',
+		name: 'Slot/disk status',
 		description: 'Set feedback based on disk status',
 		options: [
 			{
 				type: 'dropdown',
 				label: 'Disk Status',
 				id: 'status',
-				choices: this.CHOICES_SLOTSTATUS,
+				choices: CHOICES_SLOTSTATUS,
 			},
 			{
 				type: 'textinput',
 				label: 'Slot Id',
 				id: 'slotId',
 				default: 1,
-				regex: this.REGEX_SIGNED_NUMBER,
+				regex: Regex.SIGNED_NUMBER,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 0),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }, bank) => {
+		callback: ({ options }) => {
 			const slot = this.slotInfo[options.slotId]
-			if (slot && slot.status === options.status) {
-				return true
-			}
-			return false
+			return !!slot && slot.status === options.status
 		},
 	}
 	feedbacks['transport_loop'] = {
 		type: 'boolean',
-		label: 'Loop playback',
+		name: 'Loop playback',
 		description: 'Set feedback based on the loop status',
 		options: [
 			{
 				type: 'dropdown',
 				label: 'Loop',
 				id: 'setting',
-				choices: this.CHOICES_ENABLEDISABLE,
+				choices: CHOICES_ENABLEDISABLE,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 0),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }, bank) => {
-			if (options.setting === String(this.transportInfo.loop)) {
-				return true
-			}
-			return false
+		callback: ({ options }) => {
+			return options.setting === String(this.transportInfo.loop)
 		},
 	}
 	feedbacks['transport_singleClip'] = {
 		type: 'boolean',
-		label: 'Single clip playback',
+		name: 'Single clip playback',
 		description: 'Set feedback for single clip playback',
 		options: [
 			{
 				type: 'dropdown',
 				label: 'Single clip',
 				id: 'setting',
-				choices: this.CHOICES_ENABLEDISABLE,
+				choices: CHOICES_ENABLEDISABLE,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 0),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }, bank) => {
-			if (options.setting === String(this.transportInfo.singleClip)) {
-				return true
-			}
-			return false
+		callback: ({ options }) => {
+			return options.setting === String(this.transportInfo.singleClip)
 		},
 	}
 	feedbacks['video_input'] = {
 		type: 'boolean',
-		label: 'Video input',
+		name: 'Video input',
 		description: 'Set feedback based on selected video input',
 		options: [
 			{
@@ -213,21 +199,18 @@ exports.initFeedbacks = function () {
 				choices: this.CHOICES_VIDEOINPUTS,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 0),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }, bank) => {
-			if (options.setting === String(this.deckConfig.videoInput)) {
-				return true
-			}
-			return false
+		callback: ({ options }) => {
+			return options.setting === String(this.deckConfig.videoInput)
 		},
 	}
 	if (this.CHOICES_AUDIOINPUTS.length > 1) {
 		feedbacks['audio_input'] = {
 			type: 'boolean',
-			label: 'Audio input',
+			name: 'Audio input',
 			description: 'Set feedback based on selected audio input',
 			options: [
 				{
@@ -238,74 +221,63 @@ exports.initFeedbacks = function () {
 					default: 'embedded',
 				},
 			],
-			style: {
-				color: this.rgb(255, 255, 255),
-				bgcolor: this.rgb(0, 0, 0),
+			defaultStyle: {
+				color: combineRgb(255, 255, 255),
+				bgcolor: combineRgb(0, 0, 0),
 			},
-			callback: ({ options }, bank) => {
-				if (options.setting === String(this.deckConfig.audioInput)) {
-					return true
-				}
-				return false
+			callback: ({ options }) => {
+				return options.setting === String(this.deckConfig.audioInput)
 			},
 		}
 	}
 	feedbacks['audio_channels'] = {
 		type: 'boolean',
-		label: 'Audio channels',
+		name: 'Audio channels',
 		description: 'Set feedback based on configured audio channels',
 		options: [
 			{
 				type: 'dropdown',
 				label: 'Codec',
 				id: 'audioCodec',
-				default: this.CHOICES_AUDIOCODEC[0].id,
-				choices: this.CHOICES_AUDIOCODEC,
+				default: CHOICES_AUDIOCODEC[0].id,
+				choices: CHOICES_AUDIOCODEC,
 			},
 			{
 				type: 'dropdown',
 				label: 'Channels',
 				id: 'audioChannels',
 				default: '2',
-				choices: this.CHOICES_AUDIOCHANNELS,
-				isVisible: (action) => action.options.audioCodec === 'PCM',
+				choices: CHOICES_AUDIOCHANNELS,
+				isVisible: (options) => options.audioCodec === 'PCM',
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 255),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 255),
 		},
-		callback: ({ options }, bank) => {
+		callback: ({ options }) => {
 			if (options.audioCodec === 'AAC' || this.deckConfig.audioCodec === 'AAC') {
-				if (options.audioCodec === this.deckConfig.audioCodec) {
-					return true
-				}
-				return false
+				return options.audioCodec === this.deckConfig.audioCodec
 			}
-			if (options.audioChannels === String(this.deckConfig.audioInputChannels)) {
-				return true
-			}
-			return false
+			return options.audioChannels === String(this.deckConfig.audioInputChannels)
 		},
 	}
 	feedbacks['format_ready'] = {
 		type: 'boolean',
-		label: 'Format prepared',
+		name: 'Format prepared',
 		description: 'Set feedback based on a successful Format Prepare action',
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(255, 0, 0),
+		options: [],
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(255, 0, 0),
 		},
-		callback: ({ options }, bank) => {
-			if (this.formatToken !== null) {
-				return true
-			}
-			return false
+		callback: ({ options }) => {
+			return this.formatToken !== null
 		},
 	}
 	feedbacks['remote_status'] = {
 		type: 'boolean',
-		label: 'Remote Status',
+		name: 'Remote Status',
 		description: 'Set feedback based on the remote control status',
 		options: [
 			{
@@ -313,15 +285,15 @@ exports.initFeedbacks = function () {
 				label: 'Status',
 				id: 'status',
 				default: true,
-				choices: this.CHOICES_REMOTESTATUS,
+				choices: CHOICES_REMOTESTATUS,
 			},
 		],
-		style: {
-			color: this.rgb(255, 255, 255),
-			bgcolor: this.rgb(0, 0, 255),
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 255),
 		},
-		callback: ({ options }, bank) => {
-			this.debug('FEEDBACK:', options.status, this.remoteInfo)
+		callback: ({ options }) => {
+			this.log('debug', `FEEDBACK: ${options.status} ${this.remoteInfo}`)
 			return options.status === this.remoteInfo['enabled']
 		},
 	}

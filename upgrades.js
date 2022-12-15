@@ -1,8 +1,31 @@
-// v1.0.* -> v1.1.0 (combine old play actions)
-module.exports.upgradeCombineOldPlayActions = function (context, config, actions, feedbacks) {
-	var changed = false
+const { CreateConvertToBooleanFeedbackUpgradeScript } = require('@companion-module/base')
 
-	let upgradePass = function (action, changed) {
+module.exports.upgradeScripts = [
+	upgradeCombineOldPlayActions,
+	upgradeTimecodeNotifications,
+	upgrade126to127,
+	CreateConvertToBooleanFeedbackUpgradeScript({
+		transport_status: true,
+		transport_clip: true,
+		transport_slot: true,
+		slot_status: true,
+		transport_loop: true,
+		transport_singleClip: true,
+		video_input: true,
+		audio_input: true,
+		format_ready: true,
+	}),
+]
+
+// v1.0.* -> v1.1.0 (combine old play actions)
+function upgradeCombineOldPlayActions(context, props) {
+	const changes = {
+		config: null,
+		actions: [],
+		feedbacks: [],
+	}
+
+	for (const action of props.actions) {
 		if (action.options === undefined) {
 			action.options = {}
 		}
@@ -13,95 +36,98 @@ module.exports.upgradeCombineOldPlayActions = function (context, config, actions
 				action.options.loop = false
 				action.options.single = false
 				action.action = 'play'
-				changed = true
+				changes.actions.push(action)
 				break
 			case 'vplaysingle':
 				action.options.speed = opt.speed
 				action.options.loop = false
 				action.options.single = true
 				action.action = 'play'
-				changed = true
+				changes.actions.push(action)
 				break
 			case 'vplayloop':
 				action.options.speed = opt.speed
 				action.options.loop = true
 				action.options.single = false
 				action.action = 'play'
-				changed = true
+				changes.actions.push(action)
 				break
 			case 'playSingle':
 				action.options.speed = 100
 				action.options.loop = false
 				action.options.single = true
 				action.action = 'play'
-				changed = true
+				changes.actions.push(action)
 				break
 			case 'playLoop':
 				action.options.speed = 100
 				action.options.loop = true
 				action.options.single = false
 				action.action = 'play'
-				changed = true
+				changes.actions.push(action)
 				break
 			case 'play':
 				if (action.options.speed === undefined) {
 					action.options.speed = 100
-					changed = true
+					changes.actions.push(action)
 				}
 				if (action.options.loop === undefined) {
 					action.options.loop = false
-					changed = true
+					changes.actions.push(action)
 				}
 				if (action.options.single === undefined) {
 					action.options.single = false
-					changed = true
+					changes.actions.push(action)
 				}
 				break
 		}
-
-		return changed
 	}
 
-	for (var k in actions) {
-		changed = upgradePass(actions[k], changed)
-	}
-
-	return changed
+	return changes
 }
 
 // v1.1.0 -> v1.2.0 (timecode notifications)
-module.exports.upgradeTimecodeNotifications = function (context, config, actions, feedbacks) {
-	let changed = false
+function upgradeTimecodeNotifications(context, props) {
+	const changes = {
+		config: null,
+		actions: [],
+		feedbacks: [],
+	}
 
-	if (config) {
-		if (config.pollingOn !== undefined) {
-			if (config.pollingOn) {
-				config.timecodeVariables = 'polling'
+	if (props.config) {
+		if (props.config.pollingOn !== undefined) {
+			if (props.config.pollingOn) {
+				props.config.timecodeVariables = 'polling'
 			} else {
-				config.timecodeVariables = 'disabled'
+				props.config.timecodeVariables = 'disabled'
 			}
-			delete config.pollingOn
-			changed = true
+			delete props.config.pollingOn
+
+			changes.config = props.config
 		}
 	}
 
-	return changed
+	return changes
 }
 
 // v1.2.6 -> 1.2.7 (gotoClip (n) bug fix)
-module.exports.upgrade126to127 = function (context, config, actions, feedbacks) {
-	let changed = false
+function upgrade126to127(context, props) {
+	const changes = {
+		config: null,
+		actions: [],
+		feedbacks: [],
+	}
 
-	actions.forEach((action) => {
+	for (const action of props.actions) {
 		if (action.options === undefined) {
 			action.options = {}
 		}
 		// If the clip is not a number, return early as we don't need to change it
 		if (action.action === 'gotoName' && !isNaN(action.options.clip)) {
 			action.action = 'gotoN'
-			changed = true
+			changes.actions.push(action)
 		}
-	})
+	}
 
-	return changed
+	return changes
 }

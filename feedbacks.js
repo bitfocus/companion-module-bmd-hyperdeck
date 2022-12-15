@@ -5,12 +5,14 @@ exports.initFeedbacks = function () {
 		type: 'boolean',
 		label: 'Transport status',
 		description: 'Set feedback based on transport status',
-		options: [	{
-			type: 'dropdown',
-			label: 'Transport Status',
-			id: 'status',
-			choices: this.CHOICES_TRANSPORTSTATUS,
-		}],
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Transport Status',
+				id: 'status',
+				choices: this.CHOICES_TRANSPORTSTATUS,
+			},
+		],
 		style: {
 			color: this.rgb(255, 255, 255),
 			bgcolor: this.rgb(0, 0, 0),
@@ -38,14 +40,14 @@ exports.initFeedbacks = function () {
 				type: 'dropdown',
 				label: 'Slot Id',
 				id: 'slotID',
-				choices: [{ id: 'either', label: 'Any' },].concat(this.CHOICES_SLOTS),
+				choices: [{ id: 'either', label: 'Any' }].concat(this.CHOICES_SLOTS),
 				default: 'either',
 				regex: this.REGEX_SOMETHING,
 			},
 		],
 		style: {
-				color: this.rgb(255, 255, 255),
-				bgcolor: this.rgb(0, 0, 0),
+			color: this.rgb(255, 255, 255),
+			bgcolor: this.rgb(0, 0, 0),
 		},
 		callback: ({ options }, bank) => {
 			if (
@@ -76,7 +78,7 @@ exports.initFeedbacks = function () {
 				type: 'dropdown',
 				label: 'Slot Id',
 				id: 'slotID',
-				choices: [{ id: 'either', label: 'Any' },].concat(this.CHOICES_SLOTS),
+				choices: [{ id: 'either', label: 'Any' }].concat(this.CHOICES_SLOTS),
 				default: 'either',
 				regex: this.REGEX_SOMETHING,
 			},
@@ -102,13 +104,15 @@ exports.initFeedbacks = function () {
 		type: 'boolean',
 		label: 'Active slot',
 		description: 'Set feedback based on the which slot is active',
-		options: [	{
-			type: 'textinput',
-			label: 'Slot Id',
-			id: 'setting',
-			default: 1,
-			regex: this.REGEX_SIGNED_NUMBER,
-		}],
+		options: [
+			{
+				type: 'textinput',
+				label: 'Slot Id',
+				id: 'setting',
+				default: 1,
+				regex: this.REGEX_SIGNED_NUMBER,
+			},
+		],
 		style: {
 			color: this.rgb(255, 255, 255),
 			bgcolor: this.rgb(0, 0, 0),
@@ -155,12 +159,14 @@ exports.initFeedbacks = function () {
 		type: 'boolean',
 		label: 'Loop playback',
 		description: 'Set feedback based on the loop status',
-		options: [	{
-			type: 'dropdown',
-			label: 'Loop',
-			id: 'setting',
-			choices: this.CHOICES_ENABLEDISABLE,
-		}],
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Loop',
+				id: 'setting',
+				choices: this.CHOICES_ENABLEDISABLE,
+			},
+		],
 		style: {
 			color: this.rgb(255, 255, 255),
 			bgcolor: this.rgb(0, 0, 0),
@@ -176,12 +182,14 @@ exports.initFeedbacks = function () {
 		type: 'boolean',
 		label: 'Single clip playback',
 		description: 'Set feedback for single clip playback',
-		options: [	{
-			type: 'dropdown',
-			label: 'Single clip',
-			id: 'setting',
-			choices: this.CHOICES_ENABLEDISABLE,
-		}],
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Single clip',
+				id: 'setting',
+				choices: this.CHOICES_ENABLEDISABLE,
+			},
+		],
 		style: {
 			color: this.rgb(255, 255, 255),
 			bgcolor: this.rgb(0, 0, 0),
@@ -197,12 +205,14 @@ exports.initFeedbacks = function () {
 		type: 'boolean',
 		label: 'Video input',
 		description: 'Set feedback based on selected video input',
-		options: [	{
-			type: 'dropdown',
-			label: 'Input',
-			id: 'setting',
-			choices: this.CHOICES_VIDEOINPUTS,
-		}],
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Input',
+				id: 'setting',
+				choices: this.CHOICES_VIDEOINPUTS,
+			},
+		],
 		style: {
 			color: this.rgb(255, 255, 255),
 			bgcolor: this.rgb(0, 0, 0),
@@ -219,13 +229,15 @@ exports.initFeedbacks = function () {
 			type: 'boolean',
 			label: 'Audio input',
 			description: 'Set feedback based on selected audio input',
-			options: [{
-				type: 'dropdown',
-				label: 'Input',
-				id: 'setting',
-				choices: this.CHOICES_AUDIOINPUTS,
-				default: 'embedded'
-			}],
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Input',
+					id: 'setting',
+					choices: this.CHOICES_AUDIOINPUTS,
+					default: 'embedded',
+				},
+			],
 			style: {
 				color: this.rgb(255, 255, 255),
 				bgcolor: this.rgb(0, 0, 0),
@@ -260,8 +272,8 @@ exports.initFeedbacks = function () {
 			},
 		],
 		style: {
-			color: this.rgb(255,255,255),
-			bgcolor: this.rgb(0,0,255),
+			color: this.rgb(255, 255, 255),
+			bgcolor: this.rgb(0, 0, 255),
 		},
 		callback: ({ options }, bank) => {
 			if (options.audioCodec === 'AAC' || this.deckConfig.audioCodec === 'AAC') {
@@ -274,7 +286,7 @@ exports.initFeedbacks = function () {
 				return true
 			}
 			return false
-		}
+		},
 	}
 	feedbacks['format_ready'] = {
 		type: 'boolean',
@@ -310,7 +322,7 @@ exports.initFeedbacks = function () {
 		},
 		callback: ({ options }, bank) => {
 			this.debug('FEEDBACK:', options.status, this.remoteInfo)
-			return options.status === this.remoteInfo['enabled'];
+			return options.status === this.remoteInfo['enabled']
 		},
 	}
 

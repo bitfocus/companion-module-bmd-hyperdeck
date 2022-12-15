@@ -163,7 +163,7 @@ class instance extends instance_skel {
 				fileFormats: ['prores', 'proxy', 'DNx', 'DNxHD220', 'H.264', 'teleprompter'],
 				slotLabels: 'SD_USB',
 				maxShuttle: 5000,
-			}
+			},
 		}
 
 		this.CONFIG_AUDIOINPUTS = {
@@ -198,14 +198,14 @@ class instance extends instance_skel {
 			{ id: 'DNxHR_SQ', label: 'DNxHR SQ MXF', family: 'DNxHR_SQ' },
 			{ id: 'QuickTimeDNxHR_LB', label: 'DNxHR LB QT', family: 'DNxHR_LB' },
 			{ id: 'DNxHR_LB', label: 'DNxHR LB MXF', family: 'DNxHR_LB' },
-			{ id: "H.264High10_422", label: 'H.264 SDI', family: 'H.264_SDI' },
+			{ id: 'H.264High10_422', label: 'H.264 SDI', family: 'H.264_SDI' },
 			{ id: 'H.264High', label: 'H.264 High', family: 'H.264' },
 			{ id: 'H.264Medium', label: 'H.264 Medium', family: 'H.264' },
 			{ id: 'H.264Low', label: 'H.264 Low', family: 'H.264' },
 			{ id: 'H.265High', label: 'H.265 High', family: 'H.265' },
 			{ id: 'H.265Medium', label: 'H.265 Medium', family: 'H.265' },
 			{ id: 'H.265Low', label: 'H.265 Low', family: 'H.265' },
-			{ id: "H.264High10_422", label: 'H.264/5 SDI', family: 'H.264/5' },
+			{ id: 'H.264High10_422', label: 'H.264/5 SDI', family: 'H.264/5' },
 			{ id: 'H.264High', label: 'H.264/5 High', family: 'H.264/5' },
 			{ id: 'H.264Medium', label: 'H.264/5 Medium', family: 'H.264/5' },
 			{ id: 'H.264Low', label: 'H.264/5 Low', family: 'H.264/5' },
@@ -217,7 +217,7 @@ class instance extends instance_skel {
 			{ id: 'notifications', label: 'Notifications' },
 			{ id: 'polling', label: 'Polling' },
 		]
-		
+
 		this.CONFIG_SLOT_LABELS = {
 			SSD2: [
 				{ id: 1, label: '1: SSD 1' },
@@ -298,12 +298,12 @@ class instance extends instance_skel {
 			{ id: '16', label: '16 Channels' },
 			{ id: 'cycle', label: 'Cycle' },
 		]
-		
+
 		this.CHOICES_FILEFORMATS = []
 		this.CHOICES_VIDEOINPUTS = []
 		this.CHOICES_SLOTS = []
 		this.CHOICES_CLIPS = []
-		
+
 		this.CHOICES_DYNAMICRANGE = [
 			{ id: 'auto', label: 'Auto' },
 			{ id: 'Rec709', label: 'Rec.709' },
@@ -334,7 +334,7 @@ class instance extends instance_skel {
 			{ id: 'mounted', label: 'Mounted' },
 			{ id: 'mounting', label: 'Mounting' },
 		]
-		
+
 		this.CHOICES_PREVIEWMODE = [
 			{ id: 'true', label: 'Preview' },
 			{ id: 'false', label: 'Output' },
@@ -350,13 +350,13 @@ class instance extends instance_skel {
 			{ id: 'shuttle', label: 'Shuttle' },
 			{ id: 'record', label: 'Record' },
 		]
-		
+
 		this.CHOICES_REMOTECONTROL = [
 			{ id: 'toggle', label: 'Toggle' },
 			{ id: true, label: 'Enable' },
 			{ id: false, label: 'Disable' },
 		]
-		
+
 		this.CHOICES_REMOTESTATUS = [
 			{ id: true, label: 'Enabled' },
 			{ id: false, label: 'Disabled' },
@@ -383,16 +383,16 @@ class instance extends instance_skel {
 			upgradeTimecodeNotifications,
 			upgrade126to127,
 			instance_skel.CreateConvertToBooleanFeedbackUpgradeScript({
-				'transport_status': true,
-				'transport_clip': true,
-				'transport_slot': true,
-				'slot_status': true,
-				'transport_loop': true,
-				'transport_singleClip': true,
-				'video_input': true,
-				'audio_input': true,
-				'format_ready': true,
-			})
+				transport_status: true,
+				transport_clip: true,
+				transport_slot: true,
+				slot_status: true,
+				transport_loop: true,
+				transport_singleClip: true,
+				video_input: true,
+				audio_input: true,
+				format_ready: true,
+			}),
 		]
 	}
 
@@ -437,13 +437,13 @@ class instance extends instance_skel {
 					],
 				}
 			}
-	
+
 			actions['rec'] = { label: 'Record' }
-	
+
 			if (this.config.modelID == 'bmdDup4K') {
 				actions['recAppend'] = { label: 'Append Record' }
 			}
-	
+
 			if (this.config.modelID != 'bmdDup4K') {
 				actions['recName'] = {
 					label: 'Record (with name)',
@@ -479,9 +479,9 @@ class instance extends instance_skel {
 					],
 				}
 			}
-	
+
 			actions['stop'] = { label: 'Stop' }
-	
+
 			if (this.config.modelID != 'bmdDup4K') {
 				actions['goto'] = {
 					label: 'Goto (TC)',
@@ -631,7 +631,7 @@ class instance extends instance_skel {
 					],
 				}
 			} // endif (!= bmdDup4K)
-	
+
 			if (this.CHOICES_VIDEOINPUTS.length > 1) {
 				actions['videoSrc'] = {
 					label: 'Video source',
@@ -646,7 +646,7 @@ class instance extends instance_skel {
 					],
 				}
 			}
-	
+
 			if (this.CHOICES_AUDIOINPUTS.length > 1) {
 				actions['audioSrc'] = {
 					label: 'Audio source',
@@ -661,7 +661,7 @@ class instance extends instance_skel {
 					],
 				}
 			}
-			
+
 			this.debug('Stored protocol version:', this.protocolVersion)
 			if (this.protocolVersion >= 1.11) {
 				actions['audioChannels'] = {
@@ -685,7 +685,7 @@ class instance extends instance_skel {
 					],
 				}
 			}
-	
+
 			if (this.CHOICES_FILEFORMATS.length > 1) {
 				actions['fileFormat'] = {
 					label: 'File format',
@@ -700,9 +700,9 @@ class instance extends instance_skel {
 					],
 				}
 			}
-	
+
 			actions['fetchClips'] = { label: 'Fetch Clips' }
-	
+
 			/**
 				* Not currently implemented
 				*
@@ -721,7 +721,7 @@ class instance extends instance_skel {
 				};
 			}
 			*/
-	
+
 			actions['formatPrepare'] = {
 				label: 'Format drive/card (prepare)',
 				options: [
@@ -740,11 +740,11 @@ class instance extends instance_skel {
 					},
 				],
 			}
-	
+
 			actions['formatConfirm'] = {
 				label: 'Format drive/card (confirm)',
 			}
-	
+
 			actions['remote'] = {
 				label: 'Remote Control (enable/disable)',
 				options: [
@@ -757,9 +757,8 @@ class instance extends instance_skel {
 					},
 				],
 			}
-	
+
 			this.setActions(actions)
-			
 		} catch (e) {
 			if (e.code) {
 				this.log('error', e.code + ' ' + e.name)
@@ -831,9 +830,7 @@ class instance extends instance_skel {
 			case 'gotoName':
 				this.updateClips(this.transportInfo.slotId)
 				this.parseVariables(opt.clip, (parsed) => {
-					const clip = this.CHOICES_CLIPS.find(
-						({ label }) => label == this._stripExtension(parsed)
-					)
+					const clip = this.CHOICES_CLIPS.find(({ label }) => label == this._stripExtension(parsed))
 					if (clip === undefined) {
 						this.log('info', `Clip "${parsed}" does not exist`)
 					} else {
@@ -882,7 +879,7 @@ class instance extends instance_skel {
 				cmd = new Commands.ConfigurationCommand()
 				cmd.audioInput = opt.audioSrc
 				break
-			case 'audioChannels': 
+			case 'audioChannels':
 				cmd = new Commands.ConfigurationCommand()
 				cmd.audioCodec = opt.audioCodec
 				cmd.audioInputChannels = 2
@@ -1174,8 +1171,8 @@ class instance extends instance_skel {
 					for (let i = 0; i < slots; i++) {
 						this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
 					}
-//				this.debug('Slot info:', this.slotInfo)
-					
+					//				this.debug('Slot info:', this.slotInfo)
+
 					this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 
 					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
@@ -1224,7 +1221,7 @@ class instance extends instance_skel {
 				// Update the disk list to catch changes in clip
 				// TODO - not sure when the hyperdeck informs of us new clips being added...
 				this.updateClips(res.slotId)
-				
+
 				// Update internals
 				this.actions()
 				this.initFeedbacks()
@@ -1247,7 +1244,7 @@ class instance extends instance_skel {
 				updateSlotInfoVariables(this)
 				this.checkFeedbacks()
 			})
-			
+
 			this.hyperDeck.on('notify.remote', async (res) => {
 				this.log('debug', 'Remote Status Changed')
 				if (res !== undefined) {
@@ -1313,7 +1310,7 @@ class instance extends instance_skel {
 			for (var id in this.model.videoInputs) {
 				this.CHOICES_VIDEOINPUTS.push(this.CONFIG_VIDEOINPUTS[this.model.videoInputs[id]])
 			}
-			
+
 			//TODO define CHOICES_SLOTS based on model
 			this.CHOICES_SLOTS = this.CONFIG_SLOT_LABELS[this.model.slotLabels]
 		}
@@ -1329,14 +1326,14 @@ class instance extends instance_skel {
 		if (this.hyperDeck) {
 			let that = this
 			this.hyperDeck
-			.sendCommand(new Commands.TransportInfoCommand())
-			.then((transportInfo) => {
-				that.transportInfo = transportInfo
-			})
-			.catch((error) => {
-				this.log('error', 'Timecode polling failed')
-				clearInterval(this.pollTimer)
-			})
+				.sendCommand(new Commands.TransportInfoCommand())
+				.then((transportInfo) => {
+					that.transportInfo = transportInfo
+				})
+				.catch((error) => {
+					this.log('error', 'Timecode polling failed')
+					clearInterval(this.pollTimer)
+				})
 			updateTimecodeVariables(this)
 		}
 	}
@@ -1410,7 +1407,7 @@ class instance extends instance_skel {
 	updateDevice(object) {
 		const value = object.model
 
-//	this.debug('Model value:', value)
+		//	this.debug('Model value:', value)
 		if (value.match(/Extreme/)) {
 			this.config.modelID = 'hdExtreme8K'
 		} else if (value.match(/Studio Mini/)) {
@@ -1461,14 +1458,18 @@ class instance extends instance_skel {
 				const queryClips = await this.hyperDeck.sendCommand(clips)
 
 				// Check for a shorter list of clips, and unset variables if so
-				if (queryClips.clips != undefined && this.clipsList != undefined && queryClips.clips.length < this.clipsList.length) {
-					this.clipsList.forEach(clip => {
+				if (
+					queryClips.clips != undefined &&
+					this.clipsList != undefined &&
+					queryClips.clips.length < this.clipsList.length
+				) {
+					this.clipsList.forEach((clip) => {
 						clip.name = '-'
 					})
 					updateClipVariables(this)
 					this.clipsList = null
 				}
-				
+
 				this.clipsList = queryClips.clips
 
 				// reset clip choices
@@ -1488,7 +1489,7 @@ class instance extends instance_skel {
 			}
 		}
 	}
-	
+
 	/**
 	 * INTERNAL: Strip file extensions from clip names
 	 *
@@ -1508,25 +1509,21 @@ class instance extends instance_skel {
 	 */
 	updateTransportInfo() {
 		if (this.transportInfo['clipId'] != null) {
-//		clipIdVariable = this.transportInfo['clipId']
-			
+			//		clipIdVariable = this.transportInfo['clipId']
+
 			try {
-				let clipObj = this.CHOICES_CLIPS.find(
-					({ clipId }) => clipId == this.transportInfo['clipId']
-				)
-				
+				let clipObj = this.CHOICES_CLIPS.find(({ clipId }) => clipId == this.transportInfo['clipId'])
+
 				if (clipObj) {
 					this.transportInfo.clipName = clipObj.label
 				}
-			}
-			catch(error) {
+			} catch (error) {
 				if (error.code) {
 					this.log('error', error.code + ' ' + error.name)
 				}
 			}
 			// this.debug('Stored clip name:', this.transportInfo.clipName)
-		}	
+		}
 	}
-	
 }
 exports = module.exports = instance

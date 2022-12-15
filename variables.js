@@ -43,20 +43,17 @@ module.exports.updateTransportInfoVariables = function (instance) {
 	let clipNameVariable = '-'
 	if (instance.transportInfo['clipId'] != null) {
 		clipIdVariable = instance.transportInfo['clipId']
-	
+
 		try {
-			let clipObj = instance.CHOICES_CLIPS.find(
-				({ clipId }) => clipId == instance.transportInfo['clipId']
-			)
-	
+			let clipObj = instance.CHOICES_CLIPS.find(({ clipId }) => clipId == instance.transportInfo['clipId'])
+
 			if (clipObj) {
 				clipNameVariable = clipObj.label
 			}
-		}
-		catch(error) {
+		} catch (error) {
 			//some uncaught error
-		}		
-	}	
+		}
+	}
 
 	let slotIdVariable = '-'
 	if (instance.transportInfo['slotId'] != null) {
@@ -143,16 +140,11 @@ module.exports.updateTimecodeVariables = function (instance) {
 				countUp.tcHMS = tc.toString().substr(0, 8)
 				countUp.tcHMSF = tc.toString()
 
-				if (
-					instance.transportInfo['slotId'] !== undefined &&
-					instance.clipsList !== undefined
-				) {
-					const clip = instance.clipsList.find(
-						({ clipId }) => clipId == instance.transportInfo['clipId']
-					)
-//				instance.debug('Clip duration: ', clip.duration)
+				if (instance.transportInfo['slotId'] !== undefined && instance.clipsList !== undefined) {
+					const clip = instance.clipsList.find(({ clipId }) => clipId == instance.transportInfo['clipId'])
+					//				instance.debug('Clip duration: ', clip.duration)
 					const modesWhereCountdownMakesNoSense = new Set(['preview', 'record'])
-					if (clip && clip.duration && !(modesWhereCountdownMakesNoSense.has(instance.transportInfo['status']))) {
+					if (clip && clip.duration && !modesWhereCountdownMakesNoSense.has(instance.transportInfo['status'])) {
 						const tcTot = Timecode(clip.duration, tb)
 						const tcStart = Timecode(clip.startTime, tb)
 						const left = Math.max(0, tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1)
@@ -190,7 +182,7 @@ module.exports.updateTimecodeVariables = function (instance) {
 
 module.exports.updateConfigurationVariables = function (instance) {
 	if (instance.deckConfig.fileFormat !== '') {
-		const format = instance.CONFIG_FILEFORMATS.find(({id}) => id === instance.deckConfig['fileFormat'])
+		const format = instance.CONFIG_FILEFORMATS.find(({ id }) => id === instance.deckConfig['fileFormat'])
 		if (format !== undefined) {
 			instance.setVariable('fileFormat', format.label)
 		}
@@ -238,7 +230,7 @@ module.exports.initVariables = function (instance) {
 		name: 'videoFormat',
 	})
 	module.exports.updateTransportInfoVariables(instance)
-	
+
 	// Slot variables
 	variables.push({
 		label: 'Active slot recording time available',
@@ -301,7 +293,7 @@ module.exports.initVariables = function (instance) {
 			name: (isCountdown ? 'countdownT' : 't') + 'imecodeF',
 		})
 	}
-	
+
 	// Configuration variables
 	variables.push({
 		label: 'File format',
@@ -316,7 +308,7 @@ module.exports.initVariables = function (instance) {
 		name: 'audioChannels',
 	})
 	module.exports.updateConfigurationVariables(instance)
-	
+
 	// Remote status
 	variables.push({
 		label: 'Remote enabled',

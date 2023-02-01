@@ -164,7 +164,7 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		callback: ({ options }) => {
-			return options.setting === String(this.transportInfo.loop)
+			return options.setting === this.transportInfo.loop
 		},
 	}
 	feedbacks['transport_singleClip'] = {
@@ -184,7 +184,7 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		callback: ({ options }) => {
-			return options.setting === String(this.transportInfo.singleClip)
+			return options.setting === this.transportInfo.singleClip
 		},
 	}
 	feedbacks['video_input'] = {

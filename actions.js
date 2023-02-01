@@ -57,7 +57,7 @@ exports.initActions = function () {
 				},
 			],
 			callback: async (action) => {
-				const cmd = new Commands.PlayCommand(action.options.speed, action.options.loop, action.options.singleClip)
+				const cmd = new Commands.PlayCommand(action.options.speed, action.options.loop, action.options.single)
 				await sendCommand(cmd)
 			},
 		}

@@ -140,7 +140,7 @@ module.exports.updateTimecodeVariables = function (instance, newValues) {
 				countUp.tcHMS = tc.toString().substr(0, 8)
 				countUp.tcHMSF = tc.toString()
 
-				if (instance.transportInfo['slotId'] !== undefined && instance.clipsList !== undefined) {
+				if (instance.transportInfo['slotId'] !== undefined && instance.clipsList !== undefined && instance.clipsList != null) {
 					const clip = instance.clipsList.find(({ clipId }) => clipId == instance.transportInfo['clipId'])
 					//				instance.debug('Clip duration: ', clip.duration)
 					const modesWhereCountdownMakesNoSense = new Set(['preview', 'record'])
@@ -252,7 +252,7 @@ module.exports.initVariables = function (instance) {
 		name: 'Clip count',
 		variableId: 'clipCount',
 	})
-	if (instance.clipsList !== undefined) {
+	if (instance.clipsList !== undefined && instance.clipsList != null) {
 		instance.clipsList.forEach(({ clipId }) => {
 			variables.push({
 				name: `Clip ${clipId} Name`,

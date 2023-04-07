@@ -14,6 +14,7 @@ const { initFeedbacks } = require('./feedbacks')
 const { upgradeScripts } = require('./upgrades')
 const { CONFIG_MODELS } = require('./models')
 const { ConfigFields } = require('./config')
+const { protocolGte } = require('./util')
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -308,8 +309,9 @@ class HyperdeckInstance extends InstanceBase {
 				notify.slot = true
 				notify.remote = true
 				// if (isMinimumVersion(1, 11) && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
-				if (this.protocolVersion >= 1.11 && this.config.timecodeVariables === 'notifications')
+				if (protocolGte(this.protocolVersion, '1.11') && this.config.timecodeVariables === 'notifications') {
 					notify.displayTimecode = true
+				}
 				await this.hyperDeck.sendCommand(notify)
 
 				try {
@@ -519,8 +521,8 @@ class HyperdeckInstance extends InstanceBase {
 		}
 
 		if (
-			this.protocolVersion >= 1.11 &&
-			this.config.timecodeVariables !== config.timecodeVariables &&
+			protocolGte(this.protocolVersion, '1.11') &&
+			(this.config.timecodeVariables !== config.timecodeVariables) &&
 			!resetConnection
 		) {
 			if (this.hyperDeck !== undefined && this.hyperDeck.connected) {

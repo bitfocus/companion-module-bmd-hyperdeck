@@ -1,6 +1,6 @@
 {
 	"name": "bmd-hyperdeck",
-	"version": "2.0.2",
+	"version": "2.0.3",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
@@ -9,7 +9,8 @@
 	"dependencies": {
 		"@companion-module/base": "~1.0.2",
 		"hyperdeck-connection": "1.0.0",
-		"smpte-timecode": "1.2.3"
+		"smpte-timecode": "1.2.3",
+		"semver": "~7.3.8"
 	},
 	"repository": {
 		"type": "git",

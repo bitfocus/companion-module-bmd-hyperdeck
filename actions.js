@@ -10,6 +10,7 @@ const {
 } = require('./choices')
 const { getTimestamp } = require('./util')
 const { updateRemoteVariable } = require('./variables')
+const { protocolGte } = require('./util')
 
 exports.initActions = function () {
 	const actions = {}
@@ -409,7 +410,7 @@ exports.initActions = function () {
 		}
 	}
 
-	if (this.protocolVersion >= 1.11) {
+	if (protocolGte(this.protocolVersion, '1.11')) {
 		actions['audioChannels'] = {
 			name: 'Audio channels',
 			options: [

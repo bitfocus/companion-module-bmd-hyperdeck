@@ -14,7 +14,6 @@ const { initFeedbacks } = require('./feedbacks')
 const { upgradeScripts } = require('./upgrades')
 const { CONFIG_MODELS } = require('./models')
 const { ConfigFields } = require('./config')
-const { protocolGte } = require('./util')
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -296,57 +295,62 @@ class HyperdeckInstance extends InstanceBase {
 			})
 
 			this.hyperDeck.on('connected', async (c) => {
-				// c contains the result of 500 connection info
-				this.protocolVersion = c.protocolVersion
-
-				this.updateDevice(c)
-				this.initActions()
-
-				// set notification:
-				const notify = new Commands.NotifySetCommand()
-				notify.configuration = true
-				notify.transport = true
-				notify.slot = true
-				notify.remote = true
-				// if (isMinimumVersion(1, 11) && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
-				if (protocolGte(this.protocolVersion, '1.11') && this.config.timecodeVariables === 'notifications') {
-					notify.displayTimecode = true
-				}
-				await this.hyperDeck.sendCommand(notify)
-
 				try {
-					let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
-					if (slots === undefined) {
-						slots = 2
-					}
-					for (let i = 0; i < slots; i++) {
-						this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
-					}
-					//				this.debug('Slot info:', this.slotInfo)
+					// c contains the result of 500 connection info
+					this.protocolVersion = c.protocolVersion
 
-					this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
+					this.updateDevice(c)
+					this.initActions()
 
-					this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
-					// this.debug('Initial config:', this.deckConfig)
-					this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteGetCommand())
+					// set notification:
+					const notify = new Commands.NotifySetCommand()
+					notify.configuration = true
+					notify.transport = true
+					notify.slot = true
+					notify.remote = true
+					// if (isMinimumVersion(1, 11) && this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
+					if (this.protocolVersion >= 1.11 && this.config.timecodeVariables === 'notifications')
+						notify.displayTimecode = true
+					await this.hyperDeck.sendCommand(notify)
+
+					try {
+						let { slots } = await this.hyperDeck.sendCommand(new Commands.DeviceInfoCommand())
+						if (slots === undefined) {
+							slots = 2
+						}
+						for (let i = 0; i < slots; i++) {
+							this.slotInfo[i + 1] = await this.hyperDeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
+						}
+						//				this.debug('Slot info:', this.slotInfo)
+
+						this.transportInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
+
+						this.deckConfig = await this.hyperDeck.sendCommand(new Commands.ConfigurationGetCommand())
+						// this.debug('Initial config:', this.deckConfig)
+						this.remoteInfo = await this.hyperDeck.sendCommand(new Commands.RemoteGetCommand())
+					} catch (e) {
+						if (e.code) {
+							this.log('error', `Connection error - ${e.code} ${e.name}`)
+						}
+					}
+
+					this.updateStatus(InstanceStatus.Ok)
+
+					await this.updateClips(this.transportInfo.slotId)
+					this.initVariables()
+					this.checkFeedbacks()
+
+					// If polling is enabled, setup interval command
+					if (this.pollTimer !== undefined) {
+						clearInterval(this.pollTimer)
+					}
+					if (this.config.timecodeVariables === 'polling') {
+						this.pollTimer = setInterval(this.sendPollCommand.bind(this), this.config.pollingInterval)
+					}
 				} catch (e) {
 					if (e.code) {
 						this.log('error', `Connection error - ${e.code} ${e.name}`)
 					}
-				}
-
-				this.updateStatus(InstanceStatus.Ok)
-
-				await this.updateClips(this.transportInfo.slotId)
-				this.initVariables()
-				this.checkFeedbacks()
-
-				// If polling is enabled, setup interval command
-				if (this.pollTimer !== undefined) {
-					clearInterval(this.pollTimer)
-				}
-				if (this.config.timecodeVariables === 'polling') {
-					this.pollTimer = setInterval(this.sendPollCommand.bind(this), this.config.pollingInterval)
 				}
 			})
 
@@ -521,8 +525,8 @@ class HyperdeckInstance extends InstanceBase {
 		}
 
 		if (
-			protocolGte(this.protocolVersion, '1.11') &&
-			(this.config.timecodeVariables !== config.timecodeVariables) &&
+			this.protocolVersion >= 1.11 &&
+			this.config.timecodeVariables !== config.timecodeVariables &&
 			!resetConnection
 		) {
 			if (this.hyperDeck !== undefined && this.hyperDeck.connected) {

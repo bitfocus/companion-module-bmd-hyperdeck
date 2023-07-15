@@ -20,9 +20,9 @@ module.exports.upgradeScripts = [
 // v1.0.* -> v1.1.0 (combine old play actions)
 function upgradeCombineOldPlayActions(context, props) {
 	const changes = {
-		config: null,
-		actions: [],
-		feedbacks: [],
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
 	}
 
 	for (const action of props.actions) {
@@ -30,54 +30,54 @@ function upgradeCombineOldPlayActions(context, props) {
 			action.options = {}
 		}
 
-		switch (action.action) {
+		switch (action.actionId) {
 			case 'vplay':
 				action.options.speed = opt.speed
 				action.options.loop = false
 				action.options.single = false
-				action.action = 'play'
-				changes.actions.push(action)
+				action.actionId = 'play'
+				changes.updatedActions.push(action)
 				break
 			case 'vplaysingle':
 				action.options.speed = opt.speed
 				action.options.loop = false
 				action.options.single = true
-				action.action = 'play'
-				changes.actions.push(action)
+				action.actionId = 'play'
+				changes.updatedActions.push(action)
 				break
 			case 'vplayloop':
 				action.options.speed = opt.speed
 				action.options.loop = true
 				action.options.single = false
-				action.action = 'play'
-				changes.actions.push(action)
+				action.actionId = 'play'
+				changes.updatedActions.push(action)
 				break
 			case 'playSingle':
 				action.options.speed = 100
 				action.options.loop = false
 				action.options.single = true
-				action.action = 'play'
-				changes.actions.push(action)
+				action.actionId = 'play'
+				changes.updatedActions.push(action)
 				break
 			case 'playLoop':
 				action.options.speed = 100
 				action.options.loop = true
 				action.options.single = false
-				action.action = 'play'
-				changes.actions.push(action)
+				action.actionId = 'play'
+				changes.updatedActions.push(action)
 				break
 			case 'play':
 				if (action.options.speed === undefined) {
 					action.options.speed = 100
-					changes.actions.push(action)
+					changes.updatedActions.push(action)
 				}
 				if (action.options.loop === undefined) {
 					action.options.loop = false
-					changes.actions.push(action)
+					changes.updatedActions.push(action)
 				}
 				if (action.options.single === undefined) {
 					action.options.single = false
-					changes.actions.push(action)
+					changes.updatedActions.push(action)
 				}
 				break
 		}
@@ -89,9 +89,9 @@ function upgradeCombineOldPlayActions(context, props) {
 // v1.1.0 -> v1.2.0 (timecode notifications)
 function upgradeTimecodeNotifications(context, props) {
 	const changes = {
-		config: null,
-		actions: [],
-		feedbacks: [],
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
 	}
 
 	if (props.config) {
@@ -103,7 +103,7 @@ function upgradeTimecodeNotifications(context, props) {
 			}
 			delete props.config.pollingOn
 
-			changes.config = props.config
+			changes.updatedConfig = props.config
 		}
 	}
 
@@ -113,9 +113,9 @@ function upgradeTimecodeNotifications(context, props) {
 // v1.2.6 -> 1.2.7 (gotoClip (n) bug fix)
 function upgrade126to127(context, props) {
 	const changes = {
-		config: null,
-		actions: [],
-		feedbacks: [],
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
 	}
 
 	for (const action of props.actions) {
@@ -123,9 +123,9 @@ function upgrade126to127(context, props) {
 			action.options = {}
 		}
 		// If the clip is not a number, return early as we don't need to change it
-		if (action.action === 'gotoName' && !isNaN(action.options.clip)) {
-			action.action = 'gotoN'
-			changes.actions.push(action)
+		if (action.actionId === 'gotoName' && !isNaN(action.options.clip)) {
+			action.actionId = 'gotoN'
+			changes.updatedActions.push(action)
 		}
 	}
 

@@ -7,16 +7,16 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@companion-module/base": "~1.0.2",
+		"@companion-module/base": "~1.4.1",
 		"hyperdeck-connection": "1.0.0",
-		"smpte-timecode": "1.2.3",
-		"semver": "~7.5.2"
+		"semver": "~7.5.4",
+		"smpte-timecode": "1.2.3"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-bmd-hyperdeck.git"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^0.5.1"
+		"@companion-module/tools": "^1.3.2"
 	}
 }

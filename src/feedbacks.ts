@@ -6,10 +6,15 @@ import {
 	CHOICES_SLOTSTATUS,
 	CHOICES_ENABLEDISABLE,
 	CHOICES_REMOTESTATUS,
+	createModelChoices,
+	createClipsChoice,
 } from './choices.js'
 import { InstanceBaseExt } from './types.js'
 
 export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitions {
+	const modelChoices = createModelChoices(self.model)
+	const clipChoices = createClipsChoice(self)
+
 	const feedbacks: CompanionFeedbackDefinitions = {}
 
 	feedbacks['transport_status'] = {
@@ -49,7 +54,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				type: 'dropdown',
 				label: 'Slot Id',
 				id: 'slotID',
-				choices: [{ id: 'either', label: 'Any' }, ...self.CHOICES_SLOTS],
+				choices: [{ id: 'either', label: 'Any' }, ...modelChoices.Slots],
 				default: 'either',
 				regex: Regex.SOMETHING,
 			},
@@ -75,7 +80,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				label: 'Clip Name - select from list or enter text',
 				id: 'clipName',
 				default: '',
-				choices: self.CHOICES_CLIPS,
+				choices: clipChoices,
 				minChoicesForSearch: 0,
 				allowCustom: true,
 			},
@@ -83,7 +88,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				type: 'dropdown',
 				label: 'Slot Id',
 				id: 'slotID',
-				choices: [{ id: 'either', label: 'Any' }, ...self.CHOICES_SLOTS],
+				choices: [{ id: 'either', label: 'Any' }, ...modelChoices.Slots],
 				default: 'either',
 				regex: Regex.SOMETHING,
 			},
@@ -200,8 +205,8 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				type: 'dropdown',
 				label: 'Input',
 				id: 'setting',
-				choices: self.CHOICES_VIDEOINPUTS,
-				default: self.CHOICES_VIDEOINPUTS[0].id,
+				choices: modelChoices.VideoInputs,
+				default: modelChoices.VideoInputs[0].id,
 			},
 		],
 		defaultStyle: {
@@ -212,7 +217,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 			return options.setting === String(self.deckConfig.videoInput)
 		},
 	}
-	if (self.CHOICES_AUDIOINPUTS.length > 1) {
+	if (modelChoices.AudioInputs.length > 1) {
 		feedbacks['audio_input'] = {
 			type: 'boolean',
 			name: 'Audio input',
@@ -222,7 +227,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 					type: 'dropdown',
 					label: 'Input',
 					id: 'setting',
-					choices: self.CHOICES_AUDIOINPUTS,
+					choices: modelChoices.AudioInputs,
 					default: 'embedded',
 				},
 			],

@@ -19,14 +19,7 @@ export interface InstanceBaseExt extends InstanceBase<HyperdeckConfig> {
 	remoteInfo: Commands.RemoteInfoCommandResponse | null
 	formatToken: string | null
 
-	CHOICES_SLOTS: DropdownChoice[]
-	CHOICES_CLIPS: ClipDropdownChoice[]
-	CHOICES_FILEFORMATS: DropdownChoice[]
-	CHOICES_VIDEOINPUTS: DropdownChoice[]
-	CHOICES_AUDIOINPUTS: DropdownChoice[]
-
-	clipCount: number
-	clipsList: Commands.ClipInfo[] | null
+	clipsList: Commands.ClipInfo[]
 
 	/**
 	 * INTERNAL: Get clip list from the hyperdeck

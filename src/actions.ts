@@ -12,12 +12,17 @@ import {
 	CHOICES_AUDIOCHANNELS,
 	CHOICES_FILESYSTEM,
 	CHOICES_REMOTECONTROL,
+	createModelChoices,
+	createClipsChoice,
 } from './choices.js'
 import { getTimestamp, protocolGte, stripExtension } from './util.js'
 import { updateRemoteVariable } from './variables.js'
 import { InstanceBaseExt } from './types.js'
 
 export function initActions(self: InstanceBaseExt) {
+	const modelChoices = createModelChoices(self.model)
+	const clipChoices = createClipsChoice(self)
+
 	const actions: CompanionActionDefinitions = {}
 
 	const maxShuttle = self.model?.maxShuttle ?? 0
@@ -210,7 +215,7 @@ export function initActions(self: InstanceBaseExt) {
 					label: 'Clip Name - select from list or enter text (variables supported)',
 					id: 'clip',
 					default: '',
-					choices: self.CHOICES_CLIPS,
+					choices: clipChoices,
 					minChoicesForSearch: 0,
 					allowCustom: true,
 				},
@@ -218,11 +223,12 @@ export function initActions(self: InstanceBaseExt) {
 			callback: async ({ options }) => {
 				await self.updateClips()
 
-				const parsed = await self.parseVariablesInString(options.clip + '')
+				const parsedRaw = await self.parseVariablesInString(options.clip + '')
+				const parsed = stripExtension(parsedRaw.trim())
 
-				const clip = self.CHOICES_CLIPS.find(({ label }) => label == stripExtension(parsed))
+				const clip = self.clipsList.find((clip) => stripExtension(clip.name) === parsed)
 				if (!clip) {
-					self.log('info', `Clip "${parsed}" does not exist`)
+					self.log('info', `Clip "${parsedRaw}" does not exist`)
 				} else {
 					const cmd = new Commands.GoToCommand()
 					cmd.clipId = clip.clipId
@@ -345,7 +351,7 @@ export function initActions(self: InstanceBaseExt) {
 					label: 'Slot',
 					id: 'slot',
 					default: 1,
-					choices: self.CHOICES_SLOTS,
+					choices: modelChoices.Slots,
 				},
 			],
 			callback: async ({ options }) => {
@@ -378,7 +384,7 @@ export function initActions(self: InstanceBaseExt) {
 		}
 	} // endif (!= bmdDup4K)
 
-	if (self.CHOICES_VIDEOINPUTS.length > 1) {
+	if (modelChoices.VideoInputs.length > 1) {
 		actions['videoSrc'] = {
 			name: 'Video source',
 			options: [
@@ -386,8 +392,8 @@ export function initActions(self: InstanceBaseExt) {
 					type: 'dropdown',
 					label: 'Input',
 					id: 'videoSrc',
-					default: 'SDI',
-					choices: self.CHOICES_VIDEOINPUTS,
+					default: modelChoices.VideoInputs[0].id,
+					choices: modelChoices.VideoInputs,
 				},
 			],
 			callback: async ({ options }) => {
@@ -398,7 +404,7 @@ export function initActions(self: InstanceBaseExt) {
 		}
 	}
 
-	if (self.CHOICES_AUDIOINPUTS.length > 1) {
+	if (modelChoices.AudioInputs.length > 1) {
 		actions['audioSrc'] = {
 			name: 'Audio source',
 			options: [
@@ -406,8 +412,8 @@ export function initActions(self: InstanceBaseExt) {
 					type: 'dropdown',
 					label: 'Input',
 					id: 'audioSrc',
-					default: 'embedded',
-					choices: self.CHOICES_AUDIOINPUTS,
+					default: modelChoices.AudioInputs[0].id,
+					choices: modelChoices.AudioInputs,
 				},
 			],
 			callback: async ({ options }) => {
@@ -459,7 +465,7 @@ export function initActions(self: InstanceBaseExt) {
 		}
 	}
 
-	if (self.CHOICES_FILEFORMATS.length > 1) {
+	if (modelChoices.FileFormats.length > 1) {
 		actions['fileFormat'] = {
 			name: 'File format',
 			options: [
@@ -467,8 +473,8 @@ export function initActions(self: InstanceBaseExt) {
 					type: 'dropdown',
 					label: 'Format',
 					id: 'fileFormat',
-					default: 'QuickTimeProRes',
-					choices: self.CHOICES_FILEFORMATS,
+					default: modelChoices.FileFormats[0].id,
+					choices: modelChoices.FileFormats,
 				},
 			],
 			callback: async ({ options }) => {

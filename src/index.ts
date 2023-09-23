@@ -1,5 +1,5 @@
-import { runEntrypoint, InstanceBase, InstanceStatus, DropdownChoice } from '@companion-module/base'
-import { Hyperdeck, Commands, TransportStatus, VideoFormat } from 'hyperdeck-connection'
+import { runEntrypoint, InstanceBase, InstanceStatus } from '@companion-module/base'
+import { Hyperdeck, Commands, TransportStatus, VideoFormat, ErrorCode } from 'hyperdeck-connection'
 import {
 	initVariables,
 	updateTransportInfoVariables,
@@ -15,111 +15,7 @@ import { upgradeScripts } from './upgrades.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
 import { protocolGte, stripExtension } from './util.js'
-import { ClipDropdownChoice, InstanceBaseExt, TransportInfoStateExt } from './types'
-
-export const CONFIG_AUDIOINPUTS: Record<string, DropdownChoice> = {
-	embedded: { id: 'embedded', label: 'Embedded' },
-	XLR: { id: 'XLR', label: 'XLR' },
-	RCA: { id: 'RCA', label: 'RCA' },
-}
-
-export const CONFIG_VIDEOINPUTS: Record<string, DropdownChoice> = {
-	SDI: { id: 'SDI', label: 'SDI' },
-	HDMI: { id: 'HDMI', label: 'HDMI' },
-	component: { id: 'component', label: 'Component' },
-	composite: { id: 'composite', label: 'Composite' },
-	optical: { id: 'optical', label: 'Optical' },
-}
-
-export interface FormatDropdownChoice extends DropdownChoice {
-	family: string
-}
-
-export const CONFIG_FILEFORMATS: FormatDropdownChoice[] = [
-	{ id: 'QuickTimeUncompressed', label: 'QuickTime Uncompressed', family: 'uncompressed' },
-	{ id: 'QuickTimeProResHQ', label: 'QuickTime ProRes HQ', family: 'prores' },
-	{ id: 'QuickTimeProRes', label: 'QuickTime ProRes', family: 'prores' },
-	{ id: 'QuickTimeProResLT', label: 'QuickTime ProRes LT', family: 'prores' },
-	{ id: 'QuickTimeProResProxy', label: 'QuickTime ProRes Proxy', family: 'proxy' },
-	{ id: 'QuickTimeDNxHD45', label: 'DNxHD 45 QT', family: 'DNx' },
-	{ id: 'DNxHD45', label: 'DNxHD 45 MXF', family: 'DNx' },
-	{ id: 'QuickTimeDNxHD145', label: 'DNxHD 145 QT', family: 'DNx' },
-	{ id: 'DNxHD145', label: 'DNxHD 145 MXF', family: 'DNx' },
-	{ id: 'QuickTimeDNxHD220', label: 'DNxHD 220 QT', family: 'DNxHD220' },
-	{ id: 'DNxHD220', label: 'MXF DNxHD 220', family: 'DNxHD220' },
-	{ id: 'QuickTimeDNxHR_HQX', label: 'DNxHR HQX QT', family: 'DNxHR_HQX' },
-	{ id: 'DNxHR_HQX', label: 'DNxHR HQX MXF', family: 'DNxHR_HQX' },
-	{ id: 'QuickTimeDNxHR_SQ', label: 'DNxHR SQ QT', family: 'DNxHR_SQ' },
-	{ id: 'DNxHR_SQ', label: 'DNxHR SQ MXF', family: 'DNxHR_SQ' },
-	{ id: 'QuickTimeDNxHR_LB', label: 'DNxHR LB QT', family: 'DNxHR_LB' },
-	{ id: 'DNxHR_LB', label: 'DNxHR LB MXF', family: 'DNxHR_LB' },
-	{ id: 'H.264High10_422', label: 'H.264 SDI', family: 'H.264_SDI' },
-	{ id: 'H.264High', label: 'H.264 High', family: 'H.264' },
-	{ id: 'H.264Medium', label: 'H.264 Medium', family: 'H.264' },
-	{ id: 'H.264Low', label: 'H.264 Low', family: 'H.264' },
-	{ id: 'H.265High', label: 'H.265 High', family: 'H.265' },
-	{ id: 'H.265Medium', label: 'H.265 Medium', family: 'H.265' },
-	{ id: 'H.265Low', label: 'H.265 Low', family: 'H.265' },
-	{ id: 'H.264High10_422', label: 'H.264/5 SDI', family: 'H.264/5' },
-	{ id: 'H.264High', label: 'H.264/5 High', family: 'H.264/5' },
-	{ id: 'H.264Medium', label: 'H.264/5 Medium', family: 'H.264/5' },
-	{ id: 'H.264Low', label: 'H.264/5 Low', family: 'H.264/5' },
-	{ id: 'Teleprompter', label: 'Teleprompter', family: 'teleprompter' },
-]
-
-const CONFIG_SLOT_LABELS: Record<string, DropdownChoice[]> = {
-	SSD2: [
-		{ id: 1, label: '1: SSD 1' },
-		{ id: 2, label: '2: SSD 2' },
-	],
-	SD2: [
-		{ id: 1, label: '1: SD 1' },
-		{ id: 2, label: '2: SD 2' },
-	],
-	SD_USB: [
-		{ id: 1, label: '1: SD' },
-		{ id: 2, label: '2: USB-C' },
-	],
-	SD2_USB: [
-		{ id: 1, label: '1: SD 1' },
-		{ id: 2, label: '2: SD 2' },
-		{ id: 3, label: '3: USB-C' },
-	],
-	SSD2_SD2_USB: [
-		{ id: 1, label: '1: SSD 1' },
-		{ id: 2, label: '2: SSD 2' },
-		{ id: 3, label: '3: USB-C' },
-		{ id: 4, label: '4: SD 1' },
-		{ id: 5, label: '5: SD 2' },
-	],
-	SD25: [
-		{ id: 1, label: '1: SD 1' },
-		{ id: 2, label: '2: SD 2' },
-		{ id: 3, label: '3: SD 3' },
-		{ id: 4, label: '4: SD 4' },
-		{ id: 5, label: '5: SD 5' },
-		{ id: 6, label: '6: SD 6' },
-		{ id: 7, label: '7: SD 7' },
-		{ id: 8, label: '8: SD 8' },
-		{ id: 9, label: '9: SD 9' },
-		{ id: 10, label: '10: SD 10' },
-		{ id: 11, label: '11: SD 11' },
-		{ id: 12, label: '12: SD 12' },
-		{ id: 13, label: '13: SD 13' },
-		{ id: 14, label: '14: SD 14' },
-		{ id: 15, label: '15: SD 15' },
-		{ id: 16, label: '16: SD 16' },
-		{ id: 17, label: '17: SD 17' },
-		{ id: 18, label: '18: SD 18' },
-		{ id: 19, label: '19: SD 19' },
-		{ id: 20, label: '20: SD 20' },
-		{ id: 21, label: '21: SD 21' },
-		{ id: 22, label: '22: SD 22' },
-		{ id: 23, label: '23: SD 23' },
-		{ id: 24, label: '24: SD 24' },
-		{ id: 25, label: '25: SD 25' },
-	],
-}
+import { InstanceBaseExt, TransportInfoStateExt } from './types'
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -147,14 +43,8 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	remoteInfo: Commands.RemoteInfoCommandResponse | null = null
 	formatToken: string | null = null
 
-	CHOICES_SLOTS: DropdownChoice[] = []
-	CHOICES_CLIPS: ClipDropdownChoice[] = []
-	CHOICES_FILEFORMATS: DropdownChoice[] = []
-	CHOICES_VIDEOINPUTS: DropdownChoice[] = []
-	CHOICES_AUDIOINPUTS: DropdownChoice[] = []
-
 	clipCount: number = 0
-	clipsList: Commands.ClipInfo[] | null = []
+	clipsList: Commands.ClipInfo[] = []
 
 	/**
 	 * Create an instance of a HyperDeck module.
@@ -190,8 +80,6 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	 * @since 1.0.0
 	 */
 	initActions() {
-		this.setupChoices()
-
 		const actions = initActions(this)
 		this.setActionDefinitions(actions)
 	}
@@ -465,40 +353,6 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	}
 
 	/**
-	 * INTERNAL: use config data to define the choices for the dropdowns.
-	 *
-	 * @access protected
-	 * @since 1.1.0
-	 */
-	setupChoices() {
-		this.CHOICES_AUDIOINPUTS = []
-		this.CHOICES_FILEFORMATS = []
-		this.CHOICES_VIDEOINPUTS = []
-		this.CHOICES_SLOTS = []
-
-		if (this.model !== undefined) {
-			for (var id in this.model.audioInputs) {
-				this.CHOICES_AUDIOINPUTS.push(CONFIG_AUDIOINPUTS[this.model.audioInputs[id]])
-			}
-
-			for (var id in this.model.fileFormats) {
-				for (var frmt in CONFIG_FILEFORMATS) {
-					if (CONFIG_FILEFORMATS[frmt].family == this.model.fileFormats[id]) {
-						this.CHOICES_FILEFORMATS.push(CONFIG_FILEFORMATS[frmt])
-					}
-				}
-			}
-
-			for (var id in this.model.videoInputs) {
-				this.CHOICES_VIDEOINPUTS.push(CONFIG_VIDEOINPUTS[this.model.videoInputs[id]])
-			}
-
-			//TODO define CHOICES_SLOTS based on model
-			this.CHOICES_SLOTS = CONFIG_SLOT_LABELS[this.model.slotLabels]
-		}
-	}
-
-	/**
 	 * INTERNAL: Send a poll command to refresh status
 	 *
 	 * @access protected
@@ -558,7 +412,6 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 		this.config = config
 
-		this.setupChoices()
 		this.initActions()
 		this.initFeedbacks()
 		//this.initPresets();
@@ -628,43 +481,37 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 			if (!this.hyperDeck) throw new Error('TODO - no hyperdeck connection')
 
-			const clipCount = await this.hyperDeck.sendCommand(new Commands.ClipsCountCommand())
-			this.clipCount = clipCount.count
-			if (this.clipCount == 0) {
-				this.clipsList = null
-				this.CHOICES_CLIPS.length = 0
-			}
-			if (this.clipCount > 0) {
-				const queryClips = await this.hyperDeck.sendCommand(new Commands.ClipsGetCommand())
-
-				// Check for a shorter list of clips, and unset variables if so
-				if (
-					queryClips.clips != undefined &&
-					this.clipsList != null &&
-					queryClips.clips.length < this.clipsList.length
-				) {
-					this.clipsList.forEach((clip) => {
-						clip.name = '-'
-					})
-					updateClipVariables(this, newVariableValues)
-					this.clipsList = null
+			let queryResponse: Commands.ClipsGetCommandResponse
+			try {
+				queryResponse = await this.hyperDeck.sendCommand(new Commands.ClipsGetCommand())
+			} catch (e: any) {
+				if (e.code === ErrorCode.TimelineEmpty) {
+					// This error means there were no clips
+					queryResponse = {
+						clipCount: 0,
+						clips: [],
+					}
+				} else {
+					throw e
 				}
-
-				this.clipsList = queryClips.clips
-
-				// reset clip choices
-				this.CHOICES_CLIPS.length = 0
-				queryClips.clips.forEach(({ clipId, name }) => {
-					this.CHOICES_CLIPS.push({ id: name, label: stripExtension(name), clipId: clipId })
-				})
 			}
+
+			// Check for a shorter list of clips, and unset variables if so
+			const oldLength = this.clipsList.length
+			this.clipsList = queryResponse.clips
+
 			this.initActions() // reinit actions to update list
 			this.initFeedbacks() // update feedback definitions
-			this.initVariables() // update variables list, to build the current clip list
 
-			updateTransportInfoVariables(this, newVariableValues)
-			updateClipVariables(this, newVariableValues)
-			this.setVariableValues(newVariableValues)
+			if (oldLength !== this.clipsList.length) {
+				// Update variables, as clip count can have changed. This will update all the values too
+				this.initVariables()
+			} else {
+				// Selectively update variables
+				updateTransportInfoVariables(this, newVariableValues) // Current clip name could have changed
+				updateClipVariables(this, newVariableValues)
+				this.setVariableValues(newVariableValues)
+			}
 		} catch (e: any) {
 			if (e.code) {
 				this.log('error', e.code + ' ' + e.name)
@@ -684,9 +531,9 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		}
 
 		if (res.clipId !== null) {
-			const clipObj = this.CHOICES_CLIPS.find(({ clipId }) => clipId == this.transportInfo.clipId)
+			const clipObj = this.clipsList.find(({ clipId }) => clipId == this.transportInfo.clipId)
 			if (clipObj) {
-				res.clipName = clipObj.label
+				res.clipName = stripExtension(clipObj.name)
 			}
 		}
 

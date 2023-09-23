@@ -1,9 +1,9 @@
 import Timecode from 'smpte-timecode'
 import { VideoFormat } from 'hyperdeck-connection'
-import { InstanceBaseExt } from './types'
 import { CompanionVariableDefinition, CompanionVariableValues } from '@companion-module/base'
-import { stripExtension } from './util'
-import { CONFIG_FILEFORMATS } from './index'
+import { InstanceBaseExt } from './types.js'
+import { stripExtension } from './util.js'
+import { CONFIG_FILEFORMATS } from './choices.js'
 
 const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
 	[VideoFormat.NTSC]: 29.97,
@@ -43,36 +43,26 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 	newValues['speed'] = instance.transportInfo.speed
 
 	//Clip ID and Slot ID  null exceptions
-	let clipIdVariable: number | undefined
 	let clipNameVariable: string | undefined
 	if (instance.transportInfo.clipId !== null) {
-		clipIdVariable = instance.transportInfo.clipId
-
-		try {
-			let clipObj = instance.CHOICES_CLIPS.find(({ clipId }) => clipId == instance.transportInfo.clipId)
-
-			if (clipObj) {
-				clipNameVariable = clipObj.label
-			}
-		} catch (error) {
-			//some uncaught error
+		const clipObj = instance.clipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
+		if (clipObj) {
+			clipNameVariable = stripExtension(clipObj.name)
 		}
 	}
 
-	newValues['clipId'] = clipIdVariable ?? '-'
+	newValues['clipId'] = instance.transportInfo.clipId ?? '-'
 	newValues['clipName'] = clipNameVariable ?? '-'
-	newValues['clipCount'] = instance.clipCount
+	newValues['clipCount'] = instance.clipsList.length
 	newValues['slotId'] = instance.transportInfo.slotId ?? '-'
 	newValues['videoFormat'] = instance.transportInfo.videoFormat
 }
 
 export function updateClipVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
-	newValues['clipCount'] = instance.clipCount
+	newValues['clipCount'] = instance.clipsList.length
 	// Variables for every clip in the list
-	if (instance.clipsList) {
-		instance.clipsList.forEach(({ clipId, name }) => {
-			newValues[`clip${clipId}_name`] = stripExtension(name)
-		})
+	for (const { clipId, name } of instance.clipsList) {
+		newValues[`clip${clipId}_name`] = stripExtension(name)
 	}
 }
 

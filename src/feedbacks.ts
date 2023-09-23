@@ -206,7 +206,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				label: 'Input',
 				id: 'setting',
 				choices: modelChoices.VideoInputs,
-				default: modelChoices.VideoInputs[0].id,
+				default: modelChoices.VideoInputs[0]?.id,
 			},
 		],
 		defaultStyle: {
@@ -228,7 +228,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 					label: 'Input',
 					id: 'setting',
 					choices: modelChoices.AudioInputs,
-					default: 'embedded',
+					default: modelChoices.AudioInputs[0]?.id,
 				},
 			],
 			defaultStyle: {

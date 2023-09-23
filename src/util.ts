@@ -33,3 +33,15 @@ export function stripExtension(fileName: string): string {
 	const re = /(.*?)(\.([a-z]|\d){3})?$/
 	return fileName.replace(re, '$1')
 }
+
+export function mergeState<T>(current: T, patch: Partial<T>): T {
+	const res = { ...current }
+
+	for (let key in patch) {
+		if (patch[key] !== undefined) {
+			res[key] = patch[key] as any
+		}
+	}
+
+	return res
+}

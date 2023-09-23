@@ -14,7 +14,7 @@ import { initFeedbacks } from './feedbacks.js'
 import { upgradeScripts } from './upgrades.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
-import { protocolGte, stripExtension } from './util.js'
+import { mergeState, protocolGte, stripExtension } from './util.js'
 import { InstanceBaseExt, TransportInfoStateExt } from './types.js'
 
 /**
@@ -60,10 +60,11 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			clipId: null,
 			clipName: null,
 			singleClip: false,
-			displayTimecode: '--:--:--', // TODO
-			timecode: '--:--:--', // TODO
+			displayTimecode: '00:00:00:00',
+			timecode: '00:00:00:00',
 			videoFormat: VideoFormat.NTSC,
 			loop: false,
+			inputVideoFormat: null,
 		}
 		this.deckConfig = {
 			audioInput: '',
@@ -96,6 +97,9 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		} else {
 			this.config.modelID = 'hdStudio'
 			this.model = CONFIG_MODELS['hdStudio']
+		}
+		if (!this.model) {
+			this.model = Object.values(CONFIG_MODELS)[0]
 		}
 
 		this.updateStatus(InstanceStatus.Connecting)
@@ -234,10 +238,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.hyperDeck.on('notify.slot', async (res) => {
 			this.log('debug', 'Slot Status Changed')
 
-			this.slotInfo[res.slotId] = {
-				...this.slotInfo[res.slotId],
-				...res,
-			}
+			this.slotInfo[res.slotId] = mergeState(this.slotInfo[res.slotId], res)
 
 			// Update the transport status to catch slot changes
 			await this.refreshTransportInfo()
@@ -259,10 +260,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 		this.hyperDeck.on('notify.transport', async (res) => {
 			this.log('debug', 'Transport Status Changed')
-			this.transportInfo = {
-				...this.extendTransportInfo(this.transportInfo),
-				...res,
-			}
+			this.transportInfo = this.extendTransportInfo(mergeState(this.transportInfo, res))
 
 			const newVariables = {}
 			updateTransportInfoVariables(this, newVariables)
@@ -275,10 +273,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 		this.hyperDeck.on('notify.remote', async (res) => {
 			this.log('debug', 'Remote Status Changed')
-			this.remoteInfo = {
-				...this.remoteInfo,
-				...res,
-			}
+			this.remoteInfo = mergeState(this.remoteInfo, res)
 
 			const newVariables = {}
 			updateRemoteVariable(this, newVariables)
@@ -289,10 +284,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 		this.hyperDeck.on('notify.configuration', async (res) => {
 			this.log('debug', `Configuration Changed: ${JSON.stringify(res)}`)
-			this.deckConfig = {
-				...this.deckConfig,
-				...res,
-			}
+			this.deckConfig = mergeState(this.deckConfig, res)
 
 			// this.debug('Config:', this.deckConfig)
 			this.checkFeedbacks('video_input', 'audio_input', 'audio_channels')
@@ -302,15 +294,13 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			this.setVariableValues(newVariables)
 		})
 
-		if (this.config.timecodeVariables === 'notifications') {
-			this.hyperDeck.on('notify.displayTimecode', (res) => {
-				this.transportInfo.displayTimecode = res.displayTimecode
+		this.hyperDeck.on('notify.displayTimecode', (res) => {
+			this.transportInfo.displayTimecode = res.displayTimecode
 
-				const newVariables = {}
-				updateTimecodeVariables(this, newVariables)
-				this.setVariableValues(newVariables)
-			})
-		}
+			const newVariables = {}
+			updateTimecodeVariables(this, newVariables)
+			this.setVariableValues(newVariables)
+		})
 
 		this.hyperDeck.connect(this.config.host /*this.config.port*/)
 	}

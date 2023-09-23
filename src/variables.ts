@@ -55,7 +55,10 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 	newValues['clipName'] = clipNameVariable ?? '-'
 	newValues['clipCount'] = instance.clipsList.length
 	newValues['slotId'] = instance.transportInfo.slotId ?? '-'
-	newValues['videoFormat'] = instance.transportInfo.videoFormat
+	newValues['videoFormat'] = instance.transportInfo.videoFormat ?? 'none'
+	if (instance.model.hasSeparateInputFormat) {
+		newValues['inputVideoFormat'] = instance.transportInfo.inputVideoFormat ?? 'none'
+	}
 }
 
 export function updateClipVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
@@ -97,7 +100,7 @@ interface CounterValues {
 }
 
 export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
-	const tb = frameRates[instance.transportInfo.videoFormat]
+	const tb = instance.transportInfo.videoFormat && frameRates[instance.transportInfo.videoFormat]
 	const countUp: CounterValues = {
 		tcH: '--',
 		tcM: '--',
@@ -156,7 +159,8 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 					}
 				}
 			} catch (err) {
-				instance.log('error', 'Timecode error:' + JSON.stringify(err))
+				console.log(instance.transportInfo.displayTimecode)
+				instance.log('error', 'Timecode error:' + JSON.stringify(err) + (err as any)?.message + err?.toString())
 			}
 		} else {
 			// no timebase implies we can't use smpte-timecode lib
@@ -220,6 +224,12 @@ export function initVariables(instance: InstanceBaseExt) {
 		name: 'Video format',
 		variableId: 'videoFormat',
 	})
+	if (instance.model.hasSeparateInputFormat) {
+		variables.push({
+			name: 'Input video format',
+			variableId: 'inputVideoFormat',
+		})
+	}
 	updateTransportInfoVariables(instance, values)
 
 	// Slot variables

@@ -1,4 +1,4 @@
-import { AudioInputType, FileFormatFamily, VideoInputType } from './choices'
+import { AudioInputType, FileFormatFamily, VideoInputType } from './choices.js'
 
 export interface ModelInfo {
 	id: string
@@ -8,6 +8,7 @@ export interface ModelInfo {
 	fileFormats: FileFormatFamily[]
 	slotLabels: string
 	maxShuttle: number
+	hasSeparateInputFormat: boolean
 }
 
 export const CONFIG_MODELS: Record<string, ModelInfo> = {
@@ -24,6 +25,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SSD2',
 		maxShuttle: 1600,
+		hasSeparateInputFormat: false,
 	},
 	hdStudioPro: {
 		id: 'hdStudioPro',
@@ -38,6 +40,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SSD2',
 		maxShuttle: 1600,
+		hasSeparateInputFormat: false,
 	},
 	hdStudio12G: {
 		id: 'hdStudio12G',
@@ -56,6 +59,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SSD2',
 		maxShuttle: 1600,
+		hasSeparateInputFormat: false,
 	},
 	bmdDup4K: {
 		id: 'bmdDup4K',
@@ -65,6 +69,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		fileFormats: [FileFormatFamily.H264, FileFormatFamily.H265],
 		slotLabels: 'SD25', //TODO check correct slots
 		maxShuttle: 100,
+		hasSeparateInputFormat: false,
 	},
 	hdStudioMini: {
 		id: 'hdStudioMini',
@@ -83,6 +88,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SD2',
 		maxShuttle: 1600,
+		hasSeparateInputFormat: false,
 	},
 	hdStudioHDMini: {
 		id: 'hdStudioHDMini',
@@ -98,6 +104,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SD2_USB',
 		maxShuttle: 5000,
+		hasSeparateInputFormat: true,
 	},
 	hdStudioHDPlus: {
 		id: 'hdStudioHDPlus',
@@ -115,6 +122,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SD2_USB',
 		maxShuttle: 5000,
+		hasSeparateInputFormat: true,
 	},
 	hdStudioHDPro: {
 		id: 'hdStudioHDPro',
@@ -132,6 +140,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SSD2_SD2_USB',
 		maxShuttle: 5000,
+		hasSeparateInputFormat: true,
 	},
 	hdStudio4KPro: {
 		id: 'hdStudio4KPro',
@@ -148,6 +157,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SSD2_SD2_USB',
 		maxShuttle: 5000,
+		hasSeparateInputFormat: true,
 	},
 	hdExtreme8K: {
 		id: 'hdExtreme8K',
@@ -163,6 +173,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		fileFormats: [FileFormatFamily.ProRes, FileFormatFamily.H265],
 		slotLabels: 'SD2_USB', //TODO check correct slots
 		maxShuttle: 5000,
+		hasSeparateInputFormat: true,
 	},
 	hdShuttleHD: {
 		id: 'hdShuttleHD',
@@ -179,5 +190,6 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		slotLabels: 'SD_USB',
 		maxShuttle: 5000,
+		hasSeparateInputFormat: true, // TODO - verify
 	},
 }

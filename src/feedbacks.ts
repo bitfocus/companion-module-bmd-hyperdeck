@@ -236,7 +236,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				bgcolor: combineRgb(0, 0, 0),
 			},
 			callback: ({ options }) => {
-				return options.setting === String(self.deckConfig.audioInput)
+				return options.setting === self.deckConfig.audioInput
 			},
 		}
 	}

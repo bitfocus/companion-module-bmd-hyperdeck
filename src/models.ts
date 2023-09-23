@@ -173,7 +173,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.ProRes,
 			FileFormatFamily.Proxy,
 			FileFormatFamily.DNx,
-			FileFormatFamily.DNxHD220,
+			FileFormatFamily.DNxHD220x,
 			FileFormatFamily.H264,
 			FileFormatFamily.Teleprompter,
 		],

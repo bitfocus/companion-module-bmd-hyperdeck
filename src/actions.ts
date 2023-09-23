@@ -1,36 +1,45 @@
-const { Regex } = require('@companion-module/base')
-const { Commands } = require('hyperdeck-connection')
-const {
+import {
+	CompanionActionDefinitions,
+	CompanionOptionValues,
+	CompanionVariableValues,
+	Regex,
+} from '@companion-module/base'
+import { Commands } from 'hyperdeck-connection'
+import {
 	CHOICES_STARTEND,
 	CHOICES_PREVIEWMODE,
 	CHOICES_AUDIOCODEC,
 	CHOICES_AUDIOCHANNELS,
 	CHOICES_FILESYSTEM,
 	CHOICES_REMOTECONTROL,
-} = require('./choices')
-const { getTimestamp } = require('./util')
-const { updateRemoteVariable } = require('./variables')
-const { protocolGte } = require('./util')
+} from './choices.js'
+import { getTimestamp, protocolGte, stripExtension } from './util.js'
+import { updateRemoteVariable } from './variables.js'
+import { InstanceBaseExt } from './types.js'
 
-exports.initActions = function () {
-	const actions = {}
-	const sendCommand = async (cmd) => {
-		if (this.hyperDeck && this.hyperDeck.connected) {
-			try {
-				return await this.hyperDeck.sendCommand(cmd)
-			} catch (e) {
-				if (e.code) {
-					this.log('error', `${e.code} ${e.name}`)
-				}
-			}
-		} else {
-			this.log('debug', 'Socket not connected :(')
-		}
+export function initActions(self: InstanceBaseExt) {
+	const actions: CompanionActionDefinitions = {}
+
+	const maxShuttle = self.model?.maxShuttle ?? 0
+
+	const getOptNumber = (options: CompanionOptionValues, key: string): number => {
+		let value = options[key]
+		if (typeof value === 'number') return value
+		value = Number(value)
+		if (!isNaN(value)) return value
+		throw new Error(`Invalid number for ${key}: ${options[key]}`)
+	}
+	const getOptString = (options: CompanionOptionValues, key: string): string => {
+		const value = options[key]
+		return value?.toString() ?? ''
+	}
+	const getOptBool = (options: CompanionOptionValues, key: string): boolean => {
+		const value = options[key]
+		if (typeof value === 'boolean') return value
+		throw new Error(`Invalid boolean for ${key}: ${options[key]}`)
 	}
 
-	const maxShuttle = this.model?.maxShuttle ?? 0
-
-	if (this.config.modelID != 'bmdDup4K') {
+	if (self.config.modelID != 'bmdDup4K') {
 		actions['play'] = {
 			name: 'Play',
 			options: [
@@ -41,7 +50,6 @@ exports.initActions = function () {
 					default: 100,
 					min: 0 - maxShuttle,
 					max: maxShuttle,
-					required: true,
 					range: true,
 				},
 				{
@@ -57,9 +65,13 @@ exports.initActions = function () {
 					default: false,
 				},
 			],
-			callback: async (action) => {
-				const cmd = new Commands.PlayCommand(action.options.speed, action.options.loop, action.options.single)
-				await sendCommand(cmd)
+			callback: async ({ options }) => {
+				const cmd = new Commands.PlayCommand(
+					getOptString(options, 'speed'),
+					getOptBool(options, 'loop'),
+					getOptBool(options, 'single')
+				)
+				await self.sendCommand(cmd)
 			},
 		}
 	}
@@ -69,23 +81,23 @@ exports.initActions = function () {
 		options: [],
 		callback: async () => {
 			const cmd = new Commands.RecordCommand()
-			await sendCommand(cmd)
+			await self.sendCommand(cmd)
 		},
 	}
 
-	if (this.config.modelID == 'bmdDup4K') {
+	if (self.config.modelID == 'bmdDup4K') {
 		actions['recAppend'] = {
 			name: 'Append Record',
 			options: [],
 			callback: async () => {
 				const cmd = new Commands.RecordCommand()
 				cmd.append = true
-				await sendCommand(cmd)
+				await self.sendCommand(cmd)
 			},
 		}
 	}
 
-	if (this.config.modelID != 'bmdDup4K') {
+	if (self.config.modelID != 'bmdDup4K') {
 		actions['recName'] = {
 			name: 'Record (with name)',
 			options: [
@@ -98,10 +110,10 @@ exports.initActions = function () {
 					useVariables: true,
 				},
 			],
-			callback: async (action) => {
-				const name = await this.parseVariablesInString(action.options.name)
+			callback: async ({ options }) => {
+				const name = await self.parseVariablesInString(options.name + '')
 				const cmd = new Commands.RecordCommand(name)
-				await sendCommand(cmd)
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['recTimestamp'] = {
@@ -115,16 +127,16 @@ exports.initActions = function () {
 					useVariables: true,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.RecordCommand()
 				const timeStamp = getTimestamp()
-				if (action.options.prefix) {
-					const name = await this.parseVariablesInString(action.options.prefix)
+				if (options.prefix) {
+					const name = await self.parseVariablesInString(options.prefix + '')
 					cmd.filename = name + '-' + timeStamp + '-'
 				} else {
 					cmd.filename = timeStamp + '-'
 				}
-				await sendCommand(cmd)
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['recCustom'] = {
@@ -134,11 +146,12 @@ exports.initActions = function () {
 					type: 'static-text',
 					id: 'info',
 					label: "Set 'Reel' in instance config",
+					value: '',
 				},
 			],
 			callback: async () => {
-				const cmd = new Commands.RecordCommand(this.config.reel + '-')
-				await sendCommand(cmd)
+				const cmd = new Commands.RecordCommand(self.config.reel + '-')
+				await self.sendCommand(cmd)
 			},
 		}
 	}
@@ -148,11 +161,11 @@ exports.initActions = function () {
 		options: [],
 		callback: async () => {
 			const cmd = new Commands.StopCommand()
-			await sendCommand(cmd)
+			await self.sendCommand(cmd)
 		},
 	}
 
-	if (this.config.modelID != 'bmdDup4K') {
+	if (self.config.modelID != 'bmdDup4K') {
 		actions['goto'] = {
 			name: 'Goto (TC)',
 			options: [
@@ -164,30 +177,29 @@ exports.initActions = function () {
 					regex: Regex.TIMECODE,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.timecode = action.options.tc
-				await sendCommand(cmd)
+				cmd.timecode = getOptString(options, 'tc')
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['gotoN'] = {
 			name: 'Goto Clip (n)',
 			options: [
 				{
-					type: 'textinput',
+					type: 'number',
 					label: 'Clip Number',
 					id: 'clip',
 					default: 1,
 					min: 1,
 					max: 999,
-					required: true,
 					range: false,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clipId = action.options.clip
-				await sendCommand(cmd)
+				cmd.clipId = getOptNumber(options, 'clip')
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['gotoName'] = {
@@ -198,24 +210,23 @@ exports.initActions = function () {
 					label: 'Clip Name - select from list or enter text (variables supported)',
 					id: 'clip',
 					default: '',
-					required: true,
-					choices: this.CHOICES_CLIPS,
+					choices: self.CHOICES_CLIPS,
 					minChoicesForSearch: 0,
 					allowCustom: true,
 				},
 			],
-			callback: async (action) => {
-				await this.updateClips(this.transportInfo.slotId)
+			callback: async ({ options }) => {
+				await self.updateClips()
 
-				const parsed = await this.parseVariablesInString(action.options.clip)
+				const parsed = await self.parseVariablesInString(options.clip + '')
 
-				const clip = this.CHOICES_CLIPS.find(({ label }) => label == this._stripExtension(parsed))
+				const clip = self.CHOICES_CLIPS.find(({ label }) => label == stripExtension(parsed))
 				if (!clip) {
-					this.log('info', `Clip "${parsed}" does not exist`)
+					self.log('info', `Clip "${parsed}" does not exist`)
 				} else {
 					const cmd = new Commands.GoToCommand()
 					cmd.clipId = clip.clipId
-					await sendCommand(cmd)
+					await self.sendCommand(cmd)
 				}
 			},
 		}
@@ -229,14 +240,13 @@ exports.initActions = function () {
 					default: 1,
 					min: 1,
 					max: 999,
-					required: true,
 					range: false,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clipId = `+${action.options.clip}`
-				await sendCommand(cmd)
+				cmd.clipId = `+${options.clip}` as any // TODO
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['goRew'] = {
@@ -249,14 +259,13 @@ exports.initActions = function () {
 					default: 1,
 					min: 1,
 					max: 999,
-					required: true,
 					range: false,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clipId = `-${action.options.clip}`
-				await sendCommand(cmd)
+				cmd.clipId = `-${options.clip}` as any // TODO
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['goStartEnd'] = {
@@ -270,10 +279,10 @@ exports.initActions = function () {
 					choices: CHOICES_STARTEND,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clip = action.options.startEnd
-				await sendCommand(cmd)
+				cmd.clip = options.startEnd as any
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['jogFwd'] = {
@@ -287,10 +296,10 @@ exports.initActions = function () {
 					regex: Regex.TIMECODE,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.JogCommand()
-				cmd.timecode = `+${action.options.jogFwdTc}`
-				await sendCommand(cmd)
+				cmd.timecode = `+${options.jogFwdTc}`
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['jogRew'] = {
@@ -304,10 +313,10 @@ exports.initActions = function () {
 					regex: Regex.TIMECODE,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.JogCommand()
-				cmd.timecode = `-${action.options.jogRewTc}`
-				await sendCommand(cmd)
+				cmd.timecode = `-${options.jogRewTc}`
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['shuttle'] = {
@@ -320,13 +329,12 @@ exports.initActions = function () {
 					default: 100,
 					min: 0 - maxShuttle,
 					max: maxShuttle,
-					required: true,
 					range: true,
 				},
 			],
-			callback: async (action) => {
-				const cmd = new Commands.ShuttleCommand(action.options.speed)
-				await sendCommand(cmd)
+			callback: async ({ options }) => {
+				const cmd = new Commands.ShuttleCommand(getOptNumber(options, 'speed'))
+				await self.sendCommand(cmd)
 			},
 		}
 		actions['select'] = {
@@ -337,19 +345,19 @@ exports.initActions = function () {
 					label: 'Slot',
 					id: 'slot',
 					default: 1,
-					choices: this.CHOICES_SLOTS,
+					choices: self.CHOICES_SLOTS,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.SlotSelectCommand()
-				cmd.slotId = action.options.slot
-				await sendCommand(cmd)
+				cmd.slotId = getOptNumber(options, 'slot')
+				await self.sendCommand(cmd)
 
 				// select will update internal cliplist so we should fetch those
-				this.transportInfo = await sendCommand(new Commands.TransportInfoCommand())
-				await this.updateClips(this.transportInfo.slotId)
+				await self.refreshTransportInfo()
+				await self.updateClips()
 
-				this.checkFeedbacks()
+				self.checkFeedbacks()
 			},
 		}
 		actions['preview'] = {
@@ -363,14 +371,14 @@ exports.initActions = function () {
 					choices: CHOICES_PREVIEWMODE,
 				},
 			],
-			callback: async (action) => {
-				const cmd = new Commands.PreviewCommand(action.options.enable)
-				await sendCommand(cmd)
+			callback: async ({ options }) => {
+				const cmd = new Commands.PreviewCommand(getOptBool(options, 'enable'))
+				await self.sendCommand(cmd)
 			},
 		}
 	} // endif (!= bmdDup4K)
 
-	if (this.CHOICES_VIDEOINPUTS.length > 1) {
+	if (self.CHOICES_VIDEOINPUTS.length > 1) {
 		actions['videoSrc'] = {
 			name: 'Video source',
 			options: [
@@ -379,18 +387,18 @@ exports.initActions = function () {
 					label: 'Input',
 					id: 'videoSrc',
 					default: 'SDI',
-					choices: this.CHOICES_VIDEOINPUTS,
+					choices: self.CHOICES_VIDEOINPUTS,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.ConfigurationCommand()
-				cmd.videoInput = action.options.videoSrc
-				await sendCommand(cmd)
+				cmd.videoInput = getOptString(options, 'videoSrc')
+				await self.sendCommand(cmd)
 			},
 		}
 	}
 
-	if (this.CHOICES_AUDIOINPUTS.length > 1) {
+	if (self.CHOICES_AUDIOINPUTS.length > 1) {
 		actions['audioSrc'] = {
 			name: 'Audio source',
 			options: [
@@ -399,18 +407,18 @@ exports.initActions = function () {
 					label: 'Input',
 					id: 'audioSrc',
 					default: 'embedded',
-					choices: this.CHOICES_AUDIOINPUTS,
+					choices: self.CHOICES_AUDIOINPUTS,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.ConfigurationCommand()
-				cmd.audioInput = action.options.audioSrc
-				await sendCommand(cmd)
+				cmd.audioInput = getOptString(options, 'audioSrc')
+				await self.sendCommand(cmd)
 			},
 		}
 	}
 
-	if (protocolGte(this.protocolVersion, '1.11')) {
+	if (protocolGte(self.protocolVersion, '1.11')) {
 		actions['audioChannels'] = {
 			name: 'Audio channels',
 			options: [
@@ -430,23 +438,28 @@ exports.initActions = function () {
 					isVisible: (options) => options.audioCodec === 'PCM',
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.ConfigurationCommand()
-				cmd.audioCodec = action.options.audioCodec
+				cmd.audioCodec = getOptString(options, 'audioCodec') as any // TODO
 				cmd.audioInputChannels = 2
-				if (action.options.audioCodec == 'PCM') {
-					let channels = action.options.audioChannels
-					if (channels == 'cycle') {
-						channels = this.deckConfig.audioInputChannels == 16 ? 2 : this.deckConfig.audioInputChannels * 2
+				if (options.audioCodec == 'PCM') {
+					let channels = 2
+					if (options.audioChannels == 'cycle') {
+						channels =
+							self.deckConfig.audioInputChannels == 16 || typeof self.deckConfig.audioInputChannels !== 'number'
+								? 2
+								: self.deckConfig.audioInputChannels * 2
+					} else {
+						channels = getOptNumber(options, 'audioChannels')
 					}
 					cmd.audioInputChannels = channels
 				}
-				await sendCommand(cmd)
+				await self.sendCommand(cmd)
 			},
 		}
 	}
 
-	if (this.CHOICES_FILEFORMATS.length > 1) {
+	if (self.CHOICES_FILEFORMATS.length > 1) {
 		actions['fileFormat'] = {
 			name: 'File format',
 			options: [
@@ -455,13 +468,13 @@ exports.initActions = function () {
 					label: 'Format',
 					id: 'fileFormat',
 					default: 'QuickTimeProRes',
-					choices: this.CHOICES_FILEFORMATS,
+					choices: self.CHOICES_FILEFORMATS,
 				},
 			],
-			callback: async (action) => {
+			callback: async ({ options }) => {
 				const cmd = new Commands.ConfigurationCommand()
-				cmd.fileFormat = action.options.fileFormat
-				await sendCommand(cmd)
+				cmd.fileFormat = getOptString(options, 'fileFormat')
+				await self.sendCommand(cmd)
 			},
 		}
 	}
@@ -470,14 +483,14 @@ exports.initActions = function () {
 		name: 'Fetch Clips',
 		options: [],
 		callback: async () => {
-			await this.updateClips(this.transportInfo.slotId)
+			await self.updateClips()
 		},
 	}
 
 	/**
 				* Not currently implemented
 				*
-			if (this.config.modelID == 'hdExtreme8K') {
+			if (self.config.modelID == 'hdExtreme8K') {
 				actions['dynamicRange'] = {
 					name: 'Set playback dyanmic range',
 					options: [
@@ -489,10 +502,10 @@ exports.initActions = function () {
 							choices: CHOICES_DYNAMICRANGE
 						}
 					],
-                    callback: async (action) => {
+                    callback: async ({options}) => {
                         const cmd = new Commands.ConfigurationCommand()
                         cmd.dynamicRange = action.options.dynamicRange
-                        await sendCommand(cmd)
+                        await self.sendCommand(cmd)
                     },
 				};
 			}
@@ -513,23 +526,28 @@ exports.initActions = function () {
 				label: 'Confirmation timeout (sec)',
 				id: 'timeout',
 				default: 10,
+				min: 0,
+				max: 600,
 			},
 		],
-		callback: async (action) => {
+		callback: async ({ options }) => {
 			const cmd = new Commands.FormatCommand()
-			cmd.filesystem = action.options.filesystem
-			const response = await sendCommand(cmd)
+			cmd.filesystem = getOptString(options, 'filesystem') as any // TODO
+			const response = await self.sendCommand(cmd)
 
 			if (response && response.code) {
-				this.log('debug', 'Format token: ' + response.code)
-				this.formatToken = response.code
-				this.checkFeedbacks('format_ready')
+				self.log('debug', 'Format token: ' + response.code)
+				self.formatToken = response.code
+				self.checkFeedbacks('format_ready')
 			}
 
-			setTimeout(() => {
-				this.formatToken = null
-				this.checkFeedbacks('format_ready')
-			}, action.options.timeout * 1000)
+			setTimeout(
+				() => {
+					self.formatToken = null
+					self.checkFeedbacks('format_ready')
+				},
+				getOptNumber(options, 'timeout') * 1000
+			)
 		},
 	}
 
@@ -537,14 +555,14 @@ exports.initActions = function () {
 		name: 'Format drive/card (confirm)',
 		options: [],
 		callback: async () => {
-			if (this.formatToken) {
+			if (self.formatToken) {
 				const cmd = new Commands.FormatConfirmCommand()
-				cmd.code = this.formatToken
+				cmd.code = self.formatToken
 
-				this.formatToken = null
-				this.checkFeedbacks('format_ready')
+				self.formatToken = null
+				self.checkFeedbacks('format_ready')
 
-				await sendCommand(cmd)
+				await self.sendCommand(cmd)
 			}
 		},
 	}
@@ -560,21 +578,23 @@ exports.initActions = function () {
 				choices: CHOICES_REMOTECONTROL,
 			},
 		],
-		callback: async (action) => {
-			let setRemote = action.options.remoteEnable
-			if (action.options.remoteEnable == 'toggle') {
-				setRemote = !this.remoteInfo['enabled']
+		callback: async ({ options }) => {
+			let setRemote = true
+			if (options.remoteEnable == 'toggle') {
+				setRemote = !self.remoteInfo?.enabled
+			} else {
+				setRemote = getOptBool(options, 'remoteEnable')
 			}
 
 			const cmd = new Commands.RemoteCommand()
 			cmd.enable = setRemote
 
-			const newVariables = {}
-			updateRemoteVariable(this, newVariables)
-			this.setVariableValues(newVariables)
-			this.checkFeedbacks('remote_status')
+			await self.sendCommand(cmd)
 
-			await sendCommand(cmd)
+			const newVariables: CompanionVariableValues = {}
+			updateRemoteVariable(self, newVariables)
+			self.setVariableValues(newVariables)
+			self.checkFeedbacks('remote_status')
 		},
 	}
 

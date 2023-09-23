@@ -25,6 +25,10 @@
 		{
 			"name": "Balte de Wit",
 			"email": "contact@balte.nl"
+		},
+		{
+			"name": "Julian Waller",
+			"email": "git@julusian.co.uk"
 		}
 	],
 	"legacyIds": ["hyperdeck"],

@@ -1,7 +1,11 @@
-const Timecode = require('smpte-timecode')
-const { VideoFormat } = require('hyperdeck-connection')
+import Timecode from 'smpte-timecode'
+import { VideoFormat } from 'hyperdeck-connection'
+import { InstanceBaseExt } from './types'
+import { CompanionVariableDefinition, CompanionVariableValues } from '@companion-module/base'
+import { stripExtension } from './util'
+import { CONFIG_FILEFORMATS } from './index'
 
-const frameRates = {
+const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
 	[VideoFormat.NTSC]: 29.97,
 	[VideoFormat.PAL]: 25,
 	[VideoFormat.NTSCp]: 29.97,
@@ -9,7 +13,7 @@ const frameRates = {
 	[VideoFormat._720p50]: 50,
 	[VideoFormat._720p5994]: 59.94,
 	[VideoFormat._720p60]: 60,
-	// [VideoFormat._1080p23976]: 23.976, // not supported by smpte-timecode lib
+	[VideoFormat._1080p23976]: 23.976, // not supported by smpte-timecode lib
 	[VideoFormat._1080p24]: 24,
 	[VideoFormat._1080p25]: 25,
 	[VideoFormat._1080p2997]: 29.97,
@@ -20,7 +24,7 @@ const frameRates = {
 	[VideoFormat._1080p50]: 50,
 	[VideoFormat._1080p5994]: 59.94,
 	[VideoFormat._1080p60]: 60,
-	// [VideoFormat._4Kp23976]: 23.976, // not supported by smpte-timecode lib
+	[VideoFormat._4Kp23976]: 23.976, // not supported by smpte-timecode lib
 	[VideoFormat._4Kp24]: 24,
 	[VideoFormat._4Kp25]: 25,
 	[VideoFormat._4Kp2997]: 29.97,
@@ -30,22 +34,22 @@ const frameRates = {
 	[VideoFormat._4Kp60]: 60,
 }
 
-module.exports.updateTransportInfoVariables = function (instance, newValues) {
-	const capitalise = (s) => {
+export function updateTransportInfoVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+	const capitalise = (s: string) => {
 		if (typeof s !== 'string') return ''
 		return s.charAt(0).toUpperCase() + s.slice(1)
 	}
-	newValues['status'] = capitalise(instance.transportInfo['status'])
-	newValues['speed'] = instance.transportInfo['speed']
+	newValues['status'] = capitalise(instance.transportInfo.status)
+	newValues['speed'] = instance.transportInfo.speed
 
 	//Clip ID and Slot ID  null exceptions
-	let clipIdVariable = '-'
-	let clipNameVariable = '-'
-	if (instance.transportInfo['clipId'] != null) {
-		clipIdVariable = instance.transportInfo['clipId']
+	let clipIdVariable: number | undefined
+	let clipNameVariable: string | undefined
+	if (instance.transportInfo.clipId !== null) {
+		clipIdVariable = instance.transportInfo.clipId
 
 		try {
-			let clipObj = instance.CHOICES_CLIPS.find(({ clipId }) => clipId == instance.transportInfo['clipId'])
+			let clipObj = instance.CHOICES_CLIPS.find(({ clipId }) => clipId == instance.transportInfo.clipId)
 
 			if (clipObj) {
 				clipNameVariable = clipObj.label
@@ -55,53 +59,56 @@ module.exports.updateTransportInfoVariables = function (instance, newValues) {
 		}
 	}
 
-	let slotIdVariable = '-'
-	if (instance.transportInfo['slotId'] != null) {
-		slotIdVariable = instance.transportInfo['slotId']
-	}
-	newValues['clipId'] = clipIdVariable
-	newValues['clipName'] = clipNameVariable
+	newValues['clipId'] = clipIdVariable ?? '-'
+	newValues['clipName'] = clipNameVariable ?? '-'
 	newValues['clipCount'] = instance.clipCount
-	newValues['slotId'] = slotIdVariable
-	newValues['videoFormat'] = instance.transportInfo['videoFormat']
+	newValues['slotId'] = instance.transportInfo.slotId ?? '-'
+	newValues['videoFormat'] = instance.transportInfo.videoFormat
 }
 
-module.exports.updateClipVariables = function (instance, newValues) {
+export function updateClipVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
 	newValues['clipCount'] = instance.clipCount
 	// Variables for every clip in the list
 	if (instance.clipsList) {
 		instance.clipsList.forEach(({ clipId, name }) => {
-			newValues[`clip${clipId}_name`] = instance._stripExtension(name)
+			newValues[`clip${clipId}_name`] = stripExtension(name)
 		})
 	}
 }
 
-module.exports.updateSlotInfoVariables = function (instance, newValues) {
-	let recordingTimes = []
+export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+	const activeSlotId = instance.transportInfo['slotId']
 	instance.slotInfo.forEach((slot, index) => {
-		try {
-			if (slot != null) {
-				recordingTimes[index] = '--:--:--'
-				if (slot['recordingTime'] !== undefined) {
-					recordingTimes[index] = new Date(slot['recordingTime'] * 1000).toISOString().substr(11, 8)
+		if (slot != null) {
+			let recordingTime = '--:--:--'
+			try {
+				if (typeof slot.recordingTime === 'number') {
+					recordingTime = new Date(slot['recordingTime'] * 1000).toISOString().substr(11, 8)
 				}
-				newValues[`slot${index}_recordingTime`] = recordingTimes[index]
+			} catch (e) {
+				instance.log('error', `Slot ${index} recording time parse error: ${e}`)
 			}
-		} catch (e) {
-			instance.log('error', `Slot ${index} recording time parse error: ${e}`)
+
+			newValues[`slot${index}_recordingTime`] = recordingTime
+			if (slot.slotId === activeSlotId) {
+				newValues['recordingTime'] = recordingTime
+			}
 		}
 	})
-	recordingTimes[0] = '--:--:--'
-	let activeSlot = instance.transportInfo['slotId']
-	if (instance.slotInfo[activeSlot] != null && instance.slotInfo[activeSlot].recordingTime !== undefined) {
-		recordingTimes[0] = recordingTimes[activeSlot]
-	}
-	newValues['recordingTime'] = recordingTimes[0]
 }
 
-module.exports.updateTimecodeVariables = function (instance, newValues) {
+interface CounterValues {
+	tcH: string | number
+	tcM: string | number
+	tcS: string | number
+	tcF: string | number
+	tcHMS: string
+	tcHMSF: string
+}
+
+export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
 	const tb = frameRates[instance.transportInfo['videoFormat']]
-	const countUp = {
+	const countUp: CounterValues = {
 		tcH: '--',
 		tcM: '--',
 		tcS: '--',
@@ -109,7 +116,7 @@ module.exports.updateTimecodeVariables = function (instance, newValues) {
 		tcHMS: '--:--:--',
 		tcHMSF: '--:--:--:--',
 	}
-	let countDown = {
+	let countDown: CounterValues = {
 		tcH: '--',
 		tcM: '--',
 		tcS: '--',
@@ -118,9 +125,9 @@ module.exports.updateTimecodeVariables = function (instance, newValues) {
 		tcHMSF: '--:--:--:--',
 	}
 
-	const pad = (n) => ('00' + n).substr(-2)
+	const pad = (n: number | string) => ('00' + n).substr(-2)
 
-	const setTcVariable = (isCountdown, { tcH, tcM, tcS, tcF, tcHMS, tcHMSF }) => {
+	const setTcVariable = (isCountdown: boolean, { tcH, tcM, tcS, tcF, tcHMS, tcHMSF }: CounterValues) => {
 		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeHMS'] = tcHMS
 		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeHMSF'] = tcHMSF
 		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeH'] = pad(tcH)
@@ -140,11 +147,15 @@ module.exports.updateTimecodeVariables = function (instance, newValues) {
 				countUp.tcHMS = tc.toString().substr(0, 8)
 				countUp.tcHMSF = tc.toString()
 
-				if (instance.transportInfo['slotId'] !== undefined && instance.clipsList !== undefined && instance.clipsList != null) {
-					const clip = instance.clipsList.find(({ clipId }) => clipId == instance.transportInfo['clipId'])
+				if (
+					instance.transportInfo['slotId'] !== undefined &&
+					instance.clipsList !== undefined &&
+					instance.clipsList != null
+				) {
+					const clip = instance.clipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
 					//				instance.debug('Clip duration: ', clip.duration)
 					const modesWhereCountdownMakesNoSense = new Set(['preview', 'record'])
-					if (clip && clip.duration && !modesWhereCountdownMakesNoSense.has(instance.transportInfo['status'])) {
+					if (clip && clip.duration && !modesWhereCountdownMakesNoSense.has(instance.transportInfo.status)) {
 						const tcTot = Timecode(clip.duration, tb)
 						const tcStart = Timecode(clip.startTime, tb)
 						const left = Math.max(0, tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1)
@@ -181,29 +192,22 @@ module.exports.updateTimecodeVariables = function (instance, newValues) {
 	setTcVariable(true, countDown)
 }
 
-module.exports.updateConfigurationVariables = function (instance, newValues) {
-	if (instance.deckConfig.fileFormat !== '') {
-		const format = instance.CONFIG_FILEFORMATS.find(({ id }) => id === instance.deckConfig['fileFormat'])
-		if (format !== undefined) {
-			newValues['fileFormat'] = format.label
-		}
-	}
-	if (instance.deckConfig.audioCodec !== '') {
-		newValues['audioCodec'] = instance.deckConfig.audioCodec
-	}
-	if (instance.deckConfig.audioInputChannels !== '') {
-		newValues['audioChannels'] = instance.deckConfig.audioInputChannels
-	}
+export function updateConfigurationVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+	const format = CONFIG_FILEFORMATS.find(({ id }) => id === instance.deckConfig.fileFormat)
+	newValues['fileFormat'] = format?.label ?? instance.deckConfig.fileFormat
+
+	newValues['audioCodec'] = instance.deckConfig.audioCodec
+	newValues['audioChannels'] = instance.deckConfig.audioInputChannels
 }
 
-module.exports.updateRemoteVariable = function (instance, newValues) {
+export function updateRemoteVariable(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
 	newValues['remoteEnabled'] = instance.remoteInfo?.['enabled'] || false
 }
 
-module.exports.initVariables = function (instance) {
-	const variables = []
+export function initVariables(instance: InstanceBaseExt) {
+	const variables: CompanionVariableDefinition[] = []
 
-	const values = {}
+	const values: CompanionVariableValues = {}
 
 	// transport info vars:
 	variables.push({
@@ -230,7 +234,7 @@ module.exports.initVariables = function (instance) {
 		name: 'Video format',
 		variableId: 'videoFormat',
 	})
-	module.exports.updateTransportInfoVariables(instance, values)
+	updateTransportInfoVariables(instance, values)
 
 	// Slot variables
 	variables.push({
@@ -245,7 +249,7 @@ module.exports.initVariables = function (instance) {
 			})
 		}
 	})
-	module.exports.updateSlotInfoVariables(instance, values)
+	updateSlotInfoVariables(instance, values)
 
 	// Clip variables
 	variables.push({
@@ -260,10 +264,31 @@ module.exports.initVariables = function (instance) {
 			})
 		})
 	}
-	module.exports.updateClipVariables(instance, values)
+	updateClipVariables(instance, values)
+
+	// Configuration variables
+	variables.push({
+		name: 'File format',
+		variableId: 'fileFormat',
+	})
+	variables.push({
+		name: 'Audio codec',
+		variableId: 'audioCodec',
+	})
+	variables.push({
+		name: 'Audio channels',
+		variableId: 'audioChannels',
+	})
+	updateConfigurationVariables(instance, values)
+
+	// Remote status
+	variables.push({
+		name: 'Remote enabled',
+		variableId: 'remoteEnabled',
+	})
 
 	// Timecode variables
-	const initTcVariable = (isCountdown) => {
+	const initTcVariable = (isCountdown: boolean) => {
 		variables.push({
 			name: (isCountdown ? 'Countdown ' : '') + 'Timecode (HH:MM:SS)',
 			variableId: (isCountdown ? 'countdownT' : 't') + 'imecodeHMS',
@@ -294,32 +319,10 @@ module.exports.initVariables = function (instance) {
 			variableId: (isCountdown ? 'countdownT' : 't') + 'imecodeF',
 		})
 	}
-
-	// Configuration variables
-	variables.push({
-		name: 'File format',
-		variableId: 'fileFormat',
-	})
-	variables.push({
-		name: 'Audio codec',
-		variableId: 'audioCodec',
-	})
-	variables.push({
-		name: 'Audio channels',
-		variableId: 'audioChannels',
-	})
-	module.exports.updateConfigurationVariables(instance, values)
-
-	// Remote status
-	variables.push({
-		name: 'Remote enabled',
-		variableId: 'remoteEnabled',
-	})
-
 	initTcVariable(false)
 	initTcVariable(true)
 
-	module.exports.updateTimecodeVariables(instance, values)
+	updateTimecodeVariables(instance, values)
 
 	instance.setVariableDefinitions(variables)
 	instance.setVariableValues(values)

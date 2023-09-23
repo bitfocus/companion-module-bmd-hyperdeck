@@ -2,21 +2,27 @@
 	"name": "bmd-hyperdeck",
 	"version": "2.0.4",
 	"main": "index.js",
+	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "tsc",
+		"dev": "tsc --watch"
 	},
 	"license": "MIT",
 	"dependencies": {
 		"@companion-module/base": "~1.4.1",
-		"hyperdeck-connection": "1.0.0",
-		"semver": "~7.5.4",
-		"smpte-timecode": "1.2.3"
+		"hyperdeck-connection": "^1.0.0",
+		"semver": "^7.5.4",
+		"smpte-timecode": "^1.3.3"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-bmd-hyperdeck.git"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^1.3.2"
+		"@companion-module/tools": "^1.3.2",
+		"@types/node": "^18.16.19",
+		"@types/smpte-timecode": "^1.2.1",
+		"typescript": "^5.1.6"
 	}
 }

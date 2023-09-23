@@ -1,4 +1,4 @@
-const semver = require('semver')
+import semver from 'semver'
 
 /**
  * Creates a string with the current date/time
@@ -7,7 +7,7 @@ const semver = require('semver')
  * @access public
  * @since 1.0.3
  */
-module.exports.getTimestamp = function () {
+export function getTimestamp(): string {
 	const d = new Date()
 	const curr_date = ('0' + d.getDate()).slice(-2)
 	const curr_month = ('0' + (d.getMonth() + 1)).slice(-2)
@@ -23,8 +23,13 @@ module.exports.getTimestamp = function () {
  * @access protected
  * @since 2.0.3
  */
-module.exports.protocolGte = function(a, b) {
+export function protocolGte(a: string | number, b: string | number): boolean {
 	const v1 = semver.coerce(a.toString())
 	const v2 = semver.coerce(b.toString())
-	return semver.gte(v1, v2)
+	return !!v1 && !!v2 && semver.gte(v1, v2)
+}
+
+export function stripExtension(fileName: string): string {
+	const re = /(.*?)(\.([a-z]|\d){3})?$/
+	return fileName.replace(re, '$1')
 }

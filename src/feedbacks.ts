@@ -1,15 +1,16 @@
-const { Regex, combineRgb } = require('@companion-module/base')
-const {
+import { CompanionFeedbackDefinitions, Regex, combineRgb } from '@companion-module/base'
+import {
 	CHOICES_AUDIOCODEC,
 	CHOICES_AUDIOCHANNELS,
 	CHOICES_TRANSPORTSTATUS,
 	CHOICES_SLOTSTATUS,
 	CHOICES_ENABLEDISABLE,
 	CHOICES_REMOTESTATUS,
-} = require('./choices')
+} from './choices.js'
+import { InstanceBaseExt } from './types.js'
 
-exports.initFeedbacks = function () {
-	const feedbacks = {}
+export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitions {
+	const feedbacks: CompanionFeedbackDefinitions = {}
 
 	feedbacks['transport_status'] = {
 		type: 'boolean',
@@ -21,6 +22,7 @@ exports.initFeedbacks = function () {
 				label: 'Transport Status',
 				id: 'status',
 				choices: CHOICES_TRANSPORTSTATUS,
+				default: CHOICES_TRANSPORTSTATUS[0].id,
 			},
 		],
 		defaultStyle: {
@@ -28,7 +30,7 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		callback: ({ options }) => {
-			return options.status === this.transportInfo.status
+			return options.status === self.transportInfo.status
 		},
 	}
 	feedbacks['transport_clip'] = {
@@ -40,14 +42,14 @@ exports.initFeedbacks = function () {
 				type: 'textinput',
 				label: 'Clip Id',
 				id: 'clipID',
-				default: 1,
+				default: '1',
 				regex: Regex.SIGNED_NUMBER,
 			},
 			{
 				type: 'dropdown',
 				label: 'Slot Id',
 				id: 'slotID',
-				choices: [{ id: 'either', label: 'Any' }].concat(this.CHOICES_SLOTS),
+				choices: [{ id: 'either', label: 'Any' }, ...self.CHOICES_SLOTS],
 				default: 'either',
 				regex: Regex.SOMETHING,
 			},
@@ -58,8 +60,8 @@ exports.initFeedbacks = function () {
 		},
 		callback: ({ options }) => {
 			return (
-				(options.slotID == 'either' && options.clipID == this.transportInfo.clipId) ||
-				(options.slotID == this.transportInfo.slotId && options.clipID == this.transportInfo.clipId)
+				(options.slotID == 'either' && options.clipID == self.transportInfo.clipId) ||
+				(options.slotID == self.transportInfo.slotId && options.clipID == self.transportInfo.clipId)
 			)
 		},
 	}
@@ -73,8 +75,7 @@ exports.initFeedbacks = function () {
 				label: 'Clip Name - select from list or enter text',
 				id: 'clipName',
 				default: '',
-				required: true,
-				choices: this.CHOICES_CLIPS,
+				choices: self.CHOICES_CLIPS,
 				minChoicesForSearch: 0,
 				allowCustom: true,
 			},
@@ -82,7 +83,7 @@ exports.initFeedbacks = function () {
 				type: 'dropdown',
 				label: 'Slot Id',
 				id: 'slotID',
-				choices: [{ id: 'either', label: 'Any' }].concat(this.CHOICES_SLOTS),
+				choices: [{ id: 'either', label: 'Any' }, ...self.CHOICES_SLOTS],
 				default: 'either',
 				regex: Regex.SOMETHING,
 			},
@@ -93,8 +94,8 @@ exports.initFeedbacks = function () {
 		},
 		callback: ({ options }) => {
 			return (
-				(options.slotID == 'either' && options.clipName == this.transportInfo.clipName) ||
-				(options.slotID == this.transportInfo.slotId && options.clipName == this.transportInfo.clipName)
+				(options.slotID == 'either' && options.clipName == self.transportInfo.clipName) ||
+				(options.slotID == self.transportInfo.slotId && options.clipName == self.transportInfo.clipName)
 			)
 		},
 	}
@@ -107,7 +108,7 @@ exports.initFeedbacks = function () {
 				type: 'textinput',
 				label: 'Slot Id',
 				id: 'setting',
-				default: 1,
+				default: '1',
 				regex: Regex.SIGNED_NUMBER,
 			},
 		],
@@ -116,7 +117,7 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		callback: ({ options }) => {
-			return options.setting == this.transportInfo.slotId
+			return options.setting == self.transportInfo.slotId
 		},
 	}
 	feedbacks['slot_status'] = {
@@ -129,12 +130,13 @@ exports.initFeedbacks = function () {
 				label: 'Disk Status',
 				id: 'status',
 				choices: CHOICES_SLOTSTATUS,
+				default: CHOICES_SLOTSTATUS[0].id,
 			},
 			{
 				type: 'textinput',
 				label: 'Slot Id',
 				id: 'slotId',
-				default: 1,
+				default: '1',
 				regex: Regex.SIGNED_NUMBER,
 			},
 		],
@@ -143,7 +145,7 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		callback: ({ options }) => {
-			const slot = this.slotInfo[options.slotId]
+			const slot = self.slotInfo[Number(options.slotId)]
 			return !!slot && slot.status === options.status
 		},
 	}
@@ -157,6 +159,7 @@ exports.initFeedbacks = function () {
 				label: 'Loop',
 				id: 'setting',
 				choices: CHOICES_ENABLEDISABLE,
+				default: CHOICES_ENABLEDISABLE[0].id,
 			},
 		],
 		defaultStyle: {
@@ -164,7 +167,7 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		callback: ({ options }) => {
-			return options.setting === this.transportInfo.loop
+			return options.setting === self.transportInfo.loop
 		},
 	}
 	feedbacks['transport_singleClip'] = {
@@ -177,6 +180,7 @@ exports.initFeedbacks = function () {
 				label: 'Single clip',
 				id: 'setting',
 				choices: CHOICES_ENABLEDISABLE,
+				default: CHOICES_ENABLEDISABLE[0].id,
 			},
 		],
 		defaultStyle: {
@@ -184,7 +188,7 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		callback: ({ options }) => {
-			return options.setting === this.transportInfo.singleClip
+			return options.setting === self.transportInfo.singleClip
 		},
 	}
 	feedbacks['video_input'] = {
@@ -196,7 +200,8 @@ exports.initFeedbacks = function () {
 				type: 'dropdown',
 				label: 'Input',
 				id: 'setting',
-				choices: this.CHOICES_VIDEOINPUTS,
+				choices: self.CHOICES_VIDEOINPUTS,
+				default: self.CHOICES_VIDEOINPUTS[0].id,
 			},
 		],
 		defaultStyle: {
@@ -204,10 +209,10 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		callback: ({ options }) => {
-			return options.setting === String(this.deckConfig.videoInput)
+			return options.setting === String(self.deckConfig.videoInput)
 		},
 	}
-	if (this.CHOICES_AUDIOINPUTS.length > 1) {
+	if (self.CHOICES_AUDIOINPUTS.length > 1) {
 		feedbacks['audio_input'] = {
 			type: 'boolean',
 			name: 'Audio input',
@@ -217,7 +222,7 @@ exports.initFeedbacks = function () {
 					type: 'dropdown',
 					label: 'Input',
 					id: 'setting',
-					choices: this.CHOICES_AUDIOINPUTS,
+					choices: self.CHOICES_AUDIOINPUTS,
 					default: 'embedded',
 				},
 			],
@@ -226,7 +231,7 @@ exports.initFeedbacks = function () {
 				bgcolor: combineRgb(0, 0, 0),
 			},
 			callback: ({ options }) => {
-				return options.setting === String(this.deckConfig.audioInput)
+				return options.setting === String(self.deckConfig.audioInput)
 			},
 		}
 	}
@@ -256,10 +261,10 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 255),
 		},
 		callback: ({ options }) => {
-			if (options.audioCodec === 'AAC' || this.deckConfig.audioCodec === 'AAC') {
-				return options.audioCodec === this.deckConfig.audioCodec
+			if (options.audioCodec === 'AAC' || self.deckConfig.audioCodec === 'AAC') {
+				return options.audioCodec === self.deckConfig.audioCodec
 			}
-			return options.audioChannels === String(this.deckConfig.audioInputChannels)
+			return options.audioChannels === String(self.deckConfig.audioInputChannels)
 		},
 	}
 	feedbacks['format_ready'] = {
@@ -271,8 +276,8 @@ exports.initFeedbacks = function () {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(255, 0, 0),
 		},
-		callback: ({ options }) => {
-			return this.formatToken !== null
+		callback: ({}) => {
+			return self.formatToken !== null
 		},
 	}
 	feedbacks['remote_status'] = {
@@ -284,7 +289,7 @@ exports.initFeedbacks = function () {
 				type: 'dropdown',
 				label: 'Status',
 				id: 'status',
-				default: true,
+				default: CHOICES_REMOTESTATUS[0].id,
 				choices: CHOICES_REMOTESTATUS,
 			},
 		],
@@ -293,8 +298,8 @@ exports.initFeedbacks = function () {
 			bgcolor: combineRgb(0, 0, 255),
 		},
 		callback: ({ options }) => {
-			this.log('debug', `FEEDBACK: ${options.status} ${this.remoteInfo}`)
-			return options.status === this.remoteInfo?.['enabled']
+			self.log('debug', `FEEDBACK: ${options.status} ${self.remoteInfo}`)
+			return options.status === self.remoteInfo?.['enabled']
 		},
 	}
 

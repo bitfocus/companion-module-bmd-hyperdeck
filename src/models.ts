@@ -1,4 +1,14 @@
-module.exports.CONFIG_MODELS = {
+export interface ModelInfo {
+	id: string
+	label: string
+	videoInputs: string[] // TODO
+	audioInputs: string[] // TODO
+	fileFormats: string[] // TODO
+	slotLabels: string
+	maxShuttle: number
+}
+
+export const CONFIG_MODELS: Record<string, ModelInfo> = {
 	hdStudio: {
 		id: 'hdStudio',
 		label: 'HyperDeck Studio',

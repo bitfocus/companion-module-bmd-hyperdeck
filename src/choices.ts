@@ -1,19 +1,24 @@
-module.exports.CHOICES_STARTEND = [
+import { DropdownChoice, DropdownChoiceId } from '@companion-module/base'
+
+export const DropdownChoiceTrue: DropdownChoiceId = true as unknown as DropdownChoiceId
+export const DropdownChoiceFalse: DropdownChoiceId = false as unknown as DropdownChoiceId
+
+export const CHOICES_STARTEND: DropdownChoice[] = [
 	{ id: 'start', label: 'Start' },
 	{ id: 'end', label: 'End' },
 ]
 
-module.exports.CHOICES_PREVIEWMODE = [
+export const CHOICES_PREVIEWMODE: DropdownChoice[] = [
 	{ id: 'true', label: 'Preview' },
 	{ id: 'false', label: 'Output' },
 ]
 
-module.exports.CHOICES_AUDIOCODEC = [
+export const CHOICES_AUDIOCODEC: DropdownChoice[] = [
 	{ id: 'PCM', label: 'PCM' },
 	{ id: 'AAC', label: 'AAC (2 channels only)' },
 ]
 
-module.exports.CHOICES_AUDIOCHANNELS = [
+export const CHOICES_AUDIOCHANNELS: DropdownChoice[] = [
 	{ id: '2', label: '2 Channels' },
 	{ id: '4', label: '4 Channels' },
 	{ id: '8', label: '8 Channels' },
@@ -21,7 +26,7 @@ module.exports.CHOICES_AUDIOCHANNELS = [
 	{ id: 'cycle', label: 'Cycle' },
 ]
 
-module.exports.CHOICES_DYNAMICRANGE = [
+export const CHOICES_DYNAMICRANGE: DropdownChoice[] = [
 	{ id: 'auto', label: 'Auto' },
 	{ id: 'Rec709', label: 'Rec.709' },
 	{ id: 'Rec2020_SDR', label: 'Rec.2020 SDR' },
@@ -35,18 +40,18 @@ module.exports.CHOICES_DYNAMICRANGE = [
 	{ id: 'ST2048', label: 'ST2048' },
 ]
 
-module.exports.CHOICES_FILESYSTEM = [
+export const CHOICES_FILESYSTEM: DropdownChoice[] = [
 	{ id: 'HFS+', label: 'HFS+' },
 	{ id: 'exFAT', label: 'exFAT' },
 ]
 
-module.exports.CHOICES_REMOTECONTROL = [
+export const CHOICES_REMOTECONTROL: DropdownChoice[] = [
 	{ id: 'toggle', label: 'Toggle' },
-	{ id: true, label: 'Enable' },
-	{ id: false, label: 'Disable' },
+	{ id: DropdownChoiceTrue, label: 'Enable' },
+	{ id: DropdownChoiceFalse, label: 'Disable' },
 ]
 
-module.exports.CHOICES_TRANSPORTSTATUS = [
+export const CHOICES_TRANSPORTSTATUS: DropdownChoice[] = [
 	{ id: 'preview', label: 'Preview' },
 	{ id: 'stopped', label: 'Stopped' },
 	{ id: 'play', label: 'Playing' },
@@ -57,19 +62,19 @@ module.exports.CHOICES_TRANSPORTSTATUS = [
 	{ id: 'record', label: 'Record' },
 ]
 
-module.exports.CHOICES_SLOTSTATUS = [
+export const CHOICES_SLOTSTATUS: DropdownChoice[] = [
 	{ id: 'empty', label: 'Empty' },
 	{ id: 'error', label: 'Error' },
 	{ id: 'mounted', label: 'Mounted' },
 	{ id: 'mounting', label: 'Mounting' },
 ]
 
-module.exports.CHOICES_ENABLEDISABLE = [
-	{ id: true, label: 'Enable' },
-	{ id: false, label: 'Disable' },
+export const CHOICES_ENABLEDISABLE: DropdownChoice[] = [
+	{ id: DropdownChoiceTrue, label: 'Enable' },
+	{ id: DropdownChoiceFalse, label: 'Disable' },
 ]
 
-module.exports.CHOICES_REMOTESTATUS = [
-	{ id: true, label: 'Enabled' },
-	{ id: false, label: 'Disabled' },
+export const CHOICES_REMOTESTATUS: DropdownChoice[] = [
+	{ id: DropdownChoiceTrue, label: 'Enabled' },
+	{ id: DropdownChoiceFalse, label: 'Disabled' },
 ]

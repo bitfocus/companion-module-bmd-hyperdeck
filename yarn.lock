@@ -268,7 +268,7 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.2.tgz#129cc9ae69f93824f92fac653eebfb4812ab4af9"
   integrity sha512-Dd0BYtWgnWJKwO1jkmTrzofjK2QXXcai0dmtzvIBhcA+RsG5h8R3xlyta0kGOZRNfL9GuRtb1knmPEhQrePCEw==
 
-"@types/node@^18.16.3":
+"@types/node@^18.16.19", "@types/node@^18.16.3":
   version "18.16.19"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.16.19.tgz#cb03fca8910fdeb7595b755126a8a78144714eea"
   integrity sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA==
@@ -282,6 +282,11 @@
   version "7.5.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.0.tgz#591c1ce3a702c45ee15f47a42ade72c2fd78978a"
   integrity sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==
+
+"@types/smpte-timecode@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@types/smpte-timecode/-/smpte-timecode-1.2.1.tgz#b8d5ac7eb25a3c9c9e77b88cc8b8a5956c45911e"
+  integrity sha512-jCwbsb9x1oTBEBUEluJdgVUFa9MLGuQ75PhYDYJofX8/tef/4zJEWYpZoeQlknhPzsIk2X3wYwwazKSrSa9IHg==
 
 "@types/which@^3.0.0":
   version "3.0.0"
@@ -1197,7 +1202,7 @@ https-proxy-agent@^5.0.0:
     agent-base "6"
     debug "4"
 
-hyperdeck-connection@1.0.0:
+hyperdeck-connection@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/hyperdeck-connection/-/hyperdeck-connection-1.0.0.tgz#7f3dfaf4fcd27137e0e2367c90a858630871962a"
   integrity sha512-Q1OsWivSCroaGga2Qh8Xtw8A5bOmkTiCp58iNTjrSsnJHAOMAuufD268MiiVj8jpx+crg28Z9Rpvy7UyzaQceg==
@@ -1787,7 +1792,7 @@ schema-utils@^3.1.1, schema-utils@^3.2.0:
     ajv "^6.12.5"
     ajv-keywords "^3.5.2"
 
-semver@^7.0.0, semver@^7.3.7, semver@^7.5.3, semver@~7.5.4:
+semver@^7.0.0, semver@^7.3.7, semver@^7.5.3, semver@^7.5.4:
   version "7.5.4"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
   integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
@@ -1830,10 +1835,10 @@ slash@^4.0.0:
   resolved "https://registry.yarnpkg.com/slash/-/slash-4.0.0.tgz#2422372176c4c6c5addb5e2ada885af984b396a7"
   integrity sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==
 
-smpte-timecode@1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/smpte-timecode/-/smpte-timecode-1.2.3.tgz#272ac8826724ce793d956109cfd3982b2f6b1893"
-  integrity sha512-6U+vdStmprzmpzEWS+9pw8GfiChBcMmJOdJxBjaXlGJhB9U/jcQhvh0buxJzEfhuX8E0OfYJy4hayBgAO92dBg==
+smpte-timecode@^1.3.3:
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/smpte-timecode/-/smpte-timecode-1.3.3.tgz#7893a92a3deb6d77482542d5ddaa87633e5ea42e"
+  integrity sha512-BMJ1JBwiPXTKns46jEBwDnlvjziLBvGcDKs364BfFwXQmd1lF1wLMhEpfphNrttr+4yUpnNjPMNLSeff98kSkg==
 
 source-map-support@~0.5.20:
   version "0.5.21"
@@ -1976,6 +1981,11 @@ type-fest@^0.20.2:
   version "0.20.2"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.20.2.tgz#1bf207f4b28f91583666cb5fbd327887301cd5f4"
   integrity sha512-Ne+eE4r0/iWnpAxD852z3A+N0Bt5RN//NjJwRd2VFHEmrywxf5vsZlh4R6lixl6B+wz/8d+maTSAkN1FIkI3LQ==
+
+typescript@^5.1.6:
+  version "5.1.6"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.1.6.tgz#02f8ac202b6dad2c0dd5e0913745b47a37998274"
+  integrity sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==
 
 universalify@^2.0.0:
   version "2.0.0"

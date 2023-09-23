@@ -1,6 +1,13 @@
-const { CreateConvertToBooleanFeedbackUpgradeScript } = require('@companion-module/base')
+import {
+	CompanionStaticUpgradeProps,
+	CompanionStaticUpgradeResult,
+	CompanionStaticUpgradeScript,
+	CompanionUpgradeContext,
+	CreateConvertToBooleanFeedbackUpgradeScript,
+} from '@companion-module/base'
+import { HyperdeckConfig } from './config.js'
 
-module.exports.upgradeScripts = [
+export const upgradeScripts: CompanionStaticUpgradeScript<HyperdeckConfig>[] = [
 	upgradeCombineOldPlayActions,
 	upgradeTimecodeNotifications,
 	upgrade126to127,
@@ -18,35 +25,33 @@ module.exports.upgradeScripts = [
 ]
 
 // v1.0.* -> v1.1.0 (combine old play actions)
-function upgradeCombineOldPlayActions(context, props) {
-	const changes = {
+function upgradeCombineOldPlayActions(
+	_context: CompanionUpgradeContext<HyperdeckConfig>,
+	props: CompanionStaticUpgradeProps<HyperdeckConfig>
+): CompanionStaticUpgradeResult<HyperdeckConfig> {
+	const changes: CompanionStaticUpgradeResult<HyperdeckConfig> = {
 		updatedConfig: null,
 		updatedActions: [],
 		updatedFeedbacks: [],
 	}
 
 	for (const action of props.actions) {
-		if (action.options === undefined) {
-			action.options = {}
-		}
+		if (!action.options) action.options = {}
 
 		switch (action.actionId) {
 			case 'vplay':
-				action.options.speed = opt.speed
 				action.options.loop = false
 				action.options.single = false
 				action.actionId = 'play'
 				changes.updatedActions.push(action)
 				break
 			case 'vplaysingle':
-				action.options.speed = opt.speed
 				action.options.loop = false
 				action.options.single = true
 				action.actionId = 'play'
 				changes.updatedActions.push(action)
 				break
 			case 'vplayloop':
-				action.options.speed = opt.speed
 				action.options.loop = true
 				action.options.single = false
 				action.actionId = 'play'
@@ -87,23 +92,27 @@ function upgradeCombineOldPlayActions(context, props) {
 }
 
 // v1.1.0 -> v1.2.0 (timecode notifications)
-function upgradeTimecodeNotifications(context, props) {
-	const changes = {
+function upgradeTimecodeNotifications(
+	_context: CompanionUpgradeContext<HyperdeckConfig>,
+	props: CompanionStaticUpgradeProps<HyperdeckConfig>
+): CompanionStaticUpgradeResult<HyperdeckConfig> {
+	const changes: CompanionStaticUpgradeResult<HyperdeckConfig> = {
 		updatedConfig: null,
 		updatedActions: [],
 		updatedFeedbacks: [],
 	}
 
 	if (props.config) {
-		if (props.config.pollingOn !== undefined) {
-			if (props.config.pollingOn) {
-				props.config.timecodeVariables = 'polling'
+		const config: HyperdeckConfig & { pollingOn?: boolean } = props.config
+		if (config.pollingOn !== undefined) {
+			if (config.pollingOn) {
+				config.timecodeVariables = 'polling'
 			} else {
-				props.config.timecodeVariables = 'disabled'
+				config.timecodeVariables = 'disabled'
 			}
-			delete props.config.pollingOn
+			delete config.pollingOn
 
-			changes.updatedConfig = props.config
+			changes.updatedConfig = config
 		}
 	}
 
@@ -111,8 +120,11 @@ function upgradeTimecodeNotifications(context, props) {
 }
 
 // v1.2.6 -> 1.2.7 (gotoClip (n) bug fix)
-function upgrade126to127(context, props) {
-	const changes = {
+function upgrade126to127(
+	_context: CompanionUpgradeContext<HyperdeckConfig>,
+	props: CompanionStaticUpgradeProps<HyperdeckConfig>
+): CompanionStaticUpgradeResult<HyperdeckConfig> {
+	const changes: CompanionStaticUpgradeResult<HyperdeckConfig> = {
 		updatedConfig: null,
 		updatedActions: [],
 		updatedFeedbacks: [],
@@ -123,7 +135,7 @@ function upgrade126to127(context, props) {
 			action.options = {}
 		}
 		// If the clip is not a number, return early as we don't need to change it
-		if (action.actionId === 'gotoName' && !isNaN(action.options.clip)) {
+		if (action.actionId === 'gotoName' && !isNaN(action.options.clip as any)) {
 			action.actionId = 'gotoN'
 			changes.updatedActions.push(action)
 		}

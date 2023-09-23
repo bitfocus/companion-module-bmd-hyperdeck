@@ -1,7 +1,7 @@
 import { DropdownChoice, DropdownChoiceId } from '@companion-module/base'
-import { ModelInfo } from './models'
-import { ClipDropdownChoice, InstanceBaseExt } from './types'
-import { stripExtension } from './util'
+import { ModelInfo } from './models.js'
+import { ClipDropdownChoice, InstanceBaseExt } from './types.js'
+import { stripExtension } from './util.js'
 
 export const DropdownChoiceTrue: DropdownChoiceId = true as unknown as DropdownChoiceId
 export const DropdownChoiceFalse: DropdownChoiceId = false as unknown as DropdownChoiceId

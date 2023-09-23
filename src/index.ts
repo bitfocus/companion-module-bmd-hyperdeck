@@ -15,7 +15,7 @@ import { upgradeScripts } from './upgrades.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
 import { protocolGte, stripExtension } from './util.js'
-import { InstanceBaseExt, TransportInfoStateExt } from './types'
+import { InstanceBaseExt, TransportInfoStateExt } from './types.js'
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -38,12 +38,11 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	transportInfo: TransportInfoStateExt
 	deckConfig: Commands.ConfigurationCommandResponse
 	slotInfo: Commands.SlotInfoCommandResponse[] = []
-	deviceName = 'Unknown'
 
 	remoteInfo: Commands.RemoteInfoCommandResponse | null = null
 	formatToken: string | null = null
+	formatTokenTimeout: NodeJS.Timeout | null = null
 
-	clipCount: number = 0
 	clipsList: Commands.ClipInfo[] = []
 
 	/**
@@ -73,35 +72,43 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		}
 	}
 
-	/**
-	 * Setup the actions.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	initActions() {
-		const actions = initActions(this)
-		this.setActionDefinitions(actions)
-	}
-
-	cancelFormat() {
-		this.formatToken = null
+	private initActionsAndFeedbacks() {
+		this.setActionDefinitions(initActions(this))
+		this.setFeedbackDefinitions(initFeedbacks(this))
 	}
 
 	/**
 	 * Creates the configuration fields for web config.
-	 * @access public
-	 * @since 1.0.0
 	 */
 	getConfigFields() {
 		return getConfigFields()
 	}
 
 	/**
+	 * Main initialization function called once the module
+	 * is OK to start doing things.
+	 */
+	async init(config: HyperdeckConfig) {
+		this.config = config
+
+		if (this.config.modelID !== undefined) {
+			this.model = CONFIG_MODELS[this.config.modelID]
+		} else {
+			this.config.modelID = 'hdStudio'
+			this.model = CONFIG_MODELS['hdStudio']
+		}
+
+		this.updateStatus(InstanceStatus.Connecting)
+
+		this.initActionsAndFeedbacks()
+		//this.initPresets();
+		this.initVariables()
+
+		this.initHyperdeck()
+	}
+
+	/**
 	 * Clean up the instance before it is destroyed.
-	 *
-	 * @access public
-	 * @since 1.0.0
 	 */
 	async destroy() {
 		if (this.hyperDeck !== undefined) {
@@ -116,60 +123,16 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	}
 
 	/**
-	 * Main initialization function called once the module
-	 * is OK to start doing things.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	async init(config: HyperdeckConfig) {
-		this.config = config
-
-		if (this.config.modelID !== undefined) {
-			this.model = CONFIG_MODELS[this.config.modelID]
-		} else {
-			this.config.modelID = 'hdStudio'
-			this.model = CONFIG_MODELS['hdStudio']
-		}
-
-		this.updateStatus(InstanceStatus.Connecting)
-
-		this.initActions()
-		this.initFeedbacks()
-		//this.initPresets();
-		this.initVariables()
-
-		this.initHyperdeck()
-	}
-
-	/**
-	 * INTERNAL: initialize feedbacks.
-	 *
-	 * @access protected
-	 * @since 1.1.0
-	 */
-	initFeedbacks() {
-		const feedbacks = initFeedbacks(this)
-		this.setFeedbackDefinitions(feedbacks)
-	}
-
-	/**
 	 * INTERNAL: initialize variables.
-	 *
-	 * @access protected
-	 * @since 1.1.0
 	 */
-	initVariables() {
+	private initVariables() {
 		initVariables(this)
 	}
 
 	/**
 	 * INTERNAL: use setup data to initalize the hyperdeck library.
-	 *
-	 * @access protected
-	 * @since 1.0.0
 	 */
-	initHyperdeck() {
+	private initHyperdeck() {
 		if (this.hyperDeck !== undefined) {
 			this.hyperDeck.disconnect()
 			this.hyperDeck.removeAllListeners()
@@ -184,23 +147,27 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		// 	this.config.port = 9993
 		// }
 
-		if (this.config.host) {
-			const hyperdeck = new Hyperdeck()
-			this.hyperDeck = hyperdeck
+		if (!this.config.host) {
+			this.updateStatus(InstanceStatus.BadConfig)
+			return
+		}
+		this.updateStatus(InstanceStatus.Connecting)
 
-			this.hyperDeck.on('error', (msg, e: any) => {
-				this.log('error', `${msg}: ${e?.message ?? ''}`)
-			})
+		const hyperdeck = new Hyperdeck()
+		this.hyperDeck = hyperdeck
 
-			this.hyperDeck.on('connected', async (info) => {
+		this.hyperDeck.on('error', (msg, e: any) => {
+			this.log('error', `${msg}: ${e?.message ?? ''}`)
+		})
+
+		this.hyperDeck.on('connected', async (info) => {
+			try {
+				this.protocolVersion = info.protocolVersion
+
 				try {
-					// c contains the result of 500 connection info
-					this.protocolVersion = info.protocolVersion
+					this.updateDeviceModelId(info)
 
-					this.updateDevice(info)
-					this.initActions()
-
-					// set notification:
+					// setup notification:
 					const notify = new Commands.NotifySetCommand()
 					notify.configuration = true
 					notify.transport = true
@@ -211,159 +178,154 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 					await hyperdeck.sendCommand(notify)
 
-					try {
-						let { slots } = await hyperdeck.sendCommand(new Commands.DeviceInfoCommand())
-						if (slots === undefined) {
-							slots = 2
-						}
-						for (let i = 0; i < slots; i++) {
-							this.slotInfo[i + 1] = await hyperdeck.sendCommand(new Commands.SlotInfoCommand(i + 1))
-						}
-						//				this.debug('Slot info:', this.slotInfo)
+					let { slots } = await hyperdeck.sendCommand(new Commands.DeviceInfoCommand())
+					if (!slots) slots = 2
 
-						await this.refreshTransportInfo()
-
-						this.deckConfig = await hyperdeck.sendCommand(new Commands.ConfigurationGetCommand())
-						// this.debug('Initial config:', this.deckConfig)
-						this.remoteInfo = await hyperdeck.sendCommand(new Commands.RemoteGetCommand())
-					} catch (e: any) {
-						if (e.code) {
-							this.log('error', `Connection error - ${e.code} ${e.name}`)
-						}
+					for (let i = 1; i <= slots; i++) {
+						this.slotInfo[i] = await hyperdeck.sendCommand(new Commands.SlotInfoCommand(i))
+						this.log('debug', `Slot info:${JSON.stringify(this.slotInfo)}`)
 					}
 
-					this.updateStatus(InstanceStatus.Ok)
+					await this.refreshTransportInfo()
 
-					await this.updateClips()
-					this.initVariables()
-					this.checkFeedbacks()
-
-					// If polling is enabled, setup interval command
-					if (this.pollTimer) {
-						clearInterval(this.pollTimer)
-					}
-					if (this.config.timecodeVariables === 'polling') {
-						this.pollTimer = setInterval(this.sendPollCommand.bind(this), this.config.pollingInterval)
-					}
+					this.deckConfig = await hyperdeck.sendCommand(new Commands.ConfigurationGetCommand())
+					// this.debug('Initial config:', this.deckConfig)
+					this.remoteInfo = await hyperdeck.sendCommand(new Commands.RemoteGetCommand())
 				} catch (e: any) {
 					if (e.code) {
 						this.log('error', `Connection error - ${e.code} ${e.name}`)
 					}
-				}
-			})
 
-			this.hyperDeck.on('disconnected', () => {
-				this.updateStatus(InstanceStatus.Disconnected)
+					this.updateStatus(InstanceStatus.ConnectionFailure)
 
-				if (this.pollTimer) {
-					clearInterval(this.pollTimer)
-				}
-			})
+					// Connection couldn't initialise, destroy it and try again
+					hyperdeck.disconnect().catch(() => null)
 
-			this.hyperDeck.on('notify.slot', async (res) => {
-				if (this.config.modelID != 'hdStudioMini') {
-					this.log('debug', 'Slot Status Changed')
-				}
-				this.slotInfo[res.slotId] = {
-					...this.slotInfo[res.slotId],
-					...res,
+					setTimeout(() => {
+						this.initHyperdeck()
+					}, 1000)
+
+					return
 				}
 
-				// Update the transport status to catch slot changes
-				this.refreshTransportInfo()
+				this.updateStatus(InstanceStatus.Ok)
 
-				// Update slot variables
-				const newVariables = {}
-				updateSlotInfoVariables(this, newVariables)
-				this.setVariableValues(newVariables)
-
-				// Update the disk list to catch changes in clip
-				// TODO - not sure when the hyperdeck informs of us new clips being added...
-				// await this.updateClips(res.slotId)
-
-				// Update clip variables
-				await this.updateClips()
-
-				// Update internals
-				this.initActions()
-				this.initFeedbacks()
-				this.checkFeedbacks('slot_status', 'transport_slot')
-			})
-
-			this.hyperDeck.on('notify.transport', async (res) => {
-				this.log('debug', 'Transport Status Changed')
-				this.transportInfo = {
-					...this.extendTransportInfo(this.transportInfo),
-					...res,
-				}
-
-				const newVariables = {}
-				updateTransportInfoVariables(this, newVariables)
-				updateTimecodeVariables(this, newVariables)
-				updateSlotInfoVariables(this, newVariables)
-				this.setVariableValues(newVariables)
-
+				await this.updateClips(true)
 				this.checkFeedbacks()
-			})
 
-			this.hyperDeck.on('notify.remote', async (res) => {
-				this.log('debug', 'Remote Status Changed')
-				this.remoteInfo = {
-					...this.remoteInfo,
-					...res,
+				// If polling is enabled, setup interval command
+				if (this.pollTimer) clearInterval(this.pollTimer)
+				if (this.config.timecodeVariables === 'polling') {
+					this.pollTimer = setInterval(this.sendPollCommand.bind(this), this.config.pollingInterval)
 				}
-
-				const newVariables = {}
-				updateRemoteVariable(this, newVariables)
-				this.setVariableValues(newVariables)
-
-				this.checkFeedbacks('remote_status')
-			})
-
-			this.hyperDeck.on('notify.configuration', async (res) => {
-				this.log('debug', `Configuration Changed: ${JSON.stringify(res)}`)
-				this.deckConfig = {
-					...this.deckConfig,
-					...res,
+			} catch (e: any) {
+				if (e.code) {
+					this.log('error', `Connection error - ${e.code} ${e.name}`)
 				}
+			}
+		})
 
-				// this.debug('Config:', this.deckConfig)
-				this.checkFeedbacks('video_input', 'audio_input', 'audio_channels')
+		this.hyperDeck.on('disconnected', () => {
+			this.updateStatus(InstanceStatus.Disconnected)
 
-				const newVariables = {}
-				updateConfigurationVariables(this, newVariables)
-				this.setVariableValues(newVariables)
-			})
+			if (this.pollTimer) clearInterval(this.pollTimer)
+		})
 
-			if (this.config.timecodeVariables === 'notifications') {
-				this.hyperDeck.on('notify.displayTimecode', (res) => {
-					this.transportInfo.displayTimecode = res.displayTimecode
+		this.hyperDeck.on('notify.slot', async (res) => {
+			this.log('debug', 'Slot Status Changed')
 
-					const newVariables = {}
-					updateTimecodeVariables(this, newVariables)
-					this.setVariableValues(newVariables)
-				})
+			this.slotInfo[res.slotId] = {
+				...this.slotInfo[res.slotId],
+				...res,
 			}
 
-			this.hyperDeck.connect(this.config.host /*this.config.port*/)
+			// Update the transport status to catch slot changes
+			await this.refreshTransportInfo()
 
-			// hyperdeck-connection debug tool
-			// this.hyperDeck.DEBUG = true;
+			// Update slot variables
+			const newVariables = {}
+			updateTimecodeVariables(this, newVariables)
+			updateSlotInfoVariables(this, newVariables)
+			updateTransportInfoVariables(this, newVariables)
+			this.setVariableValues(newVariables)
+
+			// Update clip variables
+			await this.updateClips()
+
+			// Update internals
+			this.initActionsAndFeedbacks()
+			this.checkFeedbacks('slot_status', 'transport_slot')
+		})
+
+		this.hyperDeck.on('notify.transport', async (res) => {
+			this.log('debug', 'Transport Status Changed')
+			this.transportInfo = {
+				...this.extendTransportInfo(this.transportInfo),
+				...res,
+			}
+
+			const newVariables = {}
+			updateTransportInfoVariables(this, newVariables)
+			updateTimecodeVariables(this, newVariables)
+			updateSlotInfoVariables(this, newVariables)
+			this.setVariableValues(newVariables)
+
+			this.checkFeedbacks()
+		})
+
+		this.hyperDeck.on('notify.remote', async (res) => {
+			this.log('debug', 'Remote Status Changed')
+			this.remoteInfo = {
+				...this.remoteInfo,
+				...res,
+			}
+
+			const newVariables = {}
+			updateRemoteVariable(this, newVariables)
+			this.setVariableValues(newVariables)
+
+			this.checkFeedbacks('remote_status')
+		})
+
+		this.hyperDeck.on('notify.configuration', async (res) => {
+			this.log('debug', `Configuration Changed: ${JSON.stringify(res)}`)
+			this.deckConfig = {
+				...this.deckConfig,
+				...res,
+			}
+
+			// this.debug('Config:', this.deckConfig)
+			this.checkFeedbacks('video_input', 'audio_input', 'audio_channels')
+
+			const newVariables = {}
+			updateConfigurationVariables(this, newVariables)
+			this.setVariableValues(newVariables)
+		})
+
+		if (this.config.timecodeVariables === 'notifications') {
+			this.hyperDeck.on('notify.displayTimecode', (res) => {
+				this.transportInfo.displayTimecode = res.displayTimecode
+
+				const newVariables = {}
+				updateTimecodeVariables(this, newVariables)
+				this.setVariableValues(newVariables)
+			})
 		}
+
+		this.hyperDeck.connect(this.config.host /*this.config.port*/)
 	}
 
 	/**
 	 * INTERNAL: Send a poll command to refresh status
-	 *
-	 * @access protected
-	 * @since 1.1.0
 	 */
-	sendPollCommand() {
+	private sendPollCommand() {
 		this.refreshTransportInfo()
 			.then(() => {
-				// TODO - refactor?
+				// Update slot variables
 				const newVariables = {}
 				updateTimecodeVariables(this, newVariables)
+				updateSlotInfoVariables(this, newVariables)
+				updateTransportInfoVariables(this, newVariables)
 				this.setVariableValues(newVariables)
 			})
 			.catch((error) => {
@@ -374,100 +336,94 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 	/**
 	 * Process an updated configuration array.
-	 *
-	 * @param {Object} config - the new configuration
-	 * @access public
-	 * @since 1.0.0
 	 */
 	async configUpdated(config: HyperdeckConfig) {
 		let resetConnection = false
 
-		if (this.config.host != config.host) {
+		if (this.config.host !== config.host) {
 			resetConnection = true
 		}
 
+		// Enable/disable timecode notifications
 		if (
+			this.hyperDeck?.connected &&
 			protocolGte(this.protocolVersion, '1.11') &&
 			this.config.timecodeVariables !== config.timecodeVariables &&
 			!resetConnection
 		) {
-			if (this.hyperDeck !== undefined && this.hyperDeck.connected) {
-				if (this.config.timecodeVariables === 'notifications') {
-					// old config had notifications and new config does not
-					const notify = new Commands.NotifySetCommand()
-					notify.displayTimecode = false
-					this.hyperDeck.sendCommand(notify)
-				} else if (config.timecodeVariables === 'notifications') {
-					// old config had no notifications and new config does have them
-					const notify = new Commands.NotifySetCommand()
-					notify.displayTimecode = true
-					this.hyperDeck.sendCommand(notify)
-				}
+			if (this.config.timecodeVariables === 'notifications') {
+				// old config had notifications and new config does not
+				const notify = new Commands.NotifySetCommand()
+				notify.displayTimecode = false
+				this.hyperDeck.sendCommand(notify)
+			} else if (config.timecodeVariables === 'notifications') {
+				// old config had no notifications and new config does have them
+				const notify = new Commands.NotifySetCommand()
+				notify.displayTimecode = true
+				this.hyperDeck.sendCommand(notify)
 			}
 		}
 
-		if (this.config.modelID != config.modelID) {
+		if (this.config.modelID !== config.modelID) {
 			this.model = CONFIG_MODELS[config.modelID]
 		}
 
 		this.config = config
 
-		this.initActions()
-		this.initFeedbacks()
+		this.initActionsAndFeedbacks()
 		//this.initPresets();
 		this.initVariables()
 
-		// If polling is enabled, setup interval command
-		if (this.pollTimer) clearInterval(this.pollTimer)
-		if (this.config.timecodeVariables === 'polling') {
-			this.pollTimer = setInterval(this.sendPollCommand.bind(this), this.config.pollingInterval)
-		}
-
 		if (resetConnection || !this.hyperDeck) {
 			this.initHyperdeck()
+		} else {
+			// If polling is enabled, setup interval command
+			if (this.pollTimer) clearInterval(this.pollTimer)
+			if (this.config.timecodeVariables === 'polling') {
+				this.pollTimer = setInterval(this.sendPollCommand.bind(this), this.config.pollingInterval)
+			}
 		}
 	}
 
 	/**
 	 * INTERNAL: Updates device data from the HyperDeck
-	 *
-	 * @param {Object} object - the collected data
-	 * @access protected
-	 * @since 1.1.0
 	 */
-	updateDevice(object: Commands.ConnectionInfoResponse) {
-		const value = object.model
+	private updateDeviceModelId(info: Commands.ConnectionInfoResponse) {
+		const modelName = info.model
+
+		this.log('info', `Connected to a ${info.model}`)
+
+		const oldModelId = this.config.modelID
 
 		// TODO - can this be replaced?
 		//	this.debug('Model value:', value)
-		if (value.match(/Extreme/)) {
+		if (modelName.match(/Extreme/)) {
 			this.config.modelID = 'hdExtreme8K'
-		} else if (value.match(/Studio Mini/)) {
+		} else if (modelName.match(/Studio Mini/)) {
 			this.config.modelID = 'hdStudioMini'
-		} else if (value.match(/Duplicator/)) {
+		} else if (modelName.match(/Duplicator/)) {
 			this.config.modelID = 'bmdDup4K'
-		} else if (value.match(/12G/)) {
+		} else if (modelName.match(/12G/)) {
 			this.config.modelID = 'hdStudio12G'
-		} else if (value.match(/Studio Pro/)) {
+		} else if (modelName.match(/Studio Pro/)) {
 			this.config.modelID = 'hdStudioPro'
-		} else if (value.match(/HD Mini/)) {
+		} else if (modelName.match(/HD Mini/)) {
 			this.config.modelID = 'hdStudioHDMini'
-		} else if (value.match(/HD Plus/)) {
+		} else if (modelName.match(/HD Plus/)) {
 			this.config.modelID = 'hdStudioHDPlus'
-		} else if (value.match(/HD Pro/)) {
+		} else if (modelName.match(/HD Pro/)) {
 			this.config.modelID = 'hdStudioHDPro'
-		} else if (value.match(/4K Pro/)) {
+		} else if (modelName.match(/4K Pro/)) {
 			this.config.modelID = 'hdStudio4KPro'
-		} else if (value.match(/Shuttle HD/)) {
+		} else if (modelName.match(/Shuttle HD/)) {
 			this.config.modelID = 'hdShuttleHD'
 		} else {
 			this.config.modelID = 'hdStudio'
 		}
 
-		this.deviceName = value
-		this.log('info', 'Connected to a ' + this.deviceName)
-
-		this.saveConfig(this.config)
+		if (this.config.modelID !== oldModelId) {
+			this.saveConfig(this.config)
+		}
 	}
 
 	/**
@@ -475,7 +431,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	 *
 	 * @access protected
 	 */
-	async updateClips() {
+	async updateClips(doFullInit = false) {
 		try {
 			const newVariableValues = {}
 
@@ -500,10 +456,9 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			const oldLength = this.clipsList.length
 			this.clipsList = queryResponse.clips
 
-			this.initActions() // reinit actions to update list
-			this.initFeedbacks() // update feedback definitions
+			this.initActionsAndFeedbacks() // reinit due to clip list change
 
-			if (oldLength !== this.clipsList.length) {
+			if (doFullInit || oldLength !== this.clipsList.length) {
 				// Update variables, as clip count can have changed. This will update all the values too
 				this.initVariables()
 			} else {
@@ -521,10 +476,8 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 	/**
 	 * INTERNAL: Update transportInfo object
-	 *
-	 * @access protected
 	 */
-	extendTransportInfo(rawState: Commands.TransportInfoCommandResponse): TransportInfoStateExt {
+	private extendTransportInfo(rawState: Commands.TransportInfoCommandResponse): TransportInfoStateExt {
 		const res: TransportInfoStateExt = {
 			...rawState,
 			clipName: null,

@@ -4,7 +4,7 @@ import {
 	CompanionVariableValues,
 	Regex,
 } from '@companion-module/base'
-import { Commands } from 'hyperdeck-connection'
+import { Commands, FilesystemFormat } from 'hyperdeck-connection'
 import {
 	CHOICES_STARTEND,
 	CHOICES_PREVIEWMODE,
@@ -251,7 +251,7 @@ export function initActions(self: InstanceBaseExt) {
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clipId = `+${options.clip}` as any // TODO
+				cmd.clipId = `+${options.clip}`
 				await self.sendCommand(cmd)
 			},
 		}
@@ -270,7 +270,7 @@ export function initActions(self: InstanceBaseExt) {
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clipId = `-${options.clip}` as any // TODO
+				cmd.clipId = `-${options.clip}`
 				await self.sendCommand(cmd)
 			},
 		}
@@ -361,7 +361,7 @@ export function initActions(self: InstanceBaseExt) {
 
 				// select will update internal cliplist so we should fetch those
 				await self.refreshTransportInfo()
-				await self.updateClips()
+				await self.updateClips(true)
 
 				self.checkFeedbacks()
 			},
@@ -489,7 +489,7 @@ export function initActions(self: InstanceBaseExt) {
 		name: 'Fetch Clips',
 		options: [],
 		callback: async () => {
-			await self.updateClips()
+			await self.updateClips(true)
 		},
 	}
 
@@ -538,7 +538,7 @@ export function initActions(self: InstanceBaseExt) {
 		],
 		callback: async ({ options }) => {
 			const cmd = new Commands.FormatCommand()
-			cmd.filesystem = getOptString(options, 'filesystem') as any // TODO
+			cmd.filesystem = getOptString(options, 'filesystem') as FilesystemFormat
 			const response = await self.sendCommand(cmd)
 
 			if (response && response.code) {
@@ -547,7 +547,9 @@ export function initActions(self: InstanceBaseExt) {
 				self.checkFeedbacks('format_ready')
 			}
 
-			setTimeout(
+			if (self.formatTokenTimeout) clearTimeout(self.formatTokenTimeout)
+
+			self.formatTokenTimeout = setTimeout(
 				() => {
 					self.formatToken = null
 					self.checkFeedbacks('format_ready')
@@ -562,6 +564,11 @@ export function initActions(self: InstanceBaseExt) {
 		options: [],
 		callback: async () => {
 			if (self.formatToken) {
+				if (self.formatTokenTimeout) {
+					clearTimeout(self.formatTokenTimeout)
+					self.formatTokenTimeout = null
+				}
+
 				const cmd = new Commands.FormatConfirmCommand()
 				cmd.code = self.formatToken
 

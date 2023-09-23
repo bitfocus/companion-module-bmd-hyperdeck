@@ -67,13 +67,13 @@ export function updateClipVariables(instance: InstanceBaseExt, newValues: Compan
 }
 
 export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
-	const activeSlotId = instance.transportInfo['slotId']
+	const activeSlotId = instance.transportInfo.slotId
 	instance.slotInfo.forEach((slot, index) => {
 		if (slot != null) {
 			let recordingTime = '--:--:--'
 			try {
 				if (typeof slot.recordingTime === 'number') {
-					recordingTime = new Date(slot['recordingTime'] * 1000).toISOString().substr(11, 8)
+					recordingTime = new Date(slot.recordingTime * 1000).toISOString().substr(11, 8)
 				}
 			} catch (e) {
 				instance.log('error', `Slot ${index} recording time parse error: ${e}`)
@@ -97,7 +97,7 @@ interface CounterValues {
 }
 
 export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
-	const tb = frameRates[instance.transportInfo['videoFormat']]
+	const tb = frameRates[instance.transportInfo.videoFormat]
 	const countUp: CounterValues = {
 		tcH: '--',
 		tcM: '--',
@@ -126,10 +126,10 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeF'] = pad(tcF)
 	}
 
-	if (instance.transportInfo['displayTimecode']) {
+	if (instance.transportInfo.displayTimecode) {
 		if (tb) {
 			try {
-				let tc = Timecode(instance.transportInfo['displayTimecode'], tb)
+				let tc = Timecode(instance.transportInfo.displayTimecode, tb)
 				countUp.tcH = tc.hours
 				countUp.tcM = tc.minutes
 				countUp.tcS = tc.seconds
@@ -137,11 +137,7 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 				countUp.tcHMS = tc.toString().substr(0, 8)
 				countUp.tcHMSF = tc.toString()
 
-				if (
-					instance.transportInfo['slotId'] !== undefined &&
-					instance.clipsList !== undefined &&
-					instance.clipsList != null
-				) {
+				if (instance.transportInfo.slotId !== undefined) {
 					const clip = instance.clipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
 					//				instance.debug('Clip duration: ', clip.duration)
 					const modesWhereCountdownMakesNoSense = new Set(['preview', 'record'])
@@ -164,7 +160,7 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 			}
 		} else {
 			// no timebase implies we can't use smpte-timecode lib
-			let tc = instance.transportInfo['displayTimecode'].match(
+			let tc = instance.transportInfo.displayTimecode.match(
 				/^(?<HMS>(?<H>\d{2}):(?<M>\d{2}):(?<S>\d{2}))[:;](?<F>\d{2})$/
 			)
 			if (tc && tc.groups) {
@@ -174,7 +170,7 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 				countUp.tcF = tc.groups.F
 				countUp.tcHMS = tc.groups.HMS
 			}
-			countUp.tcHMSF = instance.transportInfo['displayTimecode']
+			countUp.tcHMSF = instance.transportInfo.displayTimecode
 		}
 	}
 
@@ -191,7 +187,7 @@ export function updateConfigurationVariables(instance: InstanceBaseExt, newValue
 }
 
 export function updateRemoteVariable(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
-	newValues['remoteEnabled'] = instance.remoteInfo?.['enabled'] || false
+	newValues['remoteEnabled'] = instance.remoteInfo?.enabled || false
 }
 
 export function initVariables(instance: InstanceBaseExt) {
@@ -246,12 +242,10 @@ export function initVariables(instance: InstanceBaseExt) {
 		name: 'Clip count',
 		variableId: 'clipCount',
 	})
-	if (instance.clipsList !== undefined && instance.clipsList != null) {
-		instance.clipsList.forEach(({ clipId }) => {
-			variables.push({
-				name: `Clip ${clipId} Name`,
-				variableId: `clip${clipId}_name`,
-			})
+	for (const { clipId } of instance.clipsList) {
+		variables.push({
+			name: `Clip ${clipId} Name`,
+			variableId: `clip${clipId}_name`,
 		})
 	}
 	updateClipVariables(instance, values)

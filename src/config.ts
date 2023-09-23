@@ -1,5 +1,5 @@
 import { Regex, SomeCompanionConfigField } from '@companion-module/base'
-import { CONFIG_MODELS } from './models'
+import { CONFIG_MODELS } from './models.js'
 
 const CONFIG_NOTIFICATION_METHOD = [
 	{ id: 'disabled', label: 'Disabled' },
@@ -20,7 +20,7 @@ export interface HyperdeckConfig {
 	host: string
 	modelID: string
 	reel: string
-	timecodeVariables: string // TODO
+	timecodeVariables: 'disabled' | 'notifications' | 'polling'
 	pollingInterval: number
 }
 
@@ -63,7 +63,6 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			label: 'Custom Reel',
 			width: 6,
 			default: 'A001',
-			regex: Regex.SOMETHING,
 		},
 		{
 			type: 'static-text',

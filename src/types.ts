@@ -18,6 +18,7 @@ export interface InstanceBaseExt extends InstanceBase<HyperdeckConfig> {
 
 	remoteInfo: Commands.RemoteInfoCommandResponse | null
 	formatToken: string | null
+	formatTokenTimeout: NodeJS.Timeout | null
 
 	clipsList: Commands.ClipInfo[]
 
@@ -26,7 +27,7 @@ export interface InstanceBaseExt extends InstanceBase<HyperdeckConfig> {
 	 *
 	 * @access protected
 	 */
-	updateClips(): Promise<void>
+	updateClips(doFullInit?: boolean): Promise<void>
 
 	sendCommand<TResponse>(cmd: Commands.AbstractCommand<TResponse>): Promise<TResponse>
 

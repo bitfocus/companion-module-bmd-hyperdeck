@@ -90,6 +90,43 @@ export function initActions(self: InstanceBaseExt) {
 		},
 	}
 
+	actions['spill'] = {
+		name: 'Spill',
+		description: 'Spill current recording to specified slot',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Slot',
+				id: 'slot',
+				default: 'next',
+				choices: [
+					{
+						id: 'next',
+						label: 'next',
+					},
+					{
+						id: 'same',
+						label: 'Same Slot',
+					},
+					...modelChoices.Slots,
+				],
+			},
+		],
+		callback: async ({ options }) => {
+			const cmd = new Commands.RecordSpillCommand()
+			if (!options.slot || options.slot === 'next') {
+				// No parameter
+			} else if (options.slot === 'same') {
+				// Split and continue on the same slot
+				if (self.transportInfo.slotId) cmd.slot = self.transportInfo.slotId
+			} else {
+				cmd.slot = getOptNumber(options, 'slot')
+			}
+
+			await self.sendCommand(cmd)
+		},
+	}
+
 	if (self.config.modelID == 'bmdDup4K') {
 		actions['recAppend'] = {
 			name: 'Append Record',

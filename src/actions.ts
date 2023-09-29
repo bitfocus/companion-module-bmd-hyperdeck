@@ -4,7 +4,7 @@ import {
 	CompanionVariableValues,
 	Regex,
 } from '@companion-module/base'
-import { Commands, FilesystemFormat } from 'hyperdeck-connection'
+import { Commands, FilesystemFormat, VideoFormat } from 'hyperdeck-connection'
 import {
 	CHOICES_STARTEND,
 	CHOICES_PREVIEWMODE,
@@ -344,19 +344,40 @@ export function initActions(self: InstanceBaseExt) {
 			},
 		}
 		actions['select'] = {
-			name: 'Select (slot)',
+			name: 'Select slot or format',
 			options: [
 				{
 					type: 'dropdown',
 					label: 'Slot',
 					id: 'slot',
 					default: 1,
-					choices: modelChoices.Slots,
+					choices: [
+						{
+							id: 'unchanged',
+							label: 'Unchanged',
+						},
+						...modelChoices.Slots,
+					],
+				},
+				{
+					type: 'dropdown',
+					label: 'Format',
+					id: 'format',
+					default: 'unchanged',
+					choices: [
+						// nocommit - upgrade script
+						{
+							id: 'unchanged',
+							label: 'Unchanged',
+						},
+						...modelChoices.VideoFormats,
+					],
 				},
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.SlotSelectCommand()
-				cmd.slotId = getOptNumber(options, 'slot')
+				if (options.slot && options.slot !== 'unchanged') cmd.slotId = getOptNumber(options, 'slot')
+				if (options.format && options.format !== 'unchanged') cmd.format = options.format as VideoFormat
 				await self.sendCommand(cmd)
 
 				// select will update internal cliplist so we should fetch those

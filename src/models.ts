@@ -1,4 +1,17 @@
 import { AudioInputType, FileFormatFamily, VideoInputType } from './choices.js'
+import {
+	FORMATS_2K_DCI,
+	FORMATS_3G_SDI,
+	FORMATS_4K30,
+	FORMATS_4K60,
+	FORMATS_4K_DCI,
+	FORMATS_8K,
+	FORMATS_8K_DCI,
+	FORMATS_HD_SDI,
+	FORMATS_SD,
+	FORMATS_SD_PROGRESSIVE,
+} from './choices/videoFormats.js'
+import { VideoFormat } from 'hyperdeck-connection'
 
 export interface ModelInfo {
 	id: string
@@ -6,6 +19,7 @@ export interface ModelInfo {
 	videoInputs: VideoInputType[]
 	audioInputs: AudioInputType[]
 	fileFormats: FileFormatFamily[]
+	videoFormats: VideoFormat[]
 	slotLabels: string
 	maxShuttle: number
 	hasSeparateInputFormat: boolean
@@ -13,6 +27,7 @@ export interface ModelInfo {
 
 export const CONFIG_MODELS: Record<string, ModelInfo> = {
 	hdStudio: {
+		// Specs: https://cvp.com/product/ex-showroom-blackmagic_bmd-hyperd-st2_hyper-832138
 		id: 'hdStudio',
 		label: 'HyperDeck Studio',
 		videoInputs: [VideoInputType.SDI, VideoInputType.HDMI],
@@ -23,11 +38,13 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.Proxy,
 			FileFormatFamily.DNxHD220,
 		],
+		videoFormats: [...FORMATS_SD, ...FORMATS_SD_PROGRESSIVE, ...FORMATS_HD_SDI],
 		slotLabels: 'SSD2',
 		maxShuttle: 1600,
 		hasSeparateInputFormat: false,
 	},
 	hdStudioPro: {
+		// Specs: https://cvp.com/product/bmd_hyperdeck_studio_pro
 		id: 'hdStudioPro',
 		label: 'HyperDeck Studio Pro',
 		videoInputs: [VideoInputType.SDI, VideoInputType.HDMI, VideoInputType.Component],
@@ -37,6 +54,14 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.ProRes,
 			FileFormatFamily.Proxy,
 			FileFormatFamily.DNxHD220,
+		],
+		videoFormats: [
+			...FORMATS_SD,
+			...FORMATS_SD_PROGRESSIVE,
+			...FORMATS_HD_SDI,
+			...FORMATS_3G_SDI,
+			...FORMATS_2K_DCI,
+			...FORMATS_4K30,
 		],
 		slotLabels: 'SSD2',
 		maxShuttle: 1600,
@@ -57,6 +82,16 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.DNxHR_SQ,
 			FileFormatFamily.DNxHR_LB,
 		],
+		videoFormats: [
+			...FORMATS_SD,
+			...FORMATS_SD_PROGRESSIVE,
+			...FORMATS_HD_SDI,
+			...FORMATS_3G_SDI,
+			...FORMATS_2K_DCI,
+			...FORMATS_4K30,
+			...FORMATS_4K60,
+			...FORMATS_4K_DCI,
+		],
 		slotLabels: 'SSD2',
 		maxShuttle: 1600,
 		hasSeparateInputFormat: false,
@@ -67,11 +102,13 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		videoInputs: [VideoInputType.SDI, VideoInputType.Optical],
 		audioInputs: [AudioInputType.Embedded],
 		fileFormats: [FileFormatFamily.H264, FileFormatFamily.H265],
+		videoFormats: [...FORMATS_SD, ...FORMATS_HD_SDI, ...FORMATS_3G_SDI, ...FORMATS_2K_DCI],
 		slotLabels: 'SD25', //TODO check correct slots
 		maxShuttle: 100,
 		hasSeparateInputFormat: false,
 	},
 	hdStudioMini: {
+		// Specs: https://cvp.com/product/ex-showroom-blackmagic-bmd-hyperd-stm-hyperdeck
 		id: 'hdStudioMini',
 		label: 'HyperDeck Studio Mini',
 		videoInputs: [VideoInputType.SDI],
@@ -86,6 +123,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.DNxHR_LB,
 			FileFormatFamily.H264,
 		],
+		videoFormats: [...FORMATS_SD, ...FORMATS_HD_SDI, ...FORMATS_3G_SDI],
 		slotLabels: 'SD2',
 		maxShuttle: 1600,
 		hasSeparateInputFormat: false,
@@ -102,6 +140,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.DNxHD220,
 			FileFormatFamily.H264,
 		],
+		videoFormats: [...FORMATS_SD, ...FORMATS_HD_SDI, ...FORMATS_3G_SDI, ...FORMATS_2K_DCI],
 		slotLabels: 'SD2_USB',
 		maxShuttle: 5000,
 		hasSeparateInputFormat: true,
@@ -119,6 +158,14 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.DNxHR_LB,
 			FileFormatFamily.H264_SDI,
 			FileFormatFamily.H264,
+		],
+		videoFormats: [
+			...FORMATS_SD,
+			...FORMATS_HD_SDI,
+			...FORMATS_3G_SDI,
+			...FORMATS_2K_DCI,
+			...FORMATS_4K30,
+			...FORMATS_4K_DCI,
 		],
 		slotLabels: 'SD2_USB',
 		maxShuttle: 5000,
@@ -138,6 +185,14 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.H264_SDI,
 			FileFormatFamily.H264,
 		],
+		videoFormats: [
+			...FORMATS_SD,
+			...FORMATS_HD_SDI,
+			...FORMATS_3G_SDI,
+			...FORMATS_2K_DCI,
+			...FORMATS_4K30,
+			...FORMATS_4K_DCI,
+		],
 		slotLabels: 'SSD2_SD2_USB',
 		maxShuttle: 5000,
 		hasSeparateInputFormat: true,
@@ -155,6 +210,15 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.DNxHR_LB,
 			FileFormatFamily.H264_5,
 		],
+		videoFormats: [
+			...FORMATS_SD,
+			...FORMATS_HD_SDI,
+			...FORMATS_3G_SDI,
+			...FORMATS_2K_DCI,
+			...FORMATS_4K30,
+			...FORMATS_4K60,
+			...FORMATS_4K_DCI,
+		],
 		slotLabels: 'SSD2_SD2_USB',
 		maxShuttle: 5000,
 		hasSeparateInputFormat: true,
@@ -171,6 +235,17 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		],
 		audioInputs: [AudioInputType.Embedded, AudioInputType.XLR, AudioInputType.RCA],
 		fileFormats: [FileFormatFamily.ProRes, FileFormatFamily.H265],
+		videoFormats: [
+			...FORMATS_SD,
+			...FORMATS_HD_SDI,
+			...FORMATS_3G_SDI,
+			...FORMATS_2K_DCI,
+			...FORMATS_4K30,
+			...FORMATS_4K60,
+			...FORMATS_4K_DCI,
+			...FORMATS_8K,
+			...FORMATS_8K_DCI,
+		],
 		slotLabels: 'SD2_USB', //TODO check correct slots
 		maxShuttle: 5000,
 		hasSeparateInputFormat: true,
@@ -188,6 +263,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.H264,
 			FileFormatFamily.Teleprompter,
 		],
+		videoFormats: [...FORMATS_SD, ...FORMATS_HD_SDI, ...FORMATS_3G_SDI, ...FORMATS_2K_DCI],
 		slotLabels: 'SD_USB',
 		maxShuttle: 5000,
 		hasSeparateInputFormat: true, // TODO - verify

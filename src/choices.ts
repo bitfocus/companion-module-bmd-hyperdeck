@@ -2,6 +2,7 @@ import { DropdownChoice, DropdownChoiceId } from '@companion-module/base'
 import { ModelInfo } from './models.js'
 import { ClipDropdownChoice, InstanceBaseExt } from './types.js'
 import { stripExtension } from './util.js'
+import { VideoFormatsToChoices } from './choices/videoFormats.js'
 
 export const DropdownChoiceTrue: DropdownChoiceId = true as unknown as DropdownChoiceId
 export const DropdownChoiceFalse: DropdownChoiceId = false as unknown as DropdownChoiceId
@@ -224,6 +225,7 @@ export interface ModelChoices {
 	VideoInputs: DropdownChoice[]
 	Slots: DropdownChoice[]
 	FileFormats: FormatDropdownChoice[]
+	VideoFormats: DropdownChoice[]
 	Clips: ClipDropdownChoice[]
 }
 
@@ -239,6 +241,7 @@ export function createModelChoices(model: ModelInfo | undefined) {
 		VideoInputs: [],
 		Slots: [],
 		FileFormats: [],
+		VideoFormats: [],
 		Clips: [],
 	}
 
@@ -256,6 +259,8 @@ export function createModelChoices(model: ModelInfo | undefined) {
 		for (const inputId of model.videoInputs) {
 			result.VideoInputs.push(CONFIG_VIDEOINPUTS[inputId] ?? createDefaultChoice(inputId))
 		}
+
+		result.VideoFormats.push(...VideoFormatsToChoices(model.videoFormats))
 
 		//TODO define CHOICES_SLOTS based on model
 		result.Slots = CONFIG_SLOT_LABELS[model.slotLabels] ?? []

@@ -22,6 +22,7 @@ export const upgradeScripts: CompanionStaticUpgradeScript<HyperdeckConfig>[] = [
 		audio_input: true,
 		format_ready: true,
 	}),
+	upgradeAddFormatToSelectSlot,
 ]
 
 // v1.0.* -> v1.1.0 (combine old play actions)
@@ -137,6 +138,29 @@ function upgrade126to127(
 		// If the clip is not a number, return early as we don't need to change it
 		if (action.actionId === 'gotoName' && !isNaN(action.options.clip as any)) {
 			action.actionId = 'gotoN'
+			changes.updatedActions.push(action)
+		}
+	}
+
+	return changes
+}
+
+function upgradeAddFormatToSelectSlot(
+	_context: CompanionUpgradeContext<HyperdeckConfig>,
+	props: CompanionStaticUpgradeProps<HyperdeckConfig>
+): CompanionStaticUpgradeResult<HyperdeckConfig> {
+	const changes: CompanionStaticUpgradeResult<HyperdeckConfig> = {
+		updatedConfig: null,
+		updatedActions: [],
+		updatedFeedbacks: [],
+	}
+
+	for (const action of props.actions) {
+		if (action.options === undefined) {
+			action.options = {}
+		}
+		if (action.actionId === 'select' && !action.options.format) {
+			action.options.format = 'unchanged'
 			changes.updatedActions.push(action)
 		}
 	}

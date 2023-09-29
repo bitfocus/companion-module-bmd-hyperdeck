@@ -10,10 +10,11 @@ const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
 	[VideoFormat.PAL]: 25,
 	[VideoFormat.NTSCp]: 29.97,
 	[VideoFormat.PALp]: 25,
+
 	[VideoFormat._720p50]: 50,
 	[VideoFormat._720p5994]: 59.94,
 	[VideoFormat._720p60]: 60,
-	[VideoFormat._1080p23976]: 23.976, // not supported by smpte-timecode lib
+	[VideoFormat._1080p23976]: 23.976,
 	[VideoFormat._1080p24]: 24,
 	[VideoFormat._1080p25]: 25,
 	[VideoFormat._1080p2997]: 29.97,
@@ -21,17 +22,42 @@ const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
 	[VideoFormat._1080i50]: 25,
 	[VideoFormat._1080i5994]: 29.97,
 	[VideoFormat._1080i60]: 30,
+
 	[VideoFormat._1080p50]: 50,
 	[VideoFormat._1080p5994]: 59.94,
 	[VideoFormat._1080p60]: 60,
-	[VideoFormat._4Kp23976]: 23.976, // not supported by smpte-timecode lib
+
+	[VideoFormat._2Kp23976DCI]: 23.976,
+	[VideoFormat._2Kp24DCI]: 24,
+	[VideoFormat._2Kp25DCI]: 25,
+
+	[VideoFormat._4Kp23976]: 23.976,
 	[VideoFormat._4Kp24]: 24,
 	[VideoFormat._4Kp25]: 25,
 	[VideoFormat._4Kp2997]: 29.97,
 	[VideoFormat._4Kp30]: 30,
+
 	[VideoFormat._4Kp50]: 50,
 	[VideoFormat._4Kp5994]: 59.94,
 	[VideoFormat._4Kp60]: 60,
+
+	[VideoFormat._4Kp23976DCI]: 23.976,
+	[VideoFormat._4Kp24DCI]: 24,
+	[VideoFormat._4Kp25DCI]: 25,
+
+	[VideoFormat._8Kp23976]: 23.976,
+	[VideoFormat._8Kp24]: 24,
+	[VideoFormat._8Kp25]: 25,
+	[VideoFormat._8Kp2997]: 29.97,
+	[VideoFormat._8Kp30]: 30,
+
+	[VideoFormat._8Kp50]: 50,
+	[VideoFormat._8Kp5994]: 59.94,
+	[VideoFormat._8Kp60]: 60,
+
+	[VideoFormat._8Kp23976DCI]: 23.976,
+	[VideoFormat._8Kp24DCI]: 24,
+	[VideoFormat._8Kp25DCI]: 25,
 }
 
 export function updateTransportInfoVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {

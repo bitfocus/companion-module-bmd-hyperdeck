@@ -1,5 +1,5 @@
 import Timecode from 'smpte-timecode'
-import { VideoFormat } from 'hyperdeck-connection'
+import { SlotStatus, VideoFormat } from 'hyperdeck-connection'
 import { CompanionVariableDefinition, CompanionVariableValues } from '@companion-module/base'
 import { InstanceBaseExt } from './types.js'
 import { stripExtension } from './util.js'
@@ -98,8 +98,10 @@ export function updateClipVariables(instance: InstanceBaseExt, newValues: Compan
 export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
 	const activeSlotId = instance.transportInfo.slotId
 	instance.slotInfo.forEach((slot, index) => {
-		if (slot != null) {
-			let recordingTime = '--:--:--'
+		if (!slot) return
+
+		let recordingTime = '--:--:--'
+		if (slot.status === SlotStatus.MOUNTED) {
 			try {
 				if (typeof slot.recordingTime === 'number') {
 					recordingTime = new Date(slot.recordingTime * 1000).toISOString().substr(11, 8)
@@ -107,11 +109,11 @@ export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: Co
 			} catch (e) {
 				instance.log('error', `Slot ${index} recording time parse error: ${e}`)
 			}
+		}
 
-			newValues[`slot${index}_recordingTime`] = recordingTime
-			if (slot.slotId === activeSlotId) {
-				newValues['recordingTime'] = recordingTime
-			}
+		newValues[`slot${index}_recordingTime`] = recordingTime
+		if (slot.slotId === activeSlotId) {
+			newValues['recordingTime'] = recordingTime
 		}
 	})
 }

@@ -11,7 +11,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@companion-module/base": "~1.4.3",
-		"hyperdeck-connection": "2.0.0-nightly-feat-strong-event-types-20230923-210102-af392d0.0",
+		"hyperdeck-connection": "2.0.0-nightly-feat-strong-event-types-20230929-210435-07905d7.0",
 		"semver": "^7.5.4",
 		"smpte-timecode": "^1.3.3"
 	},

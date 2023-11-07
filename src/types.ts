@@ -37,3 +37,8 @@ export interface InstanceBaseExt extends InstanceBase<HyperdeckConfig> {
 export interface TransportInfoStateExt extends Commands.TransportInfoCommandResponse {
 	clipName: string | null
 }
+
+export interface IpAndPort {
+	ip: string
+	port: number | undefined
+}

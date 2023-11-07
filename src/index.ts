@@ -15,7 +15,7 @@ import { upgradeScripts } from './upgrades.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
 import { mergeState, protocolGte, stripExtension } from './util.js'
-import { InstanceBaseExt, TransportInfoStateExt } from './types.js'
+import { InstanceBaseExt, IpAndPort, TransportInfoStateExt } from './types.js'
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -32,7 +32,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	config!: HyperdeckConfig
 	model!: ModelInfo
 
-	private pollTimer: NodeJS.Timer | null = null
+	private pollTimer: NodeJS.Timeout | null = null
 
 	protocolVersion: number = 0.0
 	transportInfo: TransportInfoStateExt
@@ -151,7 +151,9 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		// 	this.config.port = 9993
 		// }
 
-		if (!this.config.host) {
+		const targetAddress = this.parseIpAndPort()
+
+		if (!targetAddress) {
 			this.updateStatus(InstanceStatus.BadConfig)
 			return
 		}
@@ -302,7 +304,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			this.setVariableValues(newVariables)
 		})
 
-		this.hyperDeck.connect(this.config.host /*this.config.port*/)
+		this.hyperDeck.connect(targetAddress.ip, targetAddress.port)
 	}
 
 	/**
@@ -330,7 +332,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	async configUpdated(config: HyperdeckConfig) {
 		let resetConnection = false
 
-		if (this.config.host !== config.host) {
+		if (this.config.host !== config.host || this.config.bonjourHost !== config.bonjourHost) {
 			resetConnection = true
 		}
 
@@ -503,6 +505,29 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		if (!this.hyperDeck) throw new Error('Hyperdeck not initialised')
 		const rawInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
 		this.transportInfo = this.extendTransportInfo(rawInfo)
+	}
+
+	parseIpAndPort(): IpAndPort | null {
+		const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+
+		if (this.config.bonjourHost) {
+			const [ip, rawPort] = this.config.bonjourHost.split(':')
+			const port = Number(rawPort)
+			if (ip.match(ipRegex) && !isNaN(port)) {
+				return {
+					ip,
+					port,
+				}
+			}
+		} else if (this.config.host) {
+			if (this.config.host.match(ipRegex)) {
+				return {
+					ip: this.config.host,
+					port: undefined,
+				}
+			}
+		}
+		return null
 	}
 }
 

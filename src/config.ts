@@ -17,6 +17,7 @@ CHOICES_MODEL.sort((a, b) => {
 })
 
 export interface HyperdeckConfig {
+	bonjourHost?: string
 	host: string
 	modelID: string
 	reel: string
@@ -32,7 +33,13 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			width: 12,
 			label: 'Warning',
 			value:
-				'Hyperdeck only supports 1 connection at any given time. Be sure to disconect any other devices controling it. Remember to press the remote button on the frontpanel of the Hyperdeck to enable remote control.',
+				'Some Hyperdecks only supports 1 connection at any given time. Be sure to disconect any other devices controling it. Remember to press the remote button on the frontpanel of the Hyperdeck to enable remote control.',
+		},
+		{
+			type: 'bonjour-device',
+			id: 'bonjourHost',
+			label: 'Device',
+			width: 6,
 		},
 		{
 			type: 'textinput',
@@ -40,6 +47,15 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			label: 'Target IP',
 			width: 6,
 			regex: Regex.IP,
+			isVisible: (options) => !options['bonjourHost'],
+		},
+		{
+			type: 'static-text',
+			id: 'host-filler',
+			width: 6,
+			label: '',
+			value: '',
+			isVisible: (options) => !!options['bonjourHost'],
 		},
 		{
 			type: 'dropdown',
@@ -48,6 +64,13 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			width: 6,
 			choices: CHOICES_MODEL,
 			default: 0,
+		},
+		{
+			type: 'static-text',
+			id: 'modelID-filler',
+			width: 6,
+			label: '',
+			value: '',
 		},
 		{
 			type: 'static-text',

@@ -40,5 +40,11 @@
 	},
 	"manufacturer": "Blackmagic Design",
 	"products": ["Hyperdeck"],
-	"keywords": ["Recording", "Video", "Media"]
+	"keywords": ["Recording", "Video", "Media"],
+	"bonjourQueries": {
+		"bonjourHost": {
+			"type": "hyperdeck_ctrl",
+			"protocol": "tcp"
+		}
+	}
 }

@@ -41,8 +41,14 @@ export function initActions(self: InstanceBaseExt) {
 	const getOptBool = (options: CompanionOptionValues, key: string): boolean => {
 		let value = options[key]
 		if (typeof value === 'boolean') return value
-		value = Boolean(value)
-		if (typeof value === 'boolean') return value		
+		if (typeof value === 'string') {
+			if (value?.toLowerCase?.() === 'true') {
+				value = true
+			}else if (value?.toLowerCase?.() === 'false') {
+				value = false
+			}
+			if (typeof value === 'boolean') return value		
+		}
 		throw new Error(`Invalid boolean for ${key}: ${options[key]} (${typeof value})`)
 	}
 

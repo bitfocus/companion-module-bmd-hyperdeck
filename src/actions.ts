@@ -32,16 +32,18 @@ export function initActions(self: InstanceBaseExt) {
 		if (typeof value === 'number') return value
 		value = Number(value)
 		if (!isNaN(value)) return value
-		throw new Error(`Invalid number for ${key}: ${options[key]}`)
+		throw new Error(`Invalid number for ${key}: ${options[key]} (${typeof value})`)
 	}
 	const getOptString = (options: CompanionOptionValues, key: string): string => {
 		const value = options[key]
 		return value?.toString() ?? ''
 	}
 	const getOptBool = (options: CompanionOptionValues, key: string): boolean => {
-		const value = options[key]
+		let value = options[key]
 		if (typeof value === 'boolean') return value
-		throw new Error(`Invalid boolean for ${key}: ${options[key]}`)
+		value = Boolean(value)
+		if (typeof value === 'boolean') return value		
+		throw new Error(`Invalid boolean for ${key}: ${options[key]} (${typeof value})`)
 	}
 
 	if (self.config.modelID != 'bmdDup4K') {

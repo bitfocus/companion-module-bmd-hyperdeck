@@ -42,12 +42,8 @@ export function initActions(self: InstanceBaseExt) {
 		let value = options[key]
 		if (typeof value === 'boolean') return value
 		if (typeof value === 'string') {
-			if (value?.toLowerCase?.() === 'true') {
-				value = true
-			}else if (value?.toLowerCase?.() === 'false') {
-				value = false
-			}
-			if (typeof value === 'boolean') return value		
+			if (value.toLowerCase() === 'true')  return true
+			if (value.toLowerCase() === 'false') return false
 		}
 		throw new Error(`Invalid boolean for ${key}: ${options[key]} (${typeof value})`)
 	}

@@ -45,3 +45,13 @@ export function mergeState<T>(current: T, patch: Partial<T>): T {
 
 	return res
 }
+
+export function toHHMMSS(secs: number): string {
+	var hours   = Math.floor(secs / 3600)
+	var minutes = Math.floor(secs / 60) % 60
+	var seconds = secs % 60
+	
+	return [hours,minutes,seconds]
+	.map(v => v < 10 ? "0" + v : v)
+	.join(":")
+}

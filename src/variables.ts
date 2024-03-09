@@ -2,7 +2,7 @@ import Timecode from 'smpte-timecode'
 import { SlotStatus, VideoFormat } from 'hyperdeck-connection'
 import { CompanionVariableDefinition, CompanionVariableValues } from '@companion-module/base'
 import { InstanceBaseExt } from './types.js'
-import { stripExtension } from './util.js'
+import { stripExtension, toHHMMSS } from './util.js'
 import { CONFIG_FILEFORMATS } from './choices.js'
 
 const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
@@ -104,7 +104,8 @@ export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: Co
 		if (slot.status === SlotStatus.MOUNTED) {
 			try {
 				if (typeof slot.recordingTime === 'number') {
-					recordingTime = new Date(slot.recordingTime * 1000).toISOString().substr(11, 8)
+					recordingTime = toHHMMSS(slot.recordingTime)
+					instance.log('debug', `Slot ${index} recording time: ${slot.recordingTime} secs -> ${recordingTime}`)
 				}
 			} catch (e) {
 				instance.log('error', `Slot ${index} recording time parse error: ${e}`)

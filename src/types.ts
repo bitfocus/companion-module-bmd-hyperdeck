@@ -21,6 +21,8 @@ export interface InstanceBaseExt extends InstanceBase<HyperdeckConfig> {
 	formatTokenTimeout: NodeJS.Timeout | null
 
 	clipsList: Commands.ClipInfo[]
+	
+	slate: SlateInfoStateExt
 
 	/**
 	 * INTERNAL: Get clip list from the hyperdeck
@@ -41,4 +43,25 @@ export interface TransportInfoStateExt extends Commands.TransportInfoCommandResp
 export interface IpAndPort {
 	ip: string
 	port: number | undefined
+}
+
+export interface SlateInfoStateExt {
+	slateFor?: string
+	/*reel?: number
+	sceneId?: number
+	shotType?: string
+	take?: number
+	takeScenario?: string
+	goodTake?: string
+	environment?: string
+	dayNight?: string*/
+	projectName?: string
+	camera?: string
+	director?: string
+	cameraOperator?: string
+	/*lensType?: string
+	iris?: string
+	focalLength?: string
+	distance?: string
+	filter?: string*/
 }

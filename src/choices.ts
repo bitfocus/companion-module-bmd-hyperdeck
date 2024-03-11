@@ -220,6 +220,47 @@ const CONFIG_SLOT_LABELS: Record<string, DropdownChoice[] | undefined> = {
 	],
 }
 
+// Slate metadata
+
+export const CONFIG_SLATE_CAMERA_ID: DropdownChoice[] = [
+	{ id: 'A', label: 'A' },
+	{ id: 'B', label: 'B' },
+	{ id: 'C', label: 'C' },
+	{ id: 'D', label: 'D' },
+	{ id: 'E', label: 'E' },
+	{ id: 'F', label: 'F' },
+	{ id: 'G', label: 'G' },
+	{ id: 'H', label: 'H' },
+	{ id: 'I', label: 'I' },
+	{ id: 'J', label: 'J' },
+	{ id: 'K', label: 'K' },
+	{ id: 'L', label: 'L' },
+	{ id: 'M', label: 'M' },
+	{ id: 'N', label: 'N' },
+	{ id: 'O', label: 'O' },
+	{ id: 'P', label: 'P' },
+	{ id: 'Q', label: 'Q' },
+	{ id: 'R', label: 'R' },
+	{ id: 'S', label: 'S' },
+	{ id: 'T', label: 'T' },
+	{ id: 'U', label: 'U' },
+	{ id: 'V', label: 'V' },
+	{ id: 'W', label: 'W' },
+	{ id: 'X', label: 'X' },
+	{ id: 'Y', label: 'Y' },
+	{ id: 'Z', label: 'Z' },
+	{ id: '1', label: '1' },
+	{ id: '2', label: '2' },
+	{ id: '3', label: '3' },
+	{ id: '4', label: '4' },
+	{ id: '5', label: '5' },
+	{ id: '6', label: '6' },
+	{ id: '7', label: '7' },
+	{ id: '8', label: '8' },
+	{ id: '9', label: '9' },
+]
+
+
 export interface ModelChoices {
 	AudioInputs: DropdownChoice[]
 	VideoInputs: DropdownChoice[]
@@ -228,6 +269,7 @@ export interface ModelChoices {
 	VideoFormats: DropdownChoice[]
 	Clips: ClipDropdownChoice[]
 }
+
 
 function createDefaultChoice(id: string): DropdownChoice {
 	return {

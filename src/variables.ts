@@ -105,7 +105,9 @@ export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: Co
 			try {
 				if (typeof slot.recordingTime === 'number') {
 					recordingTime = toHHMMSS(slot.recordingTime)
-					instance.log('debug', `Slot ${index} recording time: ${slot.recordingTime} secs -> ${recordingTime}`)
+					if (instance.config.timecodeVariables !== 'polling') {
+						instance.log('debug', `Slot ${index} recording time: ${slot.recordingTime} secs -> ${recordingTime}`)
+					}
 				}
 			} catch (e) {
 				instance.log('error', `Slot ${index} recording time parse error: ${e}`)
@@ -221,6 +223,14 @@ export function updateConfigurationVariables(instance: InstanceBaseExt, newValue
 
 export function updateRemoteVariable(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
 	newValues['remoteEnabled'] = instance.remoteInfo?.enabled || false
+}
+
+export function updateSlateVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+	newValues['slateFor'] = instance.slate.slateFor || '–'
+	newValues['slateProjectName'] = instance.slate.projectName || '–'
+	newValues['slateCamera'] = instance.slate.camera || '–'
+	newValues['slateDirector'] = instance.slate.director || '–'
+	newValues['slateCameraOperator'] = instance.slate.cameraOperator || '–'
 }
 
 export function initVariables(instance: InstanceBaseExt) {
@@ -346,6 +356,32 @@ export function initVariables(instance: InstanceBaseExt) {
 	initTcVariable(true)
 
 	updateTimecodeVariables(instance, values)
+	
+	// Slate variables
+	/// Project Slate
+	variables.push({
+		name: 'Slate for',
+		variableId: 'slateFor',
+	})
+	variables.push({
+		name: 'Project Name',
+		variableId: 'slateProjectName',
+	})
+	variables.push({
+		name: 'Camera',
+		variableId: 'slateCamera',
+	})
+	variables.push({
+		name: 'Director',
+		variableId: 'slateDirector',
+	})
+	variables.push({
+		name: 'Camera Operator',
+		variableId: 'slateCameraOperator',
+	})
+	/// Clip Slate
+	/// Lens Slate
+	updateSlateVariables(instance, values)
 
 	instance.setVariableDefinitions(variables)
 	instance.setVariableValues(values)

@@ -8,6 +8,7 @@ import {
 	updateClipVariables,
 	updateConfigurationVariables,
 	updateRemoteVariable,
+	updateSlateVariables,
 } from './variables.js'
 import { initActions } from './actions.js'
 import { initFeedbacks } from './feedbacks.js'
@@ -15,7 +16,7 @@ import { upgradeScripts } from './upgrades.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
 import { mergeState, protocolGte, stripExtension } from './util.js'
-import { InstanceBaseExt, IpAndPort, TransportInfoStateExt } from './types.js'
+import { InstanceBaseExt, IpAndPort, TransportInfoStateExt, SlateInfoStateExt } from './types.js'
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -44,6 +45,8 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	formatTokenTimeout: NodeJS.Timeout | null = null
 
 	clipsList: Commands.ClipInfo[] = []
+	
+	slate: SlateInfoStateExt
 
 	/**
 	 * Create an instance of a HyperDeck module.
@@ -70,6 +73,13 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			audioInput: '',
 			videoInput: '',
 			fileFormat: '',
+		}
+		this.slate = {
+			slateFor: '–',
+			projectName: '–',
+			camera: '–',
+			director: '–',
+			cameraOperator: '–',
 		}
 	}
 
@@ -179,8 +189,12 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 					notify.transport = true
 					notify.slot = true
 					notify.remote = true
-					if (protocolGte(this.protocolVersion, '1.11') && this.config.timecodeVariables === 'notifications')
-						notify.displayTimecode = true
+					if (protocolGte(this.protocolVersion, '1.11')) {
+						if (this.config.timecodeVariables === 'notifications') {
+							notify.displayTimecode = true
+						}
+						notify.slateInfo = true
+					}
 
 					await hyperdeck.sendCommand(notify)
 
@@ -215,9 +229,14 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 				}
 
 				this.updateStatus(InstanceStatus.Ok)
-
+				
 				await this.updateClips(true)
 				this.checkFeedbacks()
+
+				if (protocolGte(this.protocolVersion, '1.11')) {
+					this.getSlate()
+					this.setSlateProject()
+				}
 
 				// If polling is enabled, setup interval command
 				if (this.pollTimer) clearInterval(this.pollTimer)
@@ -261,7 +280,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		})
 
 		this.hyperDeck.on('notify.transport', async (res) => {
-			this.log('debug', 'Transport Status Changed')
+			this.log('debug', `Transport status change: ${JSON.stringify(res)}`)
 			this.transportInfo = this.extendTransportInfo(mergeState(this.transportInfo, res))
 
 			const newVariables = {}
@@ -304,7 +323,19 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			this.setVariableValues(newVariables)
 		})
 
+		this.hyperDeck.on('notify.slateInfo', (res) => {
+			this.log('debug', `Slate Info Changed: ${JSON.stringify(res)}`)
+			this.slate = mergeState(this.slate, res)
+
+			const newVariables = {}
+			updateSlateVariables(this, newVariables)
+			this.setVariableValues(newVariables)
+		})
+
 		this.hyperDeck.connect(targetAddress.ip, targetAddress.port)
+
+		// hyperdeck-connection debug tool
+		// this.hyperDeck.DEBUG = true;
 	}
 
 	/**
@@ -365,6 +396,11 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.initActionsAndFeedbacks()
 		//this.initPresets();
 		this.initVariables()
+
+		// Update the slate project info
+		if (this.hyperDeck?.connected && protocolGte(this.protocolVersion, '1.11')) {
+			this.setSlateProject()
+		}
 
 		if (resetConnection || !this.hyperDeck) {
 			this.initHyperdeck()
@@ -483,6 +519,52 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		}
 
 		return res
+	}
+
+	// Set Slate Project metadata
+	async setSlateProject() {
+		try {
+			const cmd = new Commands.SlateProjectCommand(
+				this.config.projectName,
+				this.config.camera,
+				this.config.director,
+				this.config.cameraOperator,
+			)
+			this.sendCommand(cmd)
+			this.log('debug', `Project slate updated: Name: ${this.config.projectName}, Camera: ${this.config.camera}, Director: ${	this.config.director}, Operator: ${this.config.cameraOperator}`)
+		} catch (e: any) {
+			if (e.code) {
+				this.log('error', `${e.code}: ${e.name}`)
+			}
+		}
+	}
+
+	// Get Slate metadata
+	async getSlate() {
+		try {
+			const newVariableValues = {}
+
+			if (!this.hyperDeck) throw new Error('TODO - no hyperdeck connection')
+
+			let queryResponse: Commands.SlateProjectCommandResponse
+			try {
+				queryResponse = await this.hyperDeck.sendCommand(new Commands.SlateProjectGetCommand())
+			} catch (e: any) {
+				throw e
+			}
+
+			this.slate = queryResponse
+			this.log('debug', `Slate Info Changed: ${JSON.stringify(queryResponse)}`)
+
+			// Update the received slate variables
+			updateSlateVariables(this, newVariableValues)
+			this.setVariableValues(newVariableValues)
+			
+		} catch (e: any) {
+			if (e.code) {
+				this.log('error', e.code + ' ' + e.name)
+			}
+		}
 	}
 
 	async sendCommand<TResponse>(cmd: Commands.AbstractCommand<TResponse>): Promise<TResponse> {

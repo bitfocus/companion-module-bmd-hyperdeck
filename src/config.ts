@@ -1,5 +1,6 @@
 import { Regex, SomeCompanionConfigField } from '@companion-module/base'
 import { CONFIG_MODELS } from './models.js'
+import { CONFIG_SLATE_CAMERA_ID } from './choices.js'
 
 const CONFIG_NOTIFICATION_METHOD = [
 	{ id: 'disabled', label: 'Disabled' },
@@ -20,6 +21,10 @@ export interface HyperdeckConfig {
 	bonjourHost?: string
 	host: string
 	modelID: string
+	projectName: string
+	camera: string
+	director: string
+	cameraOperator: string
 	reel: string
 	timecodeVariables: 'disabled' | 'notifications' | 'polling'
 	pollingInterval: number
@@ -71,6 +76,40 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			width: 6,
 			label: '',
 			value: '',
+		},
+		{
+			type: 'static-text',
+			id: 'info',
+			width: 12,
+			label: 'Slate Project Information',
+			value:
+			'The following settings will be stored within the meta-data of all clips recorded on the deck. This data can also be set/changed using the relevant actions.',
+		},
+		{
+			type: 'textinput',
+			id: 'projectName',
+			label: 'Project Name',
+			width: 6,
+		},
+		{
+			type: 'dropdown',
+			id: 'camera',
+			label: 'Camera',
+			choices: CONFIG_SLATE_CAMERA_ID,
+			default: 'A',
+			width: 2,
+		},
+		{
+			type: 'textinput',
+			id: 'director',
+			label: 'Director',
+			width: 6,
+		},
+		{
+			type: 'textinput',
+			id: 'cameraOperator',
+			label: 'Camera Operator',
+			width: 6,
 		},
 		{
 			type: 'static-text',

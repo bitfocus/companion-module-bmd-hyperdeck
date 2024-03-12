@@ -226,7 +226,7 @@ export function updateRemoteVariable(instance: InstanceBaseExt, newValues: Compa
 }
 
 export function updateSlateVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
-	newValues['slateFor'] = instance.slate.slateFor || '–'
+	newValues['slateFor'] = stripExtension(instance.slate.slateFor || '–')
 	newValues['slateProjectName'] = instance.slate.projectName || '–'
 	newValues['slateCamera'] = instance.slate.camera || '–'
 	newValues['slateDirector'] = instance.slate.director || '–'

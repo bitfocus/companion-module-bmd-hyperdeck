@@ -55,13 +55,13 @@ export interface SlateInfoStateExt {
 	goodTake?: string
 	environment?: string
 	dayNight?: string*/
-	projectName?: string
+	projectName?: string | null
 	camera?: string
-	director?: string
-	cameraOperator?: string
-	/*lensType?: string
-	iris?: string
-	focalLength?: string
-	distance?: string
-	filter?: string*/
+	director?: string | null
+	cameraOperator?: string | null
+	/*lensType?: string | null
+	iris?: string | null
+	focalLength?: string | null
+	distance?: string | null
+	filter?: string | null*/
 }

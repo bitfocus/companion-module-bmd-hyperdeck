@@ -335,7 +335,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.hyperDeck.connect(targetAddress.ip, targetAddress.port)
 
 		// hyperdeck-connection debug tool
-		// this.hyperDeck.DEBUG = true;
+			this.hyperDeck.DEBUG = true;
 	}
 
 	/**

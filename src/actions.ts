@@ -651,6 +651,115 @@ export function initActions(self: InstanceBaseExt) {
 				await self.sendCommand(cmd)
 			}
 		}
+		actions['slateClipNumbers'] = {
+			name: 'Slate Clip - Reel/Scene/Take',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Reel',
+					id: 'reelOption',
+					choices: [
+						{ id: 'unchanged', label: '-unchanged-' },
+						{ id: 'inc', label: 'Increment' },
+						{ id: 'dec', label: 'Decrement' },
+						{ id: 'set', label: 'Set' },
+					],
+					default: 'unchanged',
+				},
+				{
+					type: 'number',
+					label: 'Set Reel',
+					id: 'reelSet',
+					min: 1,
+					max: 999,
+					default: 1,
+					isVisible: (options) => options.reelOption === 'set',
+				},
+				{
+					type: 'dropdown',
+					label: 'Scene',
+					id: 'sceneOption',
+					choices: [
+						{ id: 'unchanged', label: '-unchanged-' },
+						{ id: 'inc', label: 'Increment' },
+						{ id: 'dec', label: 'Decrement' },
+						{ id: 'set', label: 'Set' },
+					],
+					default: 'unchanged',
+				},
+				{
+					type: 'textinput',
+					label: 'Set Scene',
+					id: 'sceneSet',
+					isVisible: (options) => options.sceneOption === 'set',
+				},
+				{
+					type: 'dropdown',
+					label: 'Take',
+					id: 'takeOption',
+					choices: [
+						{ id: 'unchanged', label: '-unchanged-' },
+						{ id: 'inc', label: 'Increment' },
+						{ id: 'dec', label: 'Decrement' },
+						{ id: 'set', label: 'Set' },
+					],
+					default: 'unchanged',
+				},
+				{
+					type: 'number',
+					label: 'Set Take',
+					id: 'takeSet',
+					min: 1,
+					max: 99,
+					default: 1,
+					isVisible: (options) => options.takeOption === 'set',
+				},
+			],
+			callback: async ({ options }) => {
+				const cmd = new Commands.SlateClipsCommand()
+				self.log('debug', `Current reel: ${self.slate.reel}`)
+				switch (options.reelOption) {
+					case "set":
+						cmd.reel = Number(options.reelSet)
+						break
+					case "inc":
+						if (self.slate.reel) cmd.reel = Math.min(self.slate.reel + 1, 999)
+						break
+					case "dec":
+						if (self.slate.reel) cmd.reel = Math.max(self.slate.reel - 1, 1)
+						break
+					default:
+						break
+				}
+				switch (options.sceneOption) {
+					case "set":
+						cmd.sceneId = getOptString(options, 'sceneSet')
+						break
+//				case "inc":
+//					if (self.slate.sceneId) cmd.sceneId = ++self.slate.sceneId
+//					break
+//				case "dec":
+//					if (self.slate.sceneId) cmd.sceneId = --self.slate.sceneId
+//					break
+					default:
+						break
+				}
+				switch (options.takeOption) {
+					case "set":
+						cmd.take = Number(options.takeSet)
+						break
+					case "inc":
+						if (self.slate.take) cmd.take = Math.min(self.slate.take + 1, 99)
+						break
+					case "dec":
+						if (self.slate.take) cmd.take = Math.max(self.slate.take - 1, 1)
+						break
+					default:
+						break
+				}
+				await self.sendCommand(cmd)
+			},
+		}
 	}
 
 	if (modelChoices.FileFormats.length > 1) {

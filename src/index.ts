@@ -326,7 +326,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.hyperDeck.on('notify.slateInfo', (res) => {
 			this.log('debug', `Slate Info Changed: ${JSON.stringify(res)}`)
 			this.slate = mergeState(this.slate, res)
-
+			console.log(`Slate state: ${JSON.stringify(this.slate)}`)
 			const newVariables = {}
 			updateSlateVariables(this, newVariables)
 			this.setVariableValues(newVariables)

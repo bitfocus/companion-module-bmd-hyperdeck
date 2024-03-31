@@ -83,6 +83,31 @@ export const CHOICES_REMOTESTATUS: DropdownChoice[] = [
 	{ id: DropdownChoiceFalse, label: 'Disabled' },
 ]
 
+export const CHOICES_SLATE_SHOTTYPE: DropdownChoice[] = [
+	{ id: 'WS', label: 'WS: wide shot' },
+	{ id: 'MS', label: 'MS: medium shot' },
+	{ id: 'MCU', label: 'MCU: medium clise up' },
+	{ id: 'CU', label: 'CU: close up' },
+	{ id: 'BCU', label: 'BCU: big close up' },
+	{ id: 'ECU', label: 'ECU: extreme close up' },
+]
+
+export const CHOICES_SLATE_TAKESCENARIO: DropdownChoice[] = [
+	{ id: 'PU', label: 'PU: Pick up' },
+	{ id: 'VFX', label: 'VFX: Visual effects' },
+	{ id: 'SER', label: 'SER: Series' },
+]
+
+export const CHOICES_SLATE_ENVIRONMENT: DropdownChoice[] = [
+	{ id: 'interior', label: 'Interior' },
+	{ id: 'exterior', label: 'Exterior' },
+]
+
+export const CHOICES_SLATE_DAYNIGHT: DropdownChoice[] = [
+	{ id: 'day', label: 'Day' },
+	{ id: 'night', label: 'Night' },
+]
+
 export enum AudioInputType {
 	Embedded = 'embedded',
 	XLR = 'XLR',

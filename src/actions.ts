@@ -12,6 +12,10 @@ import {
 	CHOICES_AUDIOCHANNELS,
 	CHOICES_FILESYSTEM,
 	CHOICES_REMOTECONTROL,
+	CHOICES_SLATE_SHOTTYPE,
+	CHOICES_SLATE_TAKESCENARIO,
+	CHOICES_SLATE_ENVIRONMENT,
+	CHOICES_SLATE_DAYNIGHT,
 	createModelChoices,
 	createClipsChoice,
 } from './choices.js'
@@ -106,7 +110,7 @@ export function initActions(self: InstanceBaseExt) {
 				choices: [
 					{
 						id: 'next',
-						label: 'next',
+						label: 'Next',
 					},
 					{
 						id: 'same',
@@ -524,6 +528,102 @@ export function initActions(self: InstanceBaseExt) {
 				}
 				await self.sendCommand(cmd)
 			},
+		}
+	
+		// Slate clip actions
+		
+		actions['slateClipSet'] = {
+			name: 'Slate Clip - Set metadata',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Reel',
+					tooltip: 'Must be a number',
+					id: 'reel',
+					default: '',
+					regex: Regex.NUMBER,
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Scene ID',
+					id: 'sceneId',
+					tooltip: 'Should be a number, optionally with an appended letter',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'dropdown',
+					label: 'Shot Type',
+					id: 'shotType',
+					tooltip: '',
+					choices: [
+						{ id: 'unchanged', label: '-unchanged-' },
+						{ id: 'none', label: 'None' },
+						...CHOICES_SLATE_SHOTTYPE
+					],
+					default: 'unchanged',
+				},
+				{
+					type: 'textinput',
+					label: 'Take',
+					tooltip: 'Must be a number',
+					id: 'take',
+					default: '',
+					regex: Regex.NUMBER,
+					useVariables: true,
+				},
+				{
+					type: 'dropdown',
+					label: 'Take Scenario',
+					id: 'takeScenario',
+					tooltip: '',
+					choices: [
+						{ id: 'unchanged', label: '-unchanged-' },
+						{ id: 'none', label: 'None' },
+						...CHOICES_SLATE_TAKESCENARIO
+					],
+					default: 'unchanged',
+				},
+				{
+					type: 'dropdown',
+					label: 'Environment',
+					id: 'environment',
+					tooltip: '',
+					choices: [
+						{ id: 'unchanged', label: '-unchanged-' },
+						...CHOICES_SLATE_ENVIRONMENT
+					],
+					default: 'unchanged',
+				},
+				{
+					type: 'dropdown',
+					label: 'Day/Night',
+					id: 'dayNight',
+					tooltip: '',
+					choices: [
+						{ id: 'unchanged', label: '-unchanged-' },
+						...CHOICES_SLATE_DAYNIGHT
+					],
+					default: 'unchanged',
+				},
+			],
+			callback: async ({ options }) => {
+				console.log(`options: ${JSON.stringify(options)}`)
+				const reel = await self.parseVariablesInString(options.reel + '')
+				const sceneId = await self.parseVariablesInString(options.sceneId + '')
+				const take = await self.parseVariablesInString(options.take + '')
+				const cmd = new Commands.SlateClipsCommand()
+				if (reel != '') cmd.reel = Number(reel)
+				if (sceneId != '') cmd.sceneId = sceneId
+				if (options.shotType != 'unchanged') cmd.shotType = getOptString(options, 'shotType')
+				if (take != '') cmd.reel = Number(take)
+				if (options.takeScenario != 'unchanged') cmd.shotType = getOptString(options, 'takeScenario')
+				if (options.environment != 'unchanged') cmd.shotType = getOptString(options, 'environment')
+				if (options.dayNight != 'unchanged') cmd.shotType = getOptString(options, 'dayNight')
+				
+				await self.sendCommand(cmd)
+			}
 		}
 	}
 

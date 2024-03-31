@@ -546,18 +546,24 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 
 			if (!this.hyperDeck) throw new Error('TODO - no hyperdeck connection')
 
-			let queryResponse: Commands.SlateProjectCommandResponse
+			let resProject: Commands.SlateProjectCommandResponse
+			let resClips: Commands.SlateClipsCommandResponse
 			try {
-				queryResponse = await this.hyperDeck.sendCommand(new Commands.SlateProjectGetCommand())
+				resProject = await this.hyperDeck.sendCommand(new Commands.SlateProjectGetCommand())
+				resClips = await this.hyperDeck.sendCommand(new Commands.SlateClipsGetCommand())
 			} catch (e: any) {
 				throw e
 			}
+			console.log(`resProject: ${JSON.stringify(resProject)}`)
+			mergeState(this.slate, resProject)
+			mergeState(this.slate, resClips)
+			this.log('debug', `Slate Project Changed: ${JSON.stringify(resProject)}`)
+			this.log('debug', `Slate Clips Changed: ${JSON.stringify(resClips)}`)
 
-			this.slate = queryResponse
-			this.log('debug', `Slate Info Changed: ${JSON.stringify(queryResponse)}`)
-
+			console.log(`this.slate:\n ${JSON.stringify(this.slate)}`)
 			// Update the received slate variables
 			updateSlateVariables(this, newVariableValues)
+			console.log(`newVariables: ${JSON.stringify(newVariableValues)}`)
 			this.setVariableValues(newVariableValues)
 			
 		} catch (e: any) {

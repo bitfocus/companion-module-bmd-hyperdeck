@@ -47,21 +47,22 @@ export interface IpAndPort {
 
 export interface SlateInfoStateExt {
 	slateFor?: string
-	/*reel?: number
-	sceneId?: number
+	reel?: number
+	sceneId?: string
 	shotType?: string
 	take?: number
 	takeScenario?: string
-	goodTake?: string
+	takeAutoInc?: boolean
+	goodTake?: boolean
 	environment?: string
-	dayNight?: string*/
+	dayNight?: string
 	projectName?: string | null
 	camera?: string
 	director?: string | null
 	cameraOperator?: string | null
-	/*lensType?: string | null
+	lensType?: string | null
 	iris?: string | null
 	focalLength?: string | null
 	distance?: string | null
-	filter?: string | null*/
+	filter?: string | null
 }

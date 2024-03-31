@@ -226,11 +226,23 @@ export function updateRemoteVariable(instance: InstanceBaseExt, newValues: Compa
 }
 
 export function updateSlateVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+	// Clips
 	newValues['slateFor'] = stripExtension(instance.slate.slateFor || '–')
+	newValues['slateReel']	= instance.slate.reel || '–'
+	newValues['slateSceneId'] = instance.slate.sceneId || '–'
+	newValues['slateShotType'] = instance.slate.shotType || '–'
+	newValues['slateTake'] = instance.slate.take || '–'
+	newValues['slateTakeScenario'] = instance.slate.takeScenario || '–'
+	newValues['slateTakeAutoInc'] = (instance.slate.takeAutoInc ? 'true' : 'false')
+	newValues['slateGoodTake'] = (instance.slate.goodTake ? 'true' : 'false')
+	newValues['slateEnvironment'] = instance.slate.environment || '–'
+	newValues['slateDayNight'] = instance.slate.dayNight || '–'
+	// Project
 	newValues['slateProjectName'] = instance.slate.projectName || '–'
 	newValues['slateCamera'] = instance.slate.camera || '–'
 	newValues['slateDirector'] = instance.slate.director || '–'
 	newValues['slateCameraOperator'] = instance.slate.cameraOperator || '–'
+	// Lens
 }
 
 export function initVariables(instance: InstanceBaseExt) {
@@ -358,11 +370,48 @@ export function initVariables(instance: InstanceBaseExt) {
 	updateTimecodeVariables(instance, values)
 	
 	// Slate variables
-	/// Project Slate
+	// Clips Slate
 	variables.push({
 		name: 'Slate for',
 		variableId: 'slateFor',
 	})
+	variables.push({
+		name: 'Reel',
+		variableId: 'slateReel',
+	})
+	variables.push({
+		name: 'Scene ID',
+		variableId: 'slateSceneId',
+	})
+	variables.push({
+		name: 'Shot Type',
+		variableId: 'slateShotType',
+	})
+	variables.push({
+		name: 'Take',
+		variableId: 'slateTake',
+	})
+	variables.push({
+		name: 'Take Scenario',
+		variableId: 'slateTakeScenario',
+	})
+	variables.push({
+		name: 'Take Auto Increment',
+		variableId: 'slateTakeAutoInc',
+	})
+	variables.push({
+		name: 'Good Take',
+		variableId: 'slateGoodTake',
+	})
+	variables.push({
+		name: 'Environment',
+		variableId: 'slateEnvironment',
+	})
+	variables.push({
+		name: 'Day Night',
+		variableId: 'slateDayNight',
+	})
+	// Project Slate
 	variables.push({
 		name: 'Project Name',
 		variableId: 'slateProjectName',
@@ -379,8 +428,7 @@ export function initVariables(instance: InstanceBaseExt) {
 		name: 'Camera Operator',
 		variableId: 'slateCameraOperator',
 	})
-	/// Clip Slate
-	/// Lens Slate
+	// Lens Slate
 	updateSlateVariables(instance, values)
 
 	instance.setVariableDefinitions(variables)

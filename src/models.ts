@@ -246,7 +246,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			...FORMATS_8K,
 			...FORMATS_8K_DCI,
 		],
-		slotLabels: 'SD2_USB', //TODO check correct slots
+		slotLabels: 'CFAST2_USBNAS',
 		maxShuttle: 5000,
 		hasSeparateInputFormat: true,
 	},
@@ -264,7 +264,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			FileFormatFamily.Teleprompter,
 		],
 		videoFormats: [...FORMATS_SD, ...FORMATS_HD_SDI, ...FORMATS_3G_SDI, ...FORMATS_2K_DCI],
-		slotLabels: 'SD_USB',
+		slotLabels: 'SD_USBNAS',
 		maxShuttle: 5000,
 		hasSeparateInputFormat: true, // TODO - verify
 	},

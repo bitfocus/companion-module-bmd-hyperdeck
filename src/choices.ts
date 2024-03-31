@@ -179,10 +179,19 @@ const CONFIG_SLOT_LABELS: Record<string, DropdownChoice[] | undefined> = {
 		{ id: 1, label: '1: SD' },
 		{ id: 2, label: '2: USB-C' },
 	],
+	SD_USBNAS: [
+		{ id: 1, label: '1: SD' },
+		{ id: 2, label: '2: USB-C/NAS' },
+	],
 	SD2_USB: [
 		{ id: 1, label: '1: SD 1' },
 		{ id: 2, label: '2: SD 2' },
 		{ id: 3, label: '3: USB-C' },
+	],
+	CFAST2_USBNAS: [
+		{ id: 1, label: '1: CFast 1' },
+		{ id: 2, label: '2: CFast 2' },
+		{ id: 3, label: '3: USB-C/NAS' },
 	],
 	SSD2_SD2_USB: [
 		{ id: 1, label: '1: SSD 1' },

@@ -2,6 +2,7 @@ import {
 	CompanionActionDefinitions,
 	CompanionOptionValues,
 	CompanionVariableValues,
+	DropdownChoice,
 	Regex,
 } from '@companion-module/base'
 import { Commands, FilesystemFormat, VideoFormat } from 'hyperdeck-connection'
@@ -50,6 +51,14 @@ export function initActions(self: InstanceBaseExt) {
 			if (value.toLowerCase() === 'false') return false
 		}
 		throw new Error(`Invalid boolean for ${key}: ${options[key]} (${typeof value})`)
+	}
+	const getNextChoiceId = (choices: DropdownChoice[], currentId: string): string => {
+		const currentIndex = choices.findIndex(choice => choice.id === currentId);
+		if (currentIndex === -1) {
+			throw new Error(`Invalid ID value of ${currentId}`)
+		}
+		const nextIndex = (currentIndex + 1) % choices.length;
+		return choices[nextIndex].id.toString();
 	}
 
 	if (self.config.modelID != 'bmdDup4K') {
@@ -592,6 +601,7 @@ export function initActions(self: InstanceBaseExt) {
 					tooltip: '',
 					choices: [
 						{ id: 'unchanged', label: '-unchanged-' },
+						{ id: 'toggle', label: '-toggle-' },
 						...CHOICES_SLATE_ENVIRONMENT
 					],
 					default: 'unchanged',
@@ -603,6 +613,7 @@ export function initActions(self: InstanceBaseExt) {
 					tooltip: '',
 					choices: [
 						{ id: 'unchanged', label: '-unchanged-' },
+						{ id: 'toggle', label: '-toggle-' },
 						...CHOICES_SLATE_DAYNIGHT
 					],
 					default: 'unchanged',
@@ -617,11 +628,26 @@ export function initActions(self: InstanceBaseExt) {
 				if (reel != '') cmd.reel = Number(reel)
 				if (sceneId != '') cmd.sceneId = sceneId
 				if (options.shotType != 'unchanged') cmd.shotType = getOptString(options, 'shotType')
-				if (take != '') cmd.reel = Number(take)
-				if (options.takeScenario != 'unchanged') cmd.shotType = getOptString(options, 'takeScenario')
-				if (options.environment != 'unchanged') cmd.shotType = getOptString(options, 'environment')
-				if (options.dayNight != 'unchanged') cmd.shotType = getOptString(options, 'dayNight')
-				
+				if (take != '') cmd.take = Number(take)
+				if (options.takeScenario != 'unchanged') cmd.takeScenario = getOptString(options, 'takeScenario')
+				if (options.environment != 'unchanged') {
+					if (options.environment != 'toggle') {
+						cmd.environment = getOptString(options, 'environment')
+					} else {
+						if (self.slate.environment != null) {
+							cmd.environment = getNextChoiceId(CHOICES_SLATE_ENVIRONMENT, self.slate.environment)
+						}
+					}
+				}
+				if (options.dayNight != 'unchanged') {
+					if (options.dayNight != 'toggle') {
+						cmd.dayNight = getOptString(options, 'dayNight')
+					} else {
+						if (self.slate.dayNight != null) {
+							cmd.dayNight = getNextChoiceId(CHOICES_SLATE_DAYNIGHT, self.slate.dayNight)
+						}
+					}
+				}
 				await self.sendCommand(cmd)
 			}
 		}
@@ -775,3 +801,4 @@ export function initActions(self: InstanceBaseExt) {
 
 	return actions
 }
+	

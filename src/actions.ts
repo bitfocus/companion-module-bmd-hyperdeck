@@ -60,6 +60,16 @@ export function initActions(self: InstanceBaseExt) {
 		const nextIndex = (currentIndex + 1) % choices.length;
 		return choices[nextIndex].id.toString();
 	}
+	const separateNumberAndText = (input: string): { numberPart: number | null, textPart: string } => {
+		const match = input.match(/^(\d+)(.*)/);
+		if (match) {
+			const numberPart = parseInt(match[1]);
+			const textPart = match[2];
+			return { numberPart, textPart };
+		} else {
+			return { numberPart: null, textPart: input };
+		}
+	}
 
 	if (self.config.modelID != 'bmdDup4K') {
 		actions['play'] = {
@@ -735,12 +745,18 @@ export function initActions(self: InstanceBaseExt) {
 					case "set":
 						cmd.sceneId = getOptString(options, 'sceneSet')
 						break
-//				case "inc":
-//					if (self.slate.sceneId) cmd.sceneId = ++self.slate.sceneId
-//					break
-//				case "dec":
-//					if (self.slate.sceneId) cmd.sceneId = --self.slate.sceneId
-//					break
+					case "inc":
+						if (self.slate.sceneId) {
+							const split = separateNumberAndText(self.slate.sceneId)
+							if (split.numberPart != null)	cmd.sceneId = (split.numberPart + 1).toString() + split.textPart
+						}
+						break
+					case "dec":
+						if (self.slate.sceneId) {
+							const split = separateNumberAndText(self.slate.sceneId)
+							if (split.numberPart != null)	cmd.sceneId = (split.numberPart - 1).toString() + split.textPart
+					}
+					break
 					default:
 						break
 				}

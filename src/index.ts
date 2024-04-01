@@ -151,6 +151,13 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	private initVariables() {
 		initVariables(this)
 	}
+	
+	/**
+	 * INTERNAL: Checck for all slate feedbacks
+	 */
+	private checkSlateFeedbacks() {
+		this.checkFeedbacks('slate_clips_shot_type', 'slate_clips_take_scenario', 'slate_clips_environment', 'slate_clips_daynight')
+	}
 
 	/**
 	 * INTERNAL: use setup data to initalize the hyperdeck library.
@@ -336,6 +343,9 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			this.log('debug', `Slate Info Changed: ${JSON.stringify(res)}`)
 			this.slate = mergeState(this.slate, res)
 			console.log(`Slate state: ${JSON.stringify(this.slate)}`)
+			// Check feedbacks
+			this.checkSlateFeedbacks()
+			// Update variables
 			const newVariables = {}
 			updateSlateVariables(this, newVariables)
 			this.setVariableValues(newVariables)
@@ -569,6 +579,8 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			this.log('debug', `Slate Clips Changed: ${JSON.stringify(resClips)}`)
 
 			console.log(`this.slate:\n ${JSON.stringify(this.slate)}`)
+			// Check for feedbacks
+			this.checkSlateFeedbacks()
 			// Update the received slate variables
 			updateSlateVariables(this, newVariableValues)
 			console.log(`newVariables: ${JSON.stringify(newVariableValues)}`)

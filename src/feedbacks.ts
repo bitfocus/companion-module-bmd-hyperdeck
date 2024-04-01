@@ -6,6 +6,10 @@ import {
 	CHOICES_SLOTSTATUS,
 	CHOICES_ENABLEDISABLE,
 	CHOICES_REMOTESTATUS,
+	CHOICES_SLATE_SHOTTYPE,
+	CHOICES_SLATE_TAKESCENARIO,
+	CHOICES_SLATE_ENVIRONMENT,
+	CHOICES_SLATE_DAYNIGHT,
 	createModelChoices,
 	createClipsChoice,
 } from './choices.js'
@@ -270,6 +274,92 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				return options.audioCodec === self.deckConfig.audioCodec
 			}
 			return options.audioChannels === String(self.deckConfig.audioInputChannels)
+		},
+	}
+	feedbacks['slate_clips_shot_type'] = {
+		type: 'boolean',
+		name: 'Slate Clips - Shot type',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'State',
+				id: 'shotType',
+				choices: [
+					{ id: 'none', label: 'None' },
+					...CHOICES_SLATE_SHOTTYPE
+				],
+				default: 'none'
+			},
+		],
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 255),
+		},
+		callback: ({ options }) => {
+			return (self.slate.shotType ? options.shotType === self.slate.shotType : options.shotType === 'none')
+		},
+	}
+	feedbacks['slate_clips_take_scenario'] = {
+		type: 'boolean',
+		name: 'Slate Clips - Take scenario',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'State',
+				id: 'takeScenario',
+				choices: [
+					{ id: 'none', label: 'None' },
+					...CHOICES_SLATE_TAKESCENARIO
+				],
+				default: 'none'
+			},
+		],
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 255),
+		},
+		callback: ({ options }) => {
+			return (self.slate.takeScenario ? options.takeScenario === self.slate.takeScenario : options.takeScenario === 'none')
+		},
+	}
+	feedbacks['slate_clips_environment'] = {
+		type: 'boolean',
+		name: 'Slate Clips - Environment',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'State',
+				id: 'environment',
+				choices: CHOICES_SLATE_ENVIRONMENT,
+				default: 'interior'
+			},
+		],
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 255),
+		},
+		callback: ({ options }) => {
+			return options.environment === self.slate.environment
+		},
+	}
+	feedbacks['slate_clips_daynight'] = {
+		type: 'boolean',
+		name: 'Slate Clips - Day/Night',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'State',
+				id: 'dayNight',
+				choices: CHOICES_SLATE_DAYNIGHT,
+				default: 'day'
+			},
+		],
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 255),
+		},
+		callback: ({ options }) => {
+			return options.dayNight === self.slate.dayNight
 		},
 	}
 	feedbacks['format_ready'] = {

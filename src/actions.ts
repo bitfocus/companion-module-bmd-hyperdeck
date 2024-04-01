@@ -555,13 +555,20 @@ export function initActions(self: InstanceBaseExt) {
 			name: 'Slate Clip - Set metadata',
 			options: [
 				{
-					type: 'textinput',
+					type: 'checkbox',
+					label: 'Set Reel',
+					id: 'reelSet',
+					default: false,
+				},
+				{
+					type: 'number',
 					label: 'Reel',
-					tooltip: 'Must be a number',
+					tooltip: 'Number between 1-999',
 					id: 'reel',
-					default: '',
-					regex: Regex.NUMBER,
-					useVariables: true,
+					min: 1,
+					max: 999,
+					default: 1,
+					isVisible: (options) => options.reelSet === true,
 				},
 				{
 					type: 'textinput',
@@ -584,13 +591,20 @@ export function initActions(self: InstanceBaseExt) {
 					default: 'unchanged',
 				},
 				{
-					type: 'textinput',
+					type: 'checkbox',
+					label: 'Set Take',
+					id: 'takeSet',
+					default: false,
+				},
+				{
+					type: 'number',
 					label: 'Take',
-					tooltip: 'Must be a number',
+					tooltip: 'Number between 1-99',
 					id: 'take',
-					default: '',
-					regex: Regex.NUMBER,
-					useVariables: true,
+					min: 1,
+					max: 99,
+					default: 1,
+					isVisible: (options) => options.takeSet === true,
 				},
 				{
 					type: 'dropdown',
@@ -631,14 +645,12 @@ export function initActions(self: InstanceBaseExt) {
 			],
 			callback: async ({ options }) => {
 				console.log(`options: ${JSON.stringify(options)}`)
-				const reel = await self.parseVariablesInString(options.reel + '')
 				const sceneId = await self.parseVariablesInString(options.sceneId + '')
-				const take = await self.parseVariablesInString(options.take + '')
 				const cmd = new Commands.SlateClipsCommand()
-				if (reel != '') cmd.reel = Number(reel)
+				if (options.reelSet === true) cmd.reel = Number(options.reel)
 				if (sceneId != '') cmd.sceneId = sceneId
 				if (options.shotType != 'unchanged') cmd.shotType = getOptString(options, 'shotType')
-				if (take != '') cmd.take = Number(take)
+				if (options.takeSet === true) cmd.take = Number(options.take)
 				if (options.takeScenario != 'unchanged') cmd.takeScenario = getOptString(options, 'takeScenario')
 				if (options.environment != 'unchanged') {
 					if (options.environment != 'toggle') {
@@ -658,6 +670,92 @@ export function initActions(self: InstanceBaseExt) {
 						}
 					}
 				}
+				await self.sendCommand(cmd)
+			}
+		}
+		actions['slateClipSetVariables'] = {
+			name: 'Slate Clip - Set metadata with custom variables',
+			description: 'Allows variables for all data, but will fail if invalid options are set',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Reel',
+					tooltip: 'Must be number between 1-999',
+					id: 'reel',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Scene ID',
+					id: 'sceneId',
+					tooltip: 'Should be a number, optionally with an appended letter',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Shot Type',
+					id: 'shotType',
+					tooltip: 'Must be one of WS, MS, MCU, PU, CU, BCU, ECU',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Take',
+					tooltip: 'Must be number between 1-99',
+					id: 'take',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Take Scenario',
+					id: 'takeScenario',
+					tooltip: 'Must be one of PU, VFX, SER',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Environment',
+					id: 'environment',
+					tooltip: `Must be one of 'interior', 'exterior'`,
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Day/Night',
+					id: 'dayNight',
+					tooltip: `Must be one of 'day', 'night'`,
+					default: '',
+					useVariables: true,
+				},
+			],
+			callback: async ({ options }) => {
+				console.log(`options: ${JSON.stringify(options)}`)
+				const reel = await self.parseVariablesInString(options.reel + '')
+				const sceneId = await self.parseVariablesInString(options.sceneId + '')
+				const shotType = await self.parseVariablesInString(options.shotType + '')
+				const take = await self.parseVariablesInString(options.take + '')
+				const takeScenario = await self.parseVariablesInString(options.takeScenario + '')
+				const environment = await self.parseVariablesInString(options.environment + '')
+				const dayNight = await self.parseVariablesInString(options.dayNight + '')
+				const cmd = new Commands.SlateClipsCommand()
+				try {
+					if (reel != '') cmd.reel = Number(reel)
+					if (sceneId != '') cmd.sceneId = sceneId
+					if (shotType != '') cmd.shotType = shotType
+					if (take != '') cmd.take = Number(take)
+					if (takeScenario != '') cmd.takeScenario = takeScenario
+					if (environment != '') cmd.environment = environment
+					if (dayNight != '') cmd.dayNight = dayNight
+				} catch (e) {
+					self.log('error', `Invalid variable: ${e}`)
+				}
+				
 				await self.sendCommand(cmd)
 			}
 		}

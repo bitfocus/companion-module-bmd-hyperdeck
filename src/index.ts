@@ -75,11 +75,20 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			fileFormat: '',
 		}
 		this.slate = {
-			slateFor: '–',
-			projectName: '–',
-			camera: '–',
-			director: '–',
-			cameraOperator: '–',
+			slateFor: null,
+			reel: null,
+			sceneId: null,
+			shotType: null,
+			take: null,
+			takeScenario: null,
+			goodTake: null,
+			environment: null,
+			dayNight: null,
+			takeAutoInc: null,
+			projectName: null,
+			camera: null,
+			director: null,
+			cameraOperator: null,
 		}
 	}
 
@@ -554,9 +563,8 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			} catch (e: any) {
 				throw e
 			}
-			console.log(`resProject: ${JSON.stringify(resProject)}`)
-			mergeState(this.slate, resProject)
-			mergeState(this.slate, resClips)
+			this.slate = mergeState(this.slate, resProject)
+			this.slate = mergeState(this.slate, resClips)
 			this.log('debug', `Slate Project Changed: ${JSON.stringify(resProject)}`)
 			this.log('debug', `Slate Clips Changed: ${JSON.stringify(resClips)}`)
 

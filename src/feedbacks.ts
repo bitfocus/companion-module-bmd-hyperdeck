@@ -49,6 +49,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				id: 'clipID',
 				default: '1',
 				regex: Regex.SIGNED_NUMBER,
+				useVariables: true,
 			},
 			{
 				type: 'dropdown',
@@ -63,7 +64,8 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }) => {
+		callback: async ({ options }, context) => {
+			options.clipID = Number(await context.parseVariablesInString(String(options.clipID)))
 			return (
 				(options.slotID == 'either' && options.clipID == self.transportInfo.clipId) ||
 				(options.slotID == self.transportInfo.slotId && options.clipID == self.transportInfo.clipId)
@@ -115,13 +117,15 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				id: 'setting',
 				default: '1',
 				regex: Regex.SIGNED_NUMBER,
+				useVariables: true,
 			},
 		],
 		defaultStyle: {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }) => {
+		callback: async ({ options }, context) => {
+			options.setting = Number(await context.parseVariablesInString(String(options.setting)))
 			return options.setting == self.transportInfo.slotId
 		},
 	}
@@ -143,13 +147,15 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				id: 'slotId',
 				default: '1',
 				regex: Regex.SIGNED_NUMBER,
+				useVariables: true,
 			},
 		],
 		defaultStyle: {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
-		callback: ({ options }) => {
+		callback: async ({ options }, context) => {
+			options.slotId = Number(await context.parseVariablesInString(String(options.slotId)))
 			const slot = self.slotInfo[Number(options.slotId)]
 			return !!slot && slot.status === options.status
 		},

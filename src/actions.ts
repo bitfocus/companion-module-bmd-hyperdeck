@@ -34,8 +34,18 @@ export function initActions(self: InstanceBaseExt) {
 		if (!isNaN(value)) return value
 		throw new Error(`Invalid number for ${key}: ${options[key]} (${typeof value})`)
 	}
+	const parseOptNumber = async (options: CompanionOptionValues, key: string): Promise<number> => {
+		const parsedValue = await self.parseVariablesInString(String(options[key]))
+		const value = Number(parsedValue)
+		if (!isNaN(value)) return value
+		throw new Error(`Invalid number for ${key}: ${parsedValue} (${typeof value})`)
+	}
 	const getOptString = (options: CompanionOptionValues, key: string): string => {
 		const value = options[key]
+		return value?.toString() ?? ''
+	}
+	const parseOptString = async (options: CompanionOptionValues, key: string): Promise<string> => {
+		const value = await self.parseVariablesInString(String(options[key]))
 		return value?.toString() ?? ''
 	}
 	const getOptBool = (options: CompanionOptionValues, key: string): boolean => {
@@ -60,7 +70,22 @@ export function initActions(self: InstanceBaseExt) {
 					min: 0 - maxShuttle,
 					max: maxShuttle,
 					range: true,
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
 				},
+				{
+					type: 'textinput',
+					label: 'Speed %',
+					id: 'speedVar',
+					default: '',
+					useVariables: true,
+					isVisible: (options) => options.useVariable === true
+				},
+                {
+                    type: 'checkbox',
+                    label: 'Use variable for speed %',
+                    id: 'useVariable',
+                    default: false,
+                },
 				{
 					type: 'checkbox',
 					label: 'Loop clip',
@@ -75,11 +100,11 @@ export function initActions(self: InstanceBaseExt) {
 				},
 			],
 			callback: async ({ options }) => {
-				const cmd = new Commands.PlayCommand(
-					getOptString(options, 'speed'),
-					getOptBool(options, 'loop'),
-					getOptBool(options, 'single')
-				)
+				const cmd = new Commands.PlayCommand()
+				if (!options.useVariable) cmd.speed = getOptString(options, 'speed')
+				else cmd.speed = await parseOptString(options, 'speedVar')
+				cmd.loop = getOptBool(options, 'loop')
+				cmd.singleClip = getOptBool(options, 'single')
 				await self.sendCommand(cmd)
 			},
 		}
@@ -221,11 +246,12 @@ export function initActions(self: InstanceBaseExt) {
 					id: 'tc',
 					default: '00:00:01:00',
 					regex: Regex.TIMECODE,
+					useVariables: true,
 				},
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.timecode = getOptString(options, 'tc')
+				cmd.timecode = await parseOptString(options, 'tc')
 				await self.sendCommand(cmd)
 			},
 		}
@@ -240,11 +266,28 @@ export function initActions(self: InstanceBaseExt) {
 					min: 1,
 					max: 999,
 					range: false,
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
 				},
+				{
+					type: 'textinput',
+					label: 'Clip Number',
+					id: 'clipVar',
+					default: '',
+					useVariables: true,
+					isVisible: (options) => options.useVariable === true
+				},
+		                {
+		                    type: 'checkbox',
+		                    label: 'Use Variable',
+		                    id: 'useVariable',
+		                    default: false,
+		                },
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clipId = getOptNumber(options, 'clip')
+				
+				if (!options.useVariable) cmd.clipId = getOptNumber(options, 'clip')
+				else cmd.clipId = await parseOptNumber(options, 'clipVar')
 				await self.sendCommand(cmd)
 			},
 		}
@@ -288,11 +331,27 @@ export function initActions(self: InstanceBaseExt) {
 					min: 1,
 					max: 999,
 					range: false,
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
 				},
+				{
+					type: 'textinput',
+					label: 'Number of clips',
+					id: 'clipVar',
+					default: '',
+					useVariables: true,
+					isVisible: (options) => options.useVariable === true
+				},
+		                {
+		                    type: 'checkbox',
+		                    label: 'Use Variable',
+		                    id: 'useVariable',
+		                    default: false,
+		                },
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clipId = `+${options.clip}`
+				if (!options.useVariable) cmd.clipId = `+${options.clip}`
+				else cmd.clipId = `+${await parseOptNumber(options, 'clipVar')}`
 				await self.sendCommand(cmd)
 			},
 		}
@@ -307,11 +366,27 @@ export function initActions(self: InstanceBaseExt) {
 					min: 1,
 					max: 999,
 					range: false,
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
 				},
+				{
+					type: 'textinput',
+					label: 'Number of clips',
+					id: 'clipVar',
+					default: '',
+					useVariables: true,
+					isVisible: (options) => options.useVariable === true
+				},
+		                {
+		                    type: 'checkbox',
+		                    label: 'Use Variable',
+		                    id: 'useVariable',
+		                    default: false,
+		                },
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				cmd.clipId = `-${options.clip}`
+				if (!options.useVariable) cmd.clipId = `-${options.clip}`
+				else cmd.clipId = `-${await parseOptNumber(options, 'clipVar')}`
 				await self.sendCommand(cmd)
 			},
 		}
@@ -341,11 +416,12 @@ export function initActions(self: InstanceBaseExt) {
 					id: 'jogFwdTc',
 					default: '00:00:00:01',
 					regex: Regex.TIMECODE,
+					useVariables: true,
 				},
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.JogCommand()
-				cmd.timecode = `+${options.jogFwdTc}`
+				cmd.timecode = `+${await parseOptString(options, 'jogFwdTc')}`
 				await self.sendCommand(cmd)
 			},
 		}
@@ -358,11 +434,12 @@ export function initActions(self: InstanceBaseExt) {
 					id: 'jogRewTc',
 					default: '00:00:00:01',
 					regex: Regex.TIMECODE,
+					useVariables: true,
 				},
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.JogCommand()
-				cmd.timecode = `-${options.jogRewTc}`
+				cmd.timecode = `-${await parseOptString(options, 'jogRewTc')}`
 				await self.sendCommand(cmd)
 			},
 		}
@@ -377,10 +454,27 @@ export function initActions(self: InstanceBaseExt) {
 					min: 0 - maxShuttle,
 					max: maxShuttle,
 					range: true,
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
 				},
+				{
+					type: 'textinput',
+					label: 'Speed %',
+					id: 'speedVar',
+					default: '',
+					useVariables: true,
+					isVisible: (options) => options.useVariable === true
+				},
+		                {
+		                    type: 'checkbox',
+		                    label: 'Use Variable',
+		                    id: 'useVariable',
+		                    default: false,
+		                },
 			],
 			callback: async ({ options }) => {
-				const cmd = new Commands.ShuttleCommand(getOptNumber(options, 'speed'))
+				const cmd = new Commands.ShuttleCommand()
+				if (!options.useVariable) cmd.speed = getOptNumber(options, 'speed')
+				else cmd.speed = await parseOptNumber(options, 'speedVar')
 				await self.sendCommand(cmd)
 			},
 		}

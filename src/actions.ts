@@ -101,7 +101,7 @@ export function initActions(self: InstanceBaseExt) {
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.PlayCommand()
-				if (options.useVariable === false) cmd.speed = getOptString(options, 'speed')
+				if (!options.useVariable) cmd.speed = getOptString(options, 'speed')
 				else cmd.speed = await parseOptString(options, 'speedVar')
 				cmd.loop = getOptBool(options, 'loop')
 				cmd.singleClip = getOptBool(options, 'single')
@@ -276,17 +276,17 @@ export function initActions(self: InstanceBaseExt) {
 					useVariables: true,
 					isVisible: (options) => options.useVariable === true
 				},
-                {
-                    type: 'checkbox',
-                    label: 'Use Variable',
-                    id: 'useVariable',
-                    default: false,
-                },
+		                {
+		                    type: 'checkbox',
+		                    label: 'Use Variable',
+		                    id: 'useVariable',
+		                    default: false,
+		                },
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
 				
-				if (options.useVariable === false) cmd.clipId = getOptNumber(options, 'clip')
+				if (!options.useVariable) cmd.clipId = getOptNumber(options, 'clip')
 				else cmd.clipId = await parseOptNumber(options, 'clipVar')
 				await self.sendCommand(cmd)
 			},
@@ -341,16 +341,16 @@ export function initActions(self: InstanceBaseExt) {
 					useVariables: true,
 					isVisible: (options) => options.useVariable === true
 				},
-                {
-                    type: 'checkbox',
-                    label: 'Use Variable',
-                    id: 'useVariable',
-                    default: false,
-                },
+		                {
+		                    type: 'checkbox',
+		                    label: 'Use Variable',
+		                    id: 'useVariable',
+		                    default: false,
+		                },
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				if (options.useVariable === false) cmd.clipId = `+${options.clip}`
+				if (!options.useVariable) cmd.clipId = `+${options.clip}`
 				else cmd.clipId = `+${await parseOptNumber(options, 'clipVar')}`
 				await self.sendCommand(cmd)
 			},
@@ -376,16 +376,16 @@ export function initActions(self: InstanceBaseExt) {
 					useVariables: true,
 					isVisible: (options) => options.useVariable === true
 				},
-                {
-                    type: 'checkbox',
-                    label: 'Use Variable',
-                    id: 'useVariable',
-                    default: false,
-                },
+		                {
+		                    type: 'checkbox',
+		                    label: 'Use Variable',
+		                    id: 'useVariable',
+		                    default: false,
+		                },
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				if (options.useVariable === false) cmd.clipId = `-${options.clip}`
+				if (!options.useVariable) cmd.clipId = `-${options.clip}`
 				else cmd.clipId = `-${await parseOptNumber(options, 'clipVar')}`
 				await self.sendCommand(cmd)
 			},
@@ -464,16 +464,16 @@ export function initActions(self: InstanceBaseExt) {
 					useVariables: true,
 					isVisible: (options) => options.useVariable === true
 				},
-                {
-                    type: 'checkbox',
-                    label: 'Use Variable',
-                    id: 'useVariable',
-                    default: false,
-                },
+		                {
+		                    type: 'checkbox',
+		                    label: 'Use Variable',
+		                    id: 'useVariable',
+		                    default: false,
+		                },
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.ShuttleCommand()
-				if (options.useVariable === false) cmd.speed = getOptNumber(options, 'speed')
+				if (!options.useVariable) cmd.speed = getOptNumber(options, 'speed')
 				else cmd.speed = await parseOptNumber(options, 'speedVar')
 				await self.sendCommand(cmd)
 			},

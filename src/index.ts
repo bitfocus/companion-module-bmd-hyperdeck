@@ -167,9 +167,10 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		})
 
 		this.hyperDeck.on('connected', async (info) => {
+			this.log('debug', `Connected to Hyperdeck`)
 			try {
 				this.protocolVersion = info.protocolVersion
-
+				this.log('debug', `Protocol version: ${info.protocolVersion}`)
 				try {
 					this.updateDeviceModelId(info)
 
@@ -305,6 +306,9 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		})
 
 		this.hyperDeck.connect(targetAddress.ip, targetAddress.port)
+
+		// hyperdeck-connection debug tool
+		this.hyperDeck.DEBUG = true;
 	}
 
 	/**
@@ -502,9 +506,20 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	}
 
 	async refreshTransportInfo(): Promise<void> {
-		if (!this.hyperDeck) throw new Error('Hyperdeck not initialised')
-		const rawInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
-		this.transportInfo = this.extendTransportInfo(rawInfo)
+		if (!this.hyperDeck || !this.hyperDeck.connected) {
+			this.log('error', 'Hyperdeck not connected (refreshTransportInfo)')
+			return
+		}
+		try {
+			const rawInfo = await this.hyperDeck.sendCommand(new Commands.TransportInfoCommand())
+			this.transportInfo = this.extendTransportInfo(rawInfo)
+		} catch (e: any) {
+			if (e.code) {
+				throw new Error(`${e.code} ${e.name}`)
+			} else {
+				throw e
+			}
+		}
 	}
 
 	parseIpAndPort(): IpAndPort | null {

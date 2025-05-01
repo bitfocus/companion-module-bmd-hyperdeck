@@ -49,7 +49,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				id: 'clipID',
 				default: '1',
 				regex: Regex.SIGNED_NUMBER,
-				useVariables: true,
+				useVariables: { local: true },
 			},
 			{
 				type: 'dropdown',
@@ -117,7 +117,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				id: 'setting',
 				default: '1',
 				regex: Regex.SIGNED_NUMBER,
-				useVariables: true,
+				useVariables: { local: true },
 			},
 		],
 		defaultStyle: {
@@ -147,7 +147,7 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 				id: 'slotId',
 				default: '1',
 				regex: Regex.SIGNED_NUMBER,
-				useVariables: true,
+				useVariables: { local: true },
 			},
 		],
 		defaultStyle: {

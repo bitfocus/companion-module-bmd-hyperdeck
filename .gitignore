@@ -1,6 +1,16 @@
 node_modules/
 yarn.lock
 /pkg
-/pkg.tgz
+/*.tgz
 /dist
 DEBUG-*
+.DS_Store
+package-lock.json
+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+*/.yarn/*

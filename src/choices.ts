@@ -281,7 +281,7 @@ export function createModelChoices(model: ModelInfo | undefined) {
 export function createClipsChoice(instance: InstanceBaseExt) {
 	const clips: ClipDropdownChoice[] = []
 
-	for (const { clipId, name } of instance.clipsList) {
+	for (const { clipId, name } of instance.simpleClipsList) {
 		clips.push({ id: name, label: stripExtension(name), clipId: clipId })
 	}
 

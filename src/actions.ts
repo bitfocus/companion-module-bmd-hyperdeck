@@ -52,7 +52,7 @@ export function initActions(self: InstanceBaseExt) {
 		let value = options[key]
 		if (typeof value === 'boolean') return value
 		if (typeof value === 'string') {
-			if (value.toLowerCase() === 'true')  return true
+			if (value.toLowerCase() === 'true') return true
 			if (value.toLowerCase() === 'false') return false
 		}
 		throw new Error(`Invalid boolean for ${key}: ${options[key]} (${typeof value})`)
@@ -70,7 +70,7 @@ export function initActions(self: InstanceBaseExt) {
 					min: 0 - maxShuttle,
 					max: maxShuttle,
 					range: true,
-					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined,
 				},
 				{
 					type: 'textinput',
@@ -78,14 +78,14 @@ export function initActions(self: InstanceBaseExt) {
 					id: 'speedVar',
 					default: '',
 					useVariables: true,
-					isVisible: (options) => options.useVariable === true
+					isVisible: (options) => options.useVariable === true,
 				},
-                {
-                    type: 'checkbox',
-                    label: 'Use variable for speed %',
-                    id: 'useVariable',
-                    default: false,
-                },
+				{
+					type: 'checkbox',
+					label: 'Use variable for speed %',
+					id: 'useVariable',
+					default: false,
+				},
 				{
 					type: 'checkbox',
 					label: 'Loop clip',
@@ -266,7 +266,7 @@ export function initActions(self: InstanceBaseExt) {
 					min: 1,
 					max: 999,
 					range: false,
-					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined,
 				},
 				{
 					type: 'textinput',
@@ -274,18 +274,18 @@ export function initActions(self: InstanceBaseExt) {
 					id: 'clipVar',
 					default: '',
 					useVariables: true,
-					isVisible: (options) => options.useVariable === true
+					isVisible: (options) => options.useVariable === true,
 				},
-		                {
-		                    type: 'checkbox',
-		                    label: 'Use Variable',
-		                    id: 'useVariable',
-		                    default: false,
-		                },
+				{
+					type: 'checkbox',
+					label: 'Use Variable',
+					id: 'useVariable',
+					default: false,
+				},
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
-				
+
 				if (!options.useVariable) cmd.clipId = getOptNumber(options, 'clip')
 				else cmd.clipId = await parseOptNumber(options, 'clipVar')
 				await self.sendCommand(cmd)
@@ -310,7 +310,7 @@ export function initActions(self: InstanceBaseExt) {
 				const parsedRaw = await self.parseVariablesInString(options.clip + '')
 				const parsed = stripExtension(parsedRaw.trim())
 
-				const clip = self.clipsList.find((clip) => stripExtension(clip.name) === parsed)
+				const clip = self.simpleClipsList.find((clip) => stripExtension(clip.name) === parsed)
 				if (!clip) {
 					self.log('info', `Clip "${parsedRaw}" does not exist`)
 				} else {
@@ -331,7 +331,7 @@ export function initActions(self: InstanceBaseExt) {
 					min: 1,
 					max: 999,
 					range: false,
-					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined,
 				},
 				{
 					type: 'textinput',
@@ -339,14 +339,14 @@ export function initActions(self: InstanceBaseExt) {
 					id: 'clipVar',
 					default: '',
 					useVariables: true,
-					isVisible: (options) => options.useVariable === true
+					isVisible: (options) => options.useVariable === true,
 				},
-		                {
-		                    type: 'checkbox',
-		                    label: 'Use Variable',
-		                    id: 'useVariable',
-		                    default: false,
-		                },
+				{
+					type: 'checkbox',
+					label: 'Use Variable',
+					id: 'useVariable',
+					default: false,
+				},
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
@@ -366,7 +366,7 @@ export function initActions(self: InstanceBaseExt) {
 					min: 1,
 					max: 999,
 					range: false,
-					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined,
 				},
 				{
 					type: 'textinput',
@@ -374,14 +374,14 @@ export function initActions(self: InstanceBaseExt) {
 					id: 'clipVar',
 					default: '',
 					useVariables: true,
-					isVisible: (options) => options.useVariable === true
+					isVisible: (options) => options.useVariable === true,
 				},
-		                {
-		                    type: 'checkbox',
-		                    label: 'Use Variable',
-		                    id: 'useVariable',
-		                    default: false,
-		                },
+				{
+					type: 'checkbox',
+					label: 'Use Variable',
+					id: 'useVariable',
+					default: false,
+				},
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.GoToCommand()
@@ -454,7 +454,7 @@ export function initActions(self: InstanceBaseExt) {
 					min: 0 - maxShuttle,
 					max: maxShuttle,
 					range: true,
-					isVisible: (options) => options.useVariable === false || options.useVariable === undefined
+					isVisible: (options) => options.useVariable === false || options.useVariable === undefined,
 				},
 				{
 					type: 'textinput',
@@ -462,14 +462,14 @@ export function initActions(self: InstanceBaseExt) {
 					id: 'speedVar',
 					default: '',
 					useVariables: true,
-					isVisible: (options) => options.useVariable === true
+					isVisible: (options) => options.useVariable === true,
 				},
-		                {
-		                    type: 'checkbox',
-		                    label: 'Use Variable',
-		                    id: 'useVariable',
-		                    default: false,
-		                },
+				{
+					type: 'checkbox',
+					label: 'Use Variable',
+					id: 'useVariable',
+					default: false,
+				},
 			],
 			callback: async ({ options }) => {
 				const cmd = new Commands.ShuttleCommand()

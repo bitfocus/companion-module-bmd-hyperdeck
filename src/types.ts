@@ -1,7 +1,8 @@
-import { DropdownChoice, InstanceBase } from '@companion-module/base'
-import { HyperdeckConfig } from './config'
-import { Commands } from 'hyperdeck-connection'
-import { ModelInfo } from './models'
+import type { DropdownChoice, InstanceBase } from '@companion-module/base'
+import type { HyperdeckConfig } from './config'
+import type { Commands } from 'hyperdeck-connection'
+import type { ModelInfo } from './models'
+import type { SimpleClipInfo } from './util'
 
 export interface ClipDropdownChoice extends DropdownChoice {
 	clipId: number
@@ -20,7 +21,8 @@ export interface InstanceBaseExt extends InstanceBase<HyperdeckConfig> {
 	formatToken: string | null
 	formatTokenTimeout: NodeJS.Timeout | null
 
-	clipsList: Commands.ClipInfo[]
+	simpleClipsList: SimpleClipInfo[]
+	fullClipsList: Commands.ClipInfo[]
 
 	/**
 	 * INTERNAL: Get clip list from the hyperdeck

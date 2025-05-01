@@ -71,7 +71,7 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 	//Clip ID and Slot ID  null exceptions
 	let clipNameVariable: string | undefined
 	if (instance.transportInfo.clipId !== null) {
-		const clipObj = instance.clipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
+		const clipObj = instance.simpleClipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
 		if (clipObj) {
 			clipNameVariable = stripExtension(clipObj.name)
 		}
@@ -79,7 +79,7 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 
 	newValues['clipId'] = instance.transportInfo.clipId ?? '-'
 	newValues['clipName'] = clipNameVariable ?? '-'
-	newValues['clipCount'] = instance.clipsList.length
+	newValues['clipCount'] = instance.simpleClipsList.length
 	newValues['slotId'] = instance.transportInfo.slotId ?? '-'
 	newValues['videoFormat'] = instance.transportInfo.videoFormat ?? 'none'
 	if (instance.model.hasSeparateInputFormat) {
@@ -88,9 +88,9 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 }
 
 export function updateClipVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
-	newValues['clipCount'] = instance.clipsList.length
+	newValues['clipCount'] = instance.simpleClipsList.length
 	// Variables for every clip in the list
-	for (const { clipId, name } of instance.clipsList) {
+	for (const { clipId, name } of instance.simpleClipsList) {
 		newValues[`clip${clipId}_name`] = stripExtension(name)
 	}
 }
@@ -170,7 +170,7 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 				countUp.tcHMSF = tc.toString()
 
 				if (instance.transportInfo.slotId !== undefined) {
-					const clip = instance.clipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
+					const clip = instance.fullClipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
 					//				instance.debug('Clip duration: ', clip.duration)
 					const modesWhereCountdownMakesNoSense = new Set(['preview', 'record'])
 					if (clip && clip.duration && !modesWhereCountdownMakesNoSense.has(instance.transportInfo.status)) {
@@ -281,7 +281,7 @@ export function initVariables(instance: InstanceBaseExt) {
 		name: 'Clip count',
 		variableId: 'clipCount',
 	})
-	for (const { clipId } of instance.clipsList) {
+	for (const { clipId } of instance.simpleClipsList) {
 		variables.push({
 			name: `Clip ${clipId} Name`,
 			variableId: `clip${clipId}_name`,

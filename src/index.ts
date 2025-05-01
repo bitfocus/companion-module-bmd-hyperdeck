@@ -14,8 +14,9 @@ import { initFeedbacks } from './feedbacks.js'
 import { upgradeScripts } from './upgrades.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
-import { mergeState, protocolGte, stripExtension } from './util.js'
+import { makeSimpleClipInfos, mergeState, protocolGte, SimpleClipInfo, stripExtension } from './util.js'
 import { InstanceBaseExt, IpAndPort, TransportInfoStateExt } from './types.js'
+import { isDeepStrictEqual } from 'util'
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -43,7 +44,8 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	formatToken: string | null = null
 	formatTokenTimeout: NodeJS.Timeout | null = null
 
-	clipsList: Commands.ClipInfo[] = []
+	simpleClipsList: SimpleClipInfo[] = []
+	fullClipsList: Commands.ClipInfo[] = []
 
 	/**
 	 * Create an instance of a HyperDeck module.
@@ -257,7 +259,6 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			await this.updateClips()
 
 			// Update internals
-			this.initActionsAndFeedbacks()
 			this.checkFeedbacks('slot_status', 'transport_slot')
 		})
 
@@ -308,7 +309,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.hyperDeck.connect(targetAddress.ip, targetAddress.port)
 
 		// hyperdeck-connection debug tool
-		this.hyperDeck.DEBUG = true;
+		// this.hyperDeck.DEBUG = true
 	}
 
 	/**
@@ -449,12 +450,14 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			}
 
 			// Check for a shorter list of clips, and unset variables if so
-			const oldLength = this.clipsList.length
-			this.clipsList = queryResponse.clips
+			const oldClips = this.simpleClipsList
+			this.simpleClipsList = makeSimpleClipInfos(queryResponse.clips)
+			this.fullClipsList = queryResponse.clips
 
-			this.initActionsAndFeedbacks() // reinit due to clip list change
+			if (doFullInit || !isDeepStrictEqual(oldClips, this.simpleClipsList)) {
+				// reinit due to clip list change
+				this.initActionsAndFeedbacks()
 
-			if (doFullInit || oldLength !== this.clipsList.length) {
 				// Update variables, as clip count can have changed. This will update all the values too
 				this.initVariables()
 			} else {
@@ -480,7 +483,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		}
 
 		if (res.clipId !== null) {
-			const clipObj = this.clipsList.find(({ clipId }) => clipId == this.transportInfo.clipId)
+			const clipObj = this.simpleClipsList.find(({ clipId }) => clipId == this.transportInfo.clipId)
 			if (clipObj) {
 				res.clipName = stripExtension(clipObj.name)
 			}

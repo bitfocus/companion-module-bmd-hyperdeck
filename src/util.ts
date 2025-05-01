@@ -1,3 +1,4 @@
+import type { Commands } from 'hyperdeck-connection'
 import semver from 'semver'
 
 /**
@@ -47,11 +48,17 @@ export function mergeState<T>(current: T, patch: Partial<T>): T {
 }
 
 export function toHHMMSS(secs: number): string {
-	var hours   = Math.floor(secs / 3600)
+	var hours = Math.floor(secs / 3600)
 	var minutes = Math.floor(secs / 60) % 60
 	var seconds = secs % 60
-	
-	return [hours,minutes,seconds]
-	.map(v => v < 10 ? "0" + v : v)
-	.join(":")
+
+	return [hours, minutes, seconds].map((v) => (v < 10 ? '0' + v : v)).join(':')
+}
+
+export interface SimpleClipInfo {
+	clipId: number
+	name: string
+}
+export function makeSimpleClipInfos(clips: Commands.ClipInfo[]): SimpleClipInfo[] {
+	return clips.map((clip) => ({ clipId: clip.clipId, name: clip.name }))
 }

@@ -200,6 +200,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/semver@npm:^7.7.0":
+  version: 7.7.0
+  resolution: "@types/semver@npm:7.7.0"
+  checksum: 10c0/6b5f65f647474338abbd6ee91a6bbab434662ddb8fe39464edcbcfc96484d388baad9eb506dff217b6fc1727a88894930eb1f308617161ac0f376fe06be4e1ee
+  languageName: node
+  linkType: hard
+
 "@types/smpte-timecode@npm:^1.2.5":
   version: 1.2.5
   resolution: "@types/smpte-timecode@npm:1.2.5"
@@ -472,6 +479,7 @@ __metadata:
     "@companion-module/base": "npm:~1.11.3"
     "@companion-module/tools": "npm:^2.3.0"
     "@types/node": "npm:^22.15.3"
+    "@types/semver": "npm:^7.7.0"
     "@types/smpte-timecode": "npm:^1.2.5"
     hyperdeck-connection: "npm:2.0.1"
     semver: "npm:^7.7.1"

@@ -11,6 +11,7 @@ import {
 } from './variables.js'
 import { initActions } from './actions.js'
 import { initFeedbacks } from './feedbacks.js'
+import { initPresets } from './presets.js'
 import { upgradeScripts } from './upgrades.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
@@ -80,6 +81,10 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.setFeedbackDefinitions(initFeedbacks(this))
 	}
 
+	private initPresets() {
+		this.setPresetDefinitions(initPresets(this))
+	}
+
 	/**
 	 * Creates the configuration fields for web config.
 	 */
@@ -107,7 +112,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.updateStatus(InstanceStatus.Connecting)
 
 		this.initActionsAndFeedbacks()
-		//this.initPresets();
+		this.initPresets();
 		this.initVariables()
 
 		this.initHyperdeck()
@@ -368,7 +373,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.config = config
 
 		this.initActionsAndFeedbacks()
-		//this.initPresets();
+		this.initPresets();
 		this.initVariables()
 
 		if (resetConnection || !this.hyperDeck) {

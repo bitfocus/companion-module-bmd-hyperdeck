@@ -18,50 +18,66 @@ const colors = {
 }
 
 export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
-    self.log('info', 'Initializing Presets')
-    
+	self.log('info', 'Initializing Presets')
+
 	const presets: CompanionPresetDefinitions = {}
 
 	presets.play = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Play',
-        style: {
-            text: '▶\nPlay',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.green,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [
-                    { actionId: 'play', options: { speed: 100, loop: false, single: false, useVariable: false } },
-                ],
-                up: [],
-            },
-        ],
-    }
-    
-    presets.rec = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Record',
-        style: {
-            text: '●\nRec',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.red,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'rec', options: {} } ],
-                up: [],
-            },
-        ],
-    }
-    
+		type: 'button',
+		category: 'Transport',
+		name: 'Play',
+		style: {
+			text: '▶\nPlay',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'play' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.green,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'play', options: { speed: 100, loop: false, single: false, useVariable: false } }],
+				up: [],
+			},
+		],
+	}
+
+	presets.rec = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Record',
+		style: {
+			text: '●\nRec',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'record' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.red,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'rec', options: {} }],
+				up: [],
+			},
+		],
+	}
+
     presets.spill = {
         type: 'button',
         category: 'Transport',
@@ -118,26 +134,35 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
             },
         ],
     }
-    
-    presets.stop = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Stop',
-        style: {
-            text: '■\nStop',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.black,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'stop', options: {} } ],
-                up: [],
-            },
-        ],
-    }
-    
+
+	presets.stop = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Stop',
+		style: {
+			text: '■\nStop',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.grey,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'stopped' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.black,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'stop', options: {} }],
+				up: [],
+			},
+		],
+	}
+
     presets.goto = {
         type: 'button',
         category: 'Transport',
@@ -156,45 +181,63 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
             },
         ],
     }
-    
-    presets.gotoN = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Goto Clip (n)',
-        style: {
-            text: 'Goto\nClip 1',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.blue,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'gotoN', options: { clip: 1, useVariable: false } } ],
-                up: [],
-            },
-        ],
-    }
-    
-    presets.gotoName = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Goto Clip (name)',
-        style: {
-            text: 'Goto\nNamed',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.blue,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'gotoName', options: { clip: '' } } ],
-                up: [],
-            },
-        ],
-    }
-    
+
+	presets.gotoN = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Goto Clip (n)',
+		style: {
+			text: 'Goto\nClip 1',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_clip',
+				options: { clipID: 1, slotID: 'either' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.blue,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'gotoN', options: { clip: 1, useVariable: false } }],
+				up: [],
+			},
+		],
+	}
+
+	presets.gotoName = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Goto Clip (name)',
+		style: {
+			text: 'Goto\nNamed',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_clip_name',
+				options: { clipName: '', slotID: 'either' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.blue,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'gotoName', options: { clip: '' } }],
+				up: [],
+			},
+		],
+	}
+
     presets.goFwd = {
         type: 'button',
         category: 'Transport',
@@ -251,26 +294,35 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
             },
         ],
     }
-    
-    presets.formatPrepare = {
-        type: 'button',
-        category: 'Utility',
-        name: 'Format (Prepare)',
-        style: {
-            text: 'Format\nPrepare',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.red,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'formatPrepare', options: { filesystem: 'HFS+', timeout: 10 } } ],
-                up: [],
-            },
-        ],
-    }
-    
+
+	presets.formatPrepare = {
+		type: 'button',
+		category: 'Utility',
+		name: 'Format (Prepare)',
+		style: {
+			text: 'Format\nPrepare',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'format_ready',
+				options: {},
+				style: {
+					color: colors.white,
+					bgcolor: colors.red,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'formatPrepare', options: { filesystem: 'HFS+', timeout: 10 } }],
+				up: [],
+			},
+		],
+	}
+
     presets.formatConfirm = {
         type: 'button',
         category: 'Utility',
@@ -289,26 +341,174 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
             },
         ],
     }
-    
-    presets.remote = {
-        type: 'button',
-        category: 'Config',
-        name: 'Remote Toggle',
-        style: {
-            text: 'Remote\nToggle',
-            size: '14',
-            color: colors.black,
-            bgcolor: colors.grey,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'remote', options: { remoteEnable: 'toggle' } } ],
-                up: [],
-            },
-        ],
-    }
-    
+
+	presets.remote = {
+		type: 'button',
+		category: 'Config',
+		name: 'Remote Toggle',
+		style: {
+			text: 'Remote\nToggle',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'remote_status',
+				options: { status: true },
+				style: {
+					color: colors.white,
+					bgcolor: colors.blue,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'remote', options: { remoteEnable: 'toggle' } }],
+				up: [],
+			},
+		],
+	}
+
+	presets.transportStatus = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Transport Status',
+		style: {
+			text: 'Status\n$(hyperdeck:status)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.clipInfo = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Clip Info',
+		style: {
+			text: 'Clip\n$(hyperdeck:clipName)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.slotId = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Slot ID',
+		style: {
+			text: 'Slot\n$(hyperdeck:slotId)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.videoFormat = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Video Format',
+		style: {
+			text: 'Format\n$(hyperdeck:videoFormat)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.recordingTime = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Recording Time',
+		style: {
+			text: 'Rec Time\n$(hyperdeck:recordingTime)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.timecode = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Timecode',
+		style: {
+			text: 'TC\n$(hyperdeck:timecodeHMSF)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.countdown = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Countdown TC',
+		style: {
+			text: '⏳\n$(hyperdeck:countdownTimecodeHMSF)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.audioFormat = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Audio Format',
+		style: {
+			text: 'Audio\n$(hyperdeck:audioCodec)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.audioChannels = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Audio Channels',
+		style: {
+			text: 'Channels\n$(hyperdeck:audioChannels)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
+
+	presets.remoteEnabled = {
+		type: 'button',
+		category: 'Monitor',
+		name: 'Remote Status',
+		style: {
+			text: 'Remote\n$(hyperdeck:remoteEnabled)',
+			size: 'auto',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		steps: [],
+		feedbacks: [],
+	}
 
 	return presets
 }

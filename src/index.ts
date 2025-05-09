@@ -112,7 +112,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.updateStatus(InstanceStatus.Connecting)
 
 		this.initActionsAndFeedbacks()
-		this.initPresets();
+		this.initPresets()
 		this.initVariables()
 
 		this.initHyperdeck()
@@ -373,7 +373,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.config = config
 
 		this.initActionsAndFeedbacks()
-		this.initPresets();
+		this.initPresets()
 		this.initVariables()
 
 		if (resetConnection || !this.hyperDeck) {

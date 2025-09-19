@@ -102,12 +102,21 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
         category: 'Transport',
         name: 'Record w/ Name',
         style: {
-            text: 'Rec\nNamed',
+            text: 'Rec\n●\nNamed',
             size: '14',
             color: colors.white,
-            bgcolor: colors.red,
+            bgcolor: colors.black,
         },
-        feedbacks: [],
+        feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'record' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.red,
+				},
+			},
+		],
         steps: [
             {
                 down: [ { actionId: 'recName', options: { name: 'Recording' } } ],
@@ -121,12 +130,21 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
         category: 'Transport',
         name: 'Record w/ Timestamp',
         style: {
-            text: 'Rec\nTime',
+            text: 'Rec\n●\nTime',
             size: '14',
             color: colors.white,
-            bgcolor: colors.red,
+            bgcolor: colors.black,
         },
-        feedbacks: [],
+		feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'record' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.red,
+				},
+			},
+		],
         steps: [
             {
                 down: [ { actionId: 'recTimestamp', options: { prefix: '' } } ],
@@ -187,7 +205,7 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 		category: 'Transport',
 		name: 'Goto Clip (n)',
 		style: {
-			text: 'Goto\nClip 1',
+			text: 'Goto\n\u{2B80}\nClip 1',
 			size: '14',
 			color: colors.white,
 			bgcolor: colors.black,
@@ -215,7 +233,7 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 		category: 'Transport',
 		name: 'Goto Clip (name)',
 		style: {
-			text: 'Goto\nNamed',
+			text: 'Goto\n\u{2B80}\nNamed',
 			size: '14',
 			color: colors.white,
 			bgcolor: colors.black,
@@ -243,7 +261,7 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
         category: 'Transport',
         name: 'Go Fwd Clip',
         style: {
-            text: 'Next\nClip',
+            text: 'Next\n\u{1F87A}\nClip',
             size: '14',
             color: colors.black,
             bgcolor: colors.orange,
@@ -262,7 +280,7 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
         category: 'Transport',
         name: 'Go Rew Clip',
         style: {
-            text: 'Prev\nClip',
+            text: 'Prev\n\u{1F878}\nClip',
             size: '14',
             color: colors.black,
             bgcolor: colors.orange,
@@ -281,7 +299,7 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
         category: 'Utility',
         name: 'Fetch Clips',
         style: {
-            text: 'Fetch\nClips',
+            text: 'Fetch\n\u{1F517}\nClips',
             size: '14',
             color: colors.white,
             bgcolor: colors.purple,

@@ -15,7 +15,16 @@ export function getTimestamp(): string {
 	const curr_year = d.getFullYear()
 	const h = ('0' + d.getHours()).slice(-2)
 	const m = ('0' + d.getMinutes()).slice(-2)
-	return `${curr_year}${curr_month}${curr_date}_${h}${m}`
+	const s = ('0' + d.getSeconds()).slice(-2)
+	return `${curr_year}${curr_month}${curr_date}_${h}${m}${s}`
+}
+console.log('Current timestamp:', getTimestamp())
+
+// Test multiple calls to see if they're unique
+for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+        console.log(`Call ${i + 1}:`, getTimestamp())
+    }, i * 100) // 100ms apart
 }
 
 /**

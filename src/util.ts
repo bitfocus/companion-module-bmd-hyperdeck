@@ -18,15 +18,6 @@ export function getTimestamp(): string {
 	const s = ('0' + d.getSeconds()).slice(-2)
 	return `${curr_year}${curr_month}${curr_date}_${h}${m}${s}`
 }
-console.log('Current timestamp:', getTimestamp())
-
-// Test multiple calls to see if they're unique
-for (let i = 0; i < 5; i++) {
-    setTimeout(() => {
-        console.log(`Call ${i + 1}:`, getTimestamp())
-    }, i * 100) // 100ms apart
-}
-
 /**
  * Compare protocol version numbers
  *

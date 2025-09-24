@@ -18,6 +18,7 @@ export function getTimestamp(): string {
 	const s = ('0' + d.getSeconds()).slice(-2)
 	return `${curr_year}${curr_month}${curr_date}_${h}${m}${s}`
 }
+
 /**
  * Compare protocol version numbers
  *

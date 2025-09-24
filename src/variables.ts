@@ -85,6 +85,60 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 	if (instance.model.hasSeparateInputFormat) {
 		newValues['inputVideoFormat'] = instance.transportInfo.inputVideoFormat ?? 'none'
 	}
+
+	// Add active clip timecode variables
+	if (instance.transportInfo.clipId !== null) {
+		const clip = instance.fullClipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
+		if (clip) {
+			const tb = instance.transportInfo.videoFormat && frameRates[instance.transportInfo.videoFormat]
+			
+			// Clip duration timecode
+			if (clip.duration && tb) {
+				try {
+					const tcDuration = Timecode(clip.duration, tb)
+					newValues['clip_durationTimecode'] = tcDuration.toString()
+				} catch (err) {
+					newValues['clip_durationTimecode'] = '--:--:--:--'
+				}
+			} else {
+				newValues['clip_durationTimecode'] = '--:--:--:--'
+			}
+
+			// Clip start timecode
+			if (clip.startTime && tb) {
+				try {
+					const tcStart = Timecode(clip.startTime, tb)
+					newValues['clip_startTimecode'] = tcStart.toString()
+				} catch (err) {
+					newValues['clip_startTimecode'] = '--:--:--:--'
+				}
+			} else {
+				newValues['clip_startTimecode'] = '--:--:--:--'
+			}
+
+			// Clip end timecode (calculated from start + duration)
+			if (clip.startTime && clip.duration && tb) {
+				try {
+					const tcStart = Timecode(clip.startTime, tb)
+					const tcDuration = Timecode(clip.duration, tb)
+					const tcEnd = Timecode(tcStart.frameCount + tcDuration.frameCount, tb)
+					newValues['clip_endTimecode'] = tcEnd.toString()
+				} catch (err) {
+					newValues['clip_endTimecode'] = '--:--:--:--'
+				}
+			} else {
+				newValues['clip_endTimecode'] = '--:--:--:--'
+			}
+		} else {
+			newValues['clip_durationTimecode'] = '--:--:--:--'
+			newValues['clip_startTimecode'] = '--:--:--:--'
+			newValues['clip_endTimecode'] = '--:--:--:--'
+		}
+	} else {
+		newValues['clip_durationTimecode'] = '--:--:--:--'
+		newValues['clip_startTimecode'] = '--:--:--:--'
+		newValues['clip_endTimecode'] = '--:--:--:--'
+	}
 }
 
 export function updateClipVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
@@ -259,6 +313,21 @@ export function initVariables(instance: InstanceBaseExt) {
 			variableId: 'inputVideoFormat',
 		})
 	}
+
+	// Add active clip timecode variables
+	variables.push({
+		name: 'Active clip duration timecode',
+		variableId: 'clip_durationTimecode',
+	})
+	variables.push({
+		name: 'Active clip start timecode',
+		variableId: 'clip_startTimecode',
+	})
+	variables.push({
+		name: 'Active clip end timecode',
+		variableId: 'clip_endTimecode',
+	})
+
 	updateTransportInfoVariables(instance, values)
 
 	// Slot variables

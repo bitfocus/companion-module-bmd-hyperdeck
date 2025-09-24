@@ -15,7 +15,8 @@ export function getTimestamp(): string {
 	const curr_year = d.getFullYear()
 	const h = ('0' + d.getHours()).slice(-2)
 	const m = ('0' + d.getMinutes()).slice(-2)
-	return `${curr_year}${curr_month}${curr_date}_${h}${m}`
+	const s = ('0' + d.getSeconds()).slice(-2)
+	return `${curr_year}${curr_month}${curr_date}_${h}${m}${s}`
 }
 
 /**

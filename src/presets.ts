@@ -510,5 +510,43 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 		feedbacks: [],
 	}
 
+	presets.playrangeSet = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Play Range Set',
+		style: {
+			text: 'Play Range\nSet',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.teal,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [{ actionId: 'playrangeSet', options: { inTimecode: '00:00:00:00', outTimecode: '00:00:10:00' } }],
+				up: [],
+			},
+		],
+	}
+
+	presets.playrangeClear = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Play Range Clear',
+		style: {
+			text: 'Play Range\nClear',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.grey,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [{ actionId: 'playrangeClear', options: {} }],
+				up: [],
+			},
+		],
+	}
+
 	return presets
 }

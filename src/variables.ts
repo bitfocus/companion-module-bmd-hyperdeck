@@ -309,6 +309,13 @@ export function initVariables(instance: InstanceBaseExt) {
 		name: 'Remote enabled',
 		variableId: 'remoteEnabled',
 	})
+	// Target IP
+	variables.push({
+		name: 'Target IP',
+		variableId: 'ip',
+	})
+	values['ip'] = '-'
+
 
 	// Timecode variables
 	const initTcVariable = (isCountdown: boolean) => {

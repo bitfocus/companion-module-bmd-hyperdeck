@@ -54,3 +54,4 @@ Older models of Hyperdeck (pre 2023) can **only be connected to one controller a
 - Clip count
 - Timecode
 - File Format
+- IP Address

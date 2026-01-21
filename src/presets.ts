@@ -162,7 +162,41 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 			},
 		],
 	}
-
+	presets.playStopToggle = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Play/Stop Toggle',
+		style: {
+			text: '▶/■\nPlay/Stop',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'play' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.green,
+				},
+			},
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'stopped' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.grey,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'playStopToggle', options: {} }],
+				up: [],
+			},
+		],
+	}
     presets.goto = {
         type: 'button',
         category: 'Transport',

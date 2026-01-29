@@ -21,7 +21,7 @@
 		"url": "git+https://github.com/bitfocus/companion-module-bmd-hyperdeck.git"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^2.3.0",
+		"@companion-module/tools": "^2.6.0",
 		"@types/node": "^22.15.3",
 		"@types/semver": "^7.7.0",
 		"@types/smpte-timecode": "^1.2.5",

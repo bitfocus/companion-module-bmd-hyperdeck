@@ -776,5 +776,123 @@ export function initActions(self: InstanceBaseExt) {
 		},
 	}
 
+	// Play Range Actions
+	if (self.config.modelID != 'bmdDup4K') {
+		// Proper PlayRangeCommand that follows hyperdeck-connection library structure
+		class PlayRangeCommand extends Commands.AbstractCommand<any> {
+			public inTimecode?: string
+			public outTimecode?: string
+
+			constructor(inTimecode?: string, outTimecode?: string) {
+				super()
+				this.inTimecode = inTimecode
+				this.outTimecode = outTimecode
+			}
+
+			serialize(): any {
+				if (this.inTimecode && this.outTimecode) {
+					if (this.outTimecode === 'end') {
+						return {
+							name: 'playrange set',
+							params: {
+								in: this.inTimecode,
+								out: 'end'
+							}
+						}
+					}
+					return {
+						name: 'playrange set',
+						params: {
+							in: this.inTimecode,
+							out: this.outTimecode
+						}
+					}
+				} else {
+					return {
+						name: 'playrange clear',
+						params: {}
+					}
+				}
+			}
+
+			expectedResponseCode = 200 as const
+
+			deserialize(msg: any): any {
+				return msg
+			}
+		}
+
+		actions['playrangeSet'] = {
+			name: 'Play Range Set',
+			description: 'Set play range to play between specified in and out timecodes',
+			options: [
+				{
+					type: 'textinput',
+					label: 'In Timecode (hh:mm:ss:ff)',
+					id: 'inTimecode',
+					default: '00:00:00:00',
+					regex: Regex.TIMECODE,
+					useVariables: { local: true },
+				},
+				{
+					type: 'textinput',
+					label: 'Out Timecode (hh:mm:ss:ff)',
+					id: 'outTimecode',
+					default: '00:00:10:00',
+					regex: Regex.TIMECODE,
+					useVariables: { local: true },
+				},
+			],
+			callback: async ({ options }, context) => {
+				try {
+					const inTc = await parseOptString(context, options, 'inTimecode')
+					const outTc = await parseOptString(context, options, 'outTimecode')
+					
+					self.log('debug', `PlayRange Set - In: "${inTc}", Out: "${outTc}"`)
+					
+					// Validate timecodes
+					if (!inTc || !outTc) {
+						throw new Error('Both in and out timecodes are required')
+					}
+					
+					// Check if timecodes are valid format (basic validation)
+					const timecodeRegex = /^\d{2}:\d{2}:\d{2}:\d{2}$/
+					if (!timecodeRegex.test(inTc) && inTc !== 'start') {
+						throw new Error(`Invalid in timecode format: ${inTc}`)
+					}
+					if (!timecodeRegex.test(outTc) && outTc !== 'end') {
+						throw new Error(`Invalid out timecode format: ${outTc}`)
+					}
+					
+					const cmd = new PlayRangeCommand(inTc, outTc)
+					self.log('debug', `Sending command: ${cmd.serialize()}`)
+					await self.sendCommand(cmd)
+					
+					self.log('info', `Play range set: in: ${inTc} out: ${outTc}`)
+				} catch (error: any) {
+					self.log('error', `Failed to set play range: ${error.message}`)
+					self.log('debug', `Error details: ${error.stack}`)
+				}
+			},
+		}
+
+		actions['playrangeClear'] = {
+			name: 'Play Range Clear',
+			description: 'Clear/reset play range setting',
+			options: [],
+			callback: async () => {
+				try {
+					self.log('debug', 'Sending playrange clear command...')
+					const cmd = new PlayRangeCommand()
+					await self.sendCommand(cmd)
+					self.log('info', 'Play range cleared')
+				} catch (error: any) {
+					self.log('error', `Failed to clear play range: ${error.message}`)
+				}
+			},
+		}
+
+	}
+
 	return actions
 }

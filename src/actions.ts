@@ -244,6 +244,35 @@ export function initActions(self: InstanceBaseExt) {
 			await self.sendCommand(cmd)
 		},
 	}
+	actions['playStopToggle'] = {
+		name: 'Play/Stop Toggle',
+		description: 'Toggle between Play and Stop based on current transport status',
+		options: [],
+		callback: async () => {
+			try {
+				if (self.transportInfo.status === 'play') {
+					// Currently playing, so stop
+					const cmd = new Commands.StopCommand()
+					await self.sendCommand(cmd)
+					self.log('info', 'Playback stopped via toggle')
+				} else {
+					// Not playing, so start playing
+					const cmd = new Commands.PlayCommand()
+					cmd.speed = '100'
+					cmd.loop = false
+					cmd.singleClip = false
+					await self.sendCommand(cmd)
+					self.log('info', 'Playback started via toggle')
+				}
+			} catch (error: any) {
+				if (error.message && error.message.includes('108')) {
+					self.log('warn', 'Internal error: HyperDeck may be busy or in an invalid state. Try again in a moment.')
+				} else {
+					self.log('error', `Play/Stop toggle failed: ${error.message || error}`)
+				}
+			}
+		},
+	}
 
 	if (self.config.modelID != 'bmdDup4K') {
 		actions['goto'] = {

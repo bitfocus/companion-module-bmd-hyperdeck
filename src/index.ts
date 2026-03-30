@@ -115,14 +115,6 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		this.initPresets()
 		this.initVariables()
 
-
-		{
-			const ta = this.parseIpAndPort()
-			if (ta) {
-				this.setVariableValues({ ip: ta.ip })
-			}
-		}
-
 		this.initHyperdeck()
 	}
 
@@ -167,10 +159,6 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		// }
 
 		const targetAddress = this.parseIpAndPort()
-
-		if (targetAddress) {
-			this.setVariableValues({ ip: targetAddress.ip })
-		}
 
 		if (!targetAddress) {
 			this.updateStatus(InstanceStatus.BadConfig)

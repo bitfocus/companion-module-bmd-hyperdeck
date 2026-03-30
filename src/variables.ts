@@ -314,7 +314,7 @@ export function initVariables(instance: InstanceBaseExt) {
 		name: 'Target IP',
 		variableId: 'ip',
 	})
-	values['ip'] = '-'
+	values['ip'] = instance.config.bonjourHost?.split(':')[0] ?? instance.config.host ?? '-'
 
 
 	// Timecode variables

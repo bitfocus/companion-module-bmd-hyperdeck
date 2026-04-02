@@ -254,7 +254,6 @@ export function initActions(self: InstanceBaseExt) {
 					// Currently playing, so stop
 					const cmd = new Commands.StopCommand()
 					await self.sendCommand(cmd)
-					self.log('info', 'Playback stopped via toggle')
 				} else {
 					// Not playing, so start playing
 					const cmd = new Commands.PlayCommand()
@@ -262,7 +261,6 @@ export function initActions(self: InstanceBaseExt) {
 					cmd.loop = false
 					cmd.singleClip = false
 					await self.sendCommand(cmd)
-					self.log('info', 'Playback started via toggle')
 				}
 			} catch (error: any) {
 				if (error.message && error.message.includes('108')) {

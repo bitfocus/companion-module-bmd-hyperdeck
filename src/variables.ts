@@ -315,15 +315,15 @@ export function initVariables(instance: InstanceBaseExt) {
 	// Add active clip timecode variables
 	variables.push({
 		name: 'Active clip duration timecode',
-		variableId: 'clip_durationTimecode',
+		variableId: 'clipDurationTimecode',
 	})
 	variables.push({
 		name: 'Active clip start timecode',
-		variableId: 'clip_startTimecode',
+		variableId: 'clipStartTimecode',
 	})
 	variables.push({
 		name: 'Active clip end timecode',
-		variableId: 'clip_endTimecode',
+		variableId: 'clipEndTimecode',
 	})
 
 	updateTransportInfoVariables(instance, values)

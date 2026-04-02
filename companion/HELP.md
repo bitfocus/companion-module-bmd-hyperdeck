@@ -13,6 +13,7 @@ Older models of Hyperdeck (pre 2023) can **only be connected to one controller a
 - Record (with name and current date/time)
 - Record (with custom reel)
 - Stop
+- Play/Stop Toggle
 - Goto (timecode)
 - Goto Clip (n)
 - Goto Clip (name)
@@ -53,5 +54,8 @@ Older models of Hyperdeck (pre 2023) can **only be connected to one controller a
 - Recording time available
 - Clip count
 - Timecode
+- Active clip duration timecode
+- Active clip start timecode
+- Active clip end timecode
 - File Format
-- IP Address
+- Target IP

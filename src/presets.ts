@@ -78,63 +78,35 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 		],
 	}
 
-    presets.spill = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Spill',
-        style: {
-            text: '⏺️\nSpill',
-            size: '14',
-            color: colors.black,
-            bgcolor: colors.yellow,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'spill', options: { slot: 'next' } } ],
-                up: [],
-            },
-        ],
-    }
-    
-    presets.recName = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Record w/ Name',
-        style: {
-            text: 'Rec\n●\nNamed',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.black,
-        },
-        feedbacks: [
+	presets.spill = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Spill',
+		style: {
+			text: '⏺️\nSpill',
+			size: '14',
+			color: colors.black,
+			bgcolor: colors.yellow,
+		},
+		feedbacks: [],
+		steps: [
 			{
-				feedbackId: 'transport_status',
-				options: { status: 'record' },
-				style: {
-					color: colors.white,
-					bgcolor: colors.red,
-				},
+				down: [{ actionId: 'spill', options: { slot: 'next' } }],
+				up: [],
 			},
 		],
-        steps: [
-            {
-                down: [ { actionId: 'recName', options: { name: 'Recording' } } ],
-                up: [],
-            },
-        ],
-    }
-    
-    presets.recTimestamp = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Record w/ Timestamp',
-        style: {
-            text: 'Rec\n●\nTime',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.black,
-        },
+	}
+
+	presets.recName = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Record w/ Name',
+		style: {
+			text: 'Rec\n●\nNamed',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
 		feedbacks: [
 			{
 				feedbackId: 'transport_status',
@@ -145,13 +117,41 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 				},
 			},
 		],
-        steps: [
-            {
-                down: [ { actionId: 'recTimestamp', options: { prefix: '' } } ],
-                up: [],
-            },
-        ],
-    }
+		steps: [
+			{
+				down: [{ actionId: 'recName', options: { name: 'Recording' } }],
+				up: [],
+			},
+		],
+	}
+
+	presets.recTimestamp = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Record w/ Timestamp',
+		style: {
+			text: 'Rec\n●\nTime',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'record' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.red,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'recTimestamp', options: { prefix: '' } }],
+				up: [],
+			},
+		],
+	}
 
 	presets.stop = {
 		type: 'button',
@@ -215,24 +215,24 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 			},
 		],
 	}
-    presets.goto = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Goto TC',
-        style: {
-            text: 'Goto\n00:00:01:00',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.teal,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'goto', options: { tc: '00:00:01:00' } } ],
-                up: [],
-            },
-        ],
-    }
+	presets.goto = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Goto TC',
+		style: {
+			text: 'Goto\n00:00:01:00',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.teal,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [{ actionId: 'goto', options: { tc: '00:00:01:00' } }],
+				up: [],
+			},
+		],
+	}
 
 	presets.gotoN = {
 		type: 'button',
@@ -290,62 +290,62 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 		],
 	}
 
-    presets.goFwd = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Go Fwd Clip',
-        style: {
-            text: 'Next\n\u{1F87A}\nClip',
-            size: '14',
-            color: colors.black,
-            bgcolor: colors.orange,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'goFwd', options: { clip: 1, useVariable: false } } ],
-                up: [],
-            },
-        ],
-    }
-    
-    presets.goRew = {
-        type: 'button',
-        category: 'Transport',
-        name: 'Go Rew Clip',
-        style: {
-            text: 'Prev\n\u{1F878}\nClip',
-            size: '14',
-            color: colors.black,
-            bgcolor: colors.orange,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'goRew', options: { clip: 1, useVariable: false } } ],
-                up: [],
-            },
-        ],
-    }
-    
-    presets.fetchClips = {
-        type: 'button',
-        category: 'Utility',
-        name: 'Fetch Clips',
-        style: {
-            text: 'Fetch\n\u{1F517}\nClips',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.purple,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'fetchClips', options: {} } ],
-                up: [],
-            },
-        ],
-    }
+	presets.goFwd = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Go Fwd Clip',
+		style: {
+			text: 'Next\n\u{1F87A}\nClip',
+			size: '14',
+			color: colors.black,
+			bgcolor: colors.orange,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [{ actionId: 'goFwd', options: { clip: 1, useVariable: false } }],
+				up: [],
+			},
+		],
+	}
+
+	presets.goRew = {
+		type: 'button',
+		category: 'Transport',
+		name: 'Go Rew Clip',
+		style: {
+			text: 'Prev\n\u{1F878}\nClip',
+			size: '14',
+			color: colors.black,
+			bgcolor: colors.orange,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [{ actionId: 'goRew', options: { clip: 1, useVariable: false } }],
+				up: [],
+			},
+		],
+	}
+
+	presets.fetchClips = {
+		type: 'button',
+		category: 'Utility',
+		name: 'Fetch Clips',
+		style: {
+			text: 'Fetch\n\u{1F517}\nClips',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.purple,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [{ actionId: 'fetchClips', options: {} }],
+				up: [],
+			},
+		],
+	}
 
 	presets.formatPrepare = {
 		type: 'button',
@@ -375,24 +375,24 @@ export function initPresets(self: InstanceBaseExt): CompanionPresetDefinitions {
 		],
 	}
 
-    presets.formatConfirm = {
-        type: 'button',
-        category: 'Utility',
-        name: 'Format (Confirm)',
-        style: {
-            text: 'Format\nConfirm',
-            size: '14',
-            color: colors.white,
-            bgcolor: colors.red,
-        },
-        feedbacks: [],
-        steps: [
-            {
-                down: [ { actionId: 'formatConfirm', options: {} } ],
-                up: [],
-            },
-        ],
-    }
+	presets.formatConfirm = {
+		type: 'button',
+		category: 'Utility',
+		name: 'Format (Confirm)',
+		style: {
+			text: 'Format\nConfirm',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.red,
+		},
+		feedbacks: [],
+		steps: [
+			{
+				down: [{ actionId: 'formatConfirm', options: {} }],
+				up: [],
+			},
+		],
+	}
 
 	presets.remote = {
 		type: 'button',

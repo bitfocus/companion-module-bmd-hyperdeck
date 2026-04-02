@@ -376,6 +376,13 @@ export function initVariables(instance: InstanceBaseExt) {
 		name: 'Remote enabled',
 		variableId: 'remoteEnabled',
 	})
+	// Target IP
+	variables.push({
+		name: 'Target IP',
+		variableId: 'ip',
+	})
+	values['ip'] = instance.config.bonjourHost?.split(':')[0] ?? instance.config.host ?? '-'
+
 
 	// Timecode variables
 	const initTcVariable = (isCountdown: boolean) => {

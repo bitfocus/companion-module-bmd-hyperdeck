@@ -91,43 +91,41 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 		const clip = instance.fullClipsList.find(({ clipId }) => clipId == instance.transportInfo.clipId)
 		if (clip) {
 			const tb = instance.transportInfo.videoFormat && frameRates[instance.transportInfo.videoFormat]
-			
-			// Clip duration timecode
-			if (clip.duration && tb) {
-				try {
-					const tcDuration = Timecode(clip.duration, tb)
-					newValues['clip_durationTimecode'] = tcDuration.toString()
-				} catch (err) {
-					newValues['clip_durationTimecode'] = '--:--:--:--'
-				}
-			} else {
-				newValues['clip_durationTimecode'] = '--:--:--:--'
-			}
 
-			// Clip start timecode
-			if (clip.startTime && tb) {
-				try {
-					const tcStart = Timecode(clip.startTime, tb)
-					newValues['clip_startTimecode'] = tcStart.toString()
-				} catch (err) {
-					newValues['clip_startTimecode'] = '--:--:--:--'
-				}
-			} else {
-				newValues['clip_startTimecode'] = '--:--:--:--'
-			}
+			newValues['clip_durationTimecode'] = '--:--:--:--'
+			newValues['clip_startTimecode'] = '--:--:--:--'
+			newValues['clip_endTimecode'] = '--:--:--:--'
 
-			// Clip end timecode (calculated from start + duration)
-			if (clip.startTime && clip.duration && tb) {
-				try {
-					const tcStart = Timecode(clip.startTime, tb)
-					const tcDuration = Timecode(clip.duration, tb)
-					const tcEnd = Timecode(tcStart.frameCount + tcDuration.frameCount, tb)
-					newValues['clip_endTimecode'] = tcEnd.toString()
-				} catch (err) {
-					newValues['clip_endTimecode'] = '--:--:--:--'
+			if (tb) {
+				let tcStart: Timecode.Timecode | undefined
+				let tcDuration: Timecode.Timecode | undefined
+
+				if (clip.startTime) {
+					try {
+						tcStart = Timecode(clip.startTime, tb)
+						newValues['clip_startTimecode'] = tcStart.toString()
+					} catch (err) {
+						newValues['clip_startTimecode'] = '--:--:--:--'
+					}
 				}
-			} else {
-				newValues['clip_endTimecode'] = '--:--:--:--'
+
+				if (clip.duration) {
+					try {
+						tcDuration = Timecode(clip.duration, tb)
+						newValues['clip_durationTimecode'] = tcDuration.toString()
+					} catch (err) {
+						newValues['clip_durationTimecode'] = '--:--:--:--'
+					}
+				}
+
+				if (tcStart && tcDuration) {
+					try {
+						const tcEnd = Timecode(tcStart.frameCount + tcDuration.frameCount, tb)
+						newValues['clip_endTimecode'] = tcEnd.toString()
+					} catch (err) {
+						newValues['clip_endTimecode'] = '--:--:--:--'
+					}
+				}
 			}
 		} else {
 			newValues['clip_durationTimecode'] = '--:--:--:--'

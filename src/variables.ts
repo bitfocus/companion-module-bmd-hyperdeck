@@ -383,7 +383,6 @@ export function initVariables(instance: InstanceBaseExt) {
 	})
 	values['ip'] = instance.config.bonjourHost?.split(':')[0] ?? instance.config.host ?? '-'
 
-
 	// Timecode variables
 	const initTcVariable = (isCountdown: boolean) => {
 		variables.push({

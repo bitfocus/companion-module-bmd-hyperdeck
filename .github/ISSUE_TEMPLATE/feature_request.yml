@@ -1,6 +1,6 @@
 name: Feature Request
 description: Request a new feature within this module
-title: '[Feature]: '
+title: "[Feature]: "
 labels:
   - enhancement
 body:

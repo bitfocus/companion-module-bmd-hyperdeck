@@ -92,50 +92,50 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 		if (clip) {
 			const tb = instance.transportInfo.videoFormat && frameRates[instance.transportInfo.videoFormat]
 
-			newValues['clip_durationTimecode'] = '--:--:--:--'
-			newValues['clip_startTimecode'] = '--:--:--:--'
-			newValues['clip_endTimecode'] = '--:--:--:--'
+			newValues['clipDurationTimecode'] = '--:--:--:--'
+			newValues['clipStartTimecode'] = '--:--:--:--'
+			newValues['clipEndTimecode'] = '--:--:--:--'
 
 			if (tb) {
-				let tcStart: Timecode.Timecode | undefined
-				let tcDuration: Timecode.Timecode | undefined
+				let tcStart: Timecode.TimecodeInstance | undefined
+				let tcDuration: Timecode.TimecodeInstance | undefined
 
 				if (clip.startTime) {
 					try {
 						tcStart = Timecode(clip.startTime, tb)
-						newValues['clip_startTimecode'] = tcStart.toString()
+						newValues['clipStartTimecode'] = tcStart.toString()
 					} catch (err) {
-						newValues['clip_startTimecode'] = '--:--:--:--'
+						newValues['clipStartTimecode'] = '--:--:--:--'
 					}
 				}
 
 				if (clip.duration) {
 					try {
 						tcDuration = Timecode(clip.duration, tb)
-						newValues['clip_durationTimecode'] = tcDuration.toString()
+						newValues['clipDurationTimecode'] = tcDuration.toString()
 					} catch (err) {
-						newValues['clip_durationTimecode'] = '--:--:--:--'
+						newValues['clipDurationTimecode'] = '--:--:--:--'
 					}
 				}
 
 				if (tcStart && tcDuration) {
 					try {
 						const tcEnd = Timecode(tcStart.frameCount + tcDuration.frameCount, tb)
-						newValues['clip_endTimecode'] = tcEnd.toString()
+						newValues['clipEndTimecode'] = tcEnd.toString()
 					} catch (err) {
-						newValues['clip_endTimecode'] = '--:--:--:--'
+						newValues['clipEndTimecode'] = '--:--:--:--'
 					}
 				}
 			}
 		} else {
-			newValues['clip_durationTimecode'] = '--:--:--:--'
-			newValues['clip_startTimecode'] = '--:--:--:--'
-			newValues['clip_endTimecode'] = '--:--:--:--'
+			newValues['clipDurationTimecode'] = '--:--:--:--'
+			newValues['clipStartTimecode'] = '--:--:--:--'
+			newValues['clipEndTimecode'] = '--:--:--:--'
 		}
 	} else {
-		newValues['clip_durationTimecode'] = '--:--:--:--'
-		newValues['clip_startTimecode'] = '--:--:--:--'
-		newValues['clip_endTimecode'] = '--:--:--:--'
+		newValues['clipDurationTimecode'] = '--:--:--:--'
+		newValues['clipStartTimecode'] = '--:--:--:--'
+		newValues['clipEndTimecode'] = '--:--:--:--'
 	}
 }
 

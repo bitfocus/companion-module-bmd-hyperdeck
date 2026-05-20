@@ -1,0 +1,335 @@
+import { initFeedbacks } from './feedbacks'
+import { InstanceBaseExt } from './types'
+import { Choices } from '@companion-module/base'
+
+// Mock the external dependencies
+const mockCombineRgb = jest.fn((red, green, blue) => red * 65536 + green * 256 + blue)
+const mockRegex = {
+	SIGNED_NUMBER: /^-?\d+$/,
+	SOMETHING: /.+/,
+}
+
+// Mock context for parsing variables
+const mockContext = {
+	parseVariablesInString: jest.fn((str) => Promise.resolve(str))
+}
+
+// Create a mock InstanceBaseExt
+class MockInstanceBaseExt implements InstanceBaseExt {
+	// Mock properties that would normally be present in the instance
+	model = 'ATEM'
+	transportInfo = {
+		status: 'Stopped',
+		clipId: 1,
+		slotId: 1,
+		clipName: 'TestClip',
+		loop: 'Off',
+		singleClip: 'On'
+	}
+	slotInfo = {
+		1: { status: 'Mounted' }
+	}
+	deckConfig = {
+		videoInput: 1,
+		audioInput: 1,
+		audioCodec: 'PCM',
+		audioInputChannels: '2'
+	}
+	formatToken = null
+	remoteInfo = {
+		enabled: 'Enabled'
+	}
+	
+	// Mock methods
+	log = jest.fn()
+	config = {}
+	
+	// Model choices and clip choices
+	modelChoices = {
+		Slots: [
+			{ id: '1', label: 'Slot 1' },
+			{ id: '2', label: 'Slot 2' }
+		],
+		VideoInputs: [
+			{ id: '1', label: 'Video Input 1' },
+			{ id: '2', label: 'Video Input 2' }
+		],
+		AudioInputs: [
+			{ id: '1', label: 'Audio Input 1' },
+			{ id: '2', label: 'Audio Input 2' }
+		]
+	}
+}
+
+// Mock the choices module
+jest.mock('./choices', () => ({
+	CHOICES_AUDIOCODEC: [
+		{ id: 'AAC', label: 'AAC' },
+		{ id: 'PCM', label: 'PCM' }
+	],
+	CHOICES_AUDIOCHANNELS: [
+		{ id: '2', label: '2 Channels' },
+		{ id: '4', label: '4 Channels' }
+	],
+	CHOICES_TRANSPORTSTATUS: [
+		{ id: 'Playing', label: 'Playing' },
+		{ id: 'Stopped', label: 'Stopped' }
+	],
+	CHOICES_SLOTSTATUS: [
+		{ id: 'Mounted', label: 'Mounted' },
+		{ id: 'Unmounted', label: 'Unmounted' }
+	],
+	CHOICES_ENABLEDISABLE: [
+		{ id: 'On', label: 'On' },
+		{ id: 'Off', label: 'Off' }
+	],
+	CHOICES_REMOTESTATUS: [
+		{ id: 'Enabled', label: 'Enabled' },
+		{ id: 'Disabled', label: 'Disabled' }
+	],
+	createModelChoices: (model: string) => ({
+		Slots: [
+			{ id: '1', label: 'Slot 1' },
+			{ id: '2', label: 'Slot 2' }
+		],
+		VideoInputs: [
+			{ id: '1', label: 'Video Input 1' },
+			{ id: '2', label: 'Video Input 2' }
+		],
+		AudioInputs: [
+			{ id: '1', label: 'Audio Input 1' },
+			{ id: '2', label: 'Audio Input 2' }
+		]
+	}),
+	createClipsChoice: (self: InstanceBaseExt) => [
+		{ id: 'TestClip', label: 'TestClip' },
+		{ id: 'AnotherClip', label: 'AnotherClip' }
+	]
+}))
+
+describe('Feedbacks', () => {
+	let mockSelf: InstanceBaseExt
+	let feedbacks: any
+
+	beforeEach(() => {
+		mockSelf = new MockInstanceBaseExt() as InstanceBaseExt
+		feedbacks = initFeedbacks(mockSelf)
+		jest.clearAllMocks()
+	})
+
+	describe('transport_status', () => {
+		it('should return true when transport status matches', () => {
+			const options = { status: 'Stopped' }
+			const result = feedbacks['transport_status'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return false when transport status does not match', () => {
+			const options = { status: 'Playing' }
+			const result = feedbacks['transport_status'].callback({ options })
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('transport_clip', () => {
+		it('should return true when clip ID matches and slot is either', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('1')
+			const options = { clipID: '1', slotID: 'either' }
+			const result = await feedbacks['transport_clip'].callback({ options }, mockContext)
+			expect(result).toBe(true)
+		})
+
+		it('should return true when clip ID and slot ID match', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('1')
+			const options = { clipID: '1', slotID: '1' }
+			const result = await feedbacks['transport_clip'].callback({ options }, mockContext)
+			expect(result).toBe(true)
+		})
+
+		it('should return false when clip ID does not match', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('2')
+			const options = { clipID: '2', slotID: 'either' }
+			const result = await feedbacks['transport_clip'].callback({ options }, mockContext)
+			expect(result).toBe(false)
+		})
+
+		it('should return false when slot ID does not match', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('1')
+			const options = { clipID: '1', slotID: '2' }
+			const result = await feedbacks['transport_clip'].callback({ options }, mockContext)
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('transport_clip_name', () => {
+		it('should return true when clip name matches and slot is either', () => {
+			const options = { clipName: 'TestClip', slotID: 'either' }
+			const result = feedbacks['transport_clip_name'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return true when clip name and slot ID match', () => {
+			const options = { clipName: 'TestClip', slotID: '1' }
+			const result = feedbacks['transport_clip_name'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return false when clip name does not match', () => {
+			const options = { clipName: 'WrongClip', slotID: 'either' }
+			const result = feedbacks['transport_clip_name'].callback({ options })
+			expect(result).toBe(false)
+		})
+
+		it('should return false when slot ID does not match', () => {
+			const options = { clipName: 'TestClip', slotID: '2' }
+			const result = feedbacks['transport_clip_name'].callback({ options })
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('transport_slot', () => {
+		it('should return true when slot ID matches', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('1')
+			const options = { setting: '1' }
+			const result = await feedbacks['transport_slot'].callback({ options }, mockContext)
+			expect(result).toBe(true)
+		})
+
+		it('should return false when slot ID does not match', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('2')
+			const options = { setting: '2' }
+			const result = await feedbacks['transport_slot'].callback({ options }, mockContext)
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('slot_status', () => {
+		it('should return true when slot status matches', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('1')
+			const options = { status: 'Mounted', slotId: '1' }
+			const result = await feedbacks['slot_status'].callback({ options }, mockContext)
+			expect(result).toBe(true)
+		})
+
+		it('should return false when slot status does not match', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('1')
+			const options = { status: 'Unmounted', slotId: '1' }
+			const result = await feedbacks['slot_status'].callback({ options }, mockContext)
+			expect(result).toBe(false)
+		})
+
+		it('should return false when slot does not exist', async () => {
+			mockContext.parseVariablesInString.mockResolvedValue('99')
+			const options = { status: 'Mounted', slotId: '99' }
+			const result = await feedbacks['slot_status'].callback({ options }, mockContext)
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('transport_loop', () => {
+		it('should return true when loop setting matches', () => {
+			const options = { setting: 'On' }
+			const result = feedbacks['transport_loop'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return false when loop setting does not match', () => {
+			const options = { setting: 'Off' }
+			const result = feedbacks['transport_loop'].callback({ options })
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('transport_singleClip', () => {
+		it('should return true when single clip setting matches', () => {
+			const options = { setting: 'On' }
+			const result = feedbacks['transport_singleClip'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return false when single clip setting does not match', () => {
+			const options = { setting: 'Off' }
+			const result = feedbacks['transport_singleClip'].callback({ options })
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('video_input', () => {
+		it('should return true when video input matches', () => {
+			const options = { setting: '1' }
+			const result = feedbacks['video_input'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return false when video input does not match', () => {
+			const options = { setting: '2' }
+			const result = feedbacks['video_input'].callback({ options })
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('audio_input', () => {
+		it('should return true when audio input matches', () => {
+			const options = { setting: '1' }
+			const result = feedbacks['audio_input'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return false when audio input does not match', () => {
+			const options = { setting: '2' }
+			const result = feedbacks['audio_input'].callback({ options })
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('audio_channels', () => {
+		it('should return true when audio codec is AAC and matches', () => {
+			mockSelf.deckConfig.audioCodec = 'AAC'
+			const options = { audioCodec: 'AAC', audioChannels: '2' }
+			const result = feedbacks['audio_channels'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return true when audio channels match for PCM', () => {
+			mockSelf.deckConfig.audioCodec = 'PCM'
+			mockSelf.deckConfig.audioInputChannels = '2'
+			const options = { audioCodec: 'PCM', audioChannels: '2' }
+			const result = feedbacks['audio_channels'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return false when audio channels do not match for PCM', () => {
+			mockSelf.deckConfig.audioInputChannels = '4'
+			const options = { audioCodec: 'PCM', audioChannels: '2' }
+			const result = feedbacks['audio_channels'].callback({ options })
+			expect(result).toBe(false)
+		})
+	})
+
+	describe('format_ready', () => {
+		it('should return false when formatToken is null', () => {
+			const result = feedbacks['format_ready'].callback({})
+			expect(result).toBe(false)
+		})
+
+		it('should return true when formatToken is not null', () => {
+			mockSelf.formatToken = 'some-token'
+			const result = feedbacks['format_ready'].callback({})
+			expect(result).toBe(true)
+		})
+	})
+
+	describe('remote_status', () => {
+		it('should return true when remote status matches', () => {
+			const options = { status: 'Enabled' }
+			const result = feedbacks['remote_status'].callback({ options })
+			expect(result).toBe(true)
+		})
+
+		it('should return false when remote status does not match', () => {
+			const options = { status: 'Disabled' }
+			const result = feedbacks['remote_status'].callback({ options })
+			expect(result).toBe(false)
+		})
+	})
+})

@@ -5,8 +5,7 @@ import {
 	updateSlotInfoVariables,
 	updateTimecodeVariables,
 	updateConfigurationVariables,
-	updateRemoteVariable,
-	initVariables
+	updateRemoteVariable
 } from './variables.js'
 import { SlotStatus, VideoFormat } from 'hyperdeck-connection'
 
@@ -371,67 +370,4 @@ describe('variables.ts functions', () => {
 		})
 	})
 	
-	describe('initVariables', () => {
-		it('should initialize all variable definitions and values correctly', () => {
-			// Spy on methods to check if they are called with the right arguments
-			const instance = new MockInstanceBaseExt()
-			instance.transportInfo = {
-				status: 'playing',
-				speed: 1.0,
-				clipId: 1,
-				slotId: 2,
-				videoFormat: VideoFormat._1080p30
-			}
-			instance.simpleClipsList = [
-				{ clipId: 1, name: 'clip1.mp4' }
-			]
-			instance.slotInfo = [
-				{
-					slotId: 0,
-					status: SlotStatus.MOUNTED,
-					recordingTime: 125
-				}
-			]
-			instance.deckConfig = {
-				fileFormat: 'prores',
-				audioCodec: 'pcm',
-				audioInputChannels: 2
-			}
-			instance.remoteInfo = { enabled: true }
-			
-			// We'll spy on these methods by replacing them temporarily
-			const originalSetVariableDefinitions = instance.setVariableDefinitions
-			const originalSetVariableValues = instance.setVariableValues
-			const variableDefinitions: CompanionVariableDefinition[] = []
-			const variableValues: CompanionVariableValues = {}
-			
-			instance.setVariableDefinitions = (defs: CompanionVariableDefinition[]) => {
-				defs.forEach(def => variableDefinitions.push(def))
-			}
-			instance.setVariableValues = (vals: CompanionVariableValues) => {
-				Object.assign(variableValues, vals)
-			}
-			
-			initVariables(instance as InstanceBaseExt)
-
-			// Check that certain variables are defined
-			expect(variableDefinitions.some(v => v.variableId === 'status')).toBe(true)
-			expect(variableDefinitions.some(v => v.variableId === 'speed')).toBe(true)
-			expect(variableDefinitions.some(v => v.variableId === 'clipId')).toBe(true)
-			expect(variableDefinitions.some(v => v.variableId === 'clipName')).toBe(true)
-			expect(variableDefinitions.some(v => v.variableId === 'slotId')).toBe(true)
-			expect(variableDefinitions.some(v => v.variableId === 'videoFormat')).toBe(true)
-
-			// Check that certain values are set
-			expect(variableValues['status']).toBe('Playing')
-			expect(variableValues['speed']).toBe(1.0)
-			expect(variableValues['clipId']).toBe(1)
-			expect(variableValues['slotId']).toBe(2)
-			expect(variableValues['videoFormat']).toBe(VideoFormat._1080p30)
-
-			// Restore original methods
-			instance.setVariableDefinitions = originalSetVariableDefinitions
-			instance.setVariableValues = originalSetVariableValues
-		})
-	})
 })

@@ -6,6 +6,7 @@ yarn.lock
 DEBUG-*
 .DS_Store
 package-lock.json
+/.devcontainer/devcontainer-lock.json
 
 .pnp.*
 .yarn/*

@@ -19,6 +19,7 @@ export type VariablesSchema = {
 	[slotRecordingTime: `slot${number}_recordingTime`]: string
 
 	// Clip list
+	clipNames: string[]
 	[clipName: `clip${number}_name`]: string
 
 	// Configuration

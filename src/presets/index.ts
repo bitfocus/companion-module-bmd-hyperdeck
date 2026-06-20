@@ -5,6 +5,7 @@ import { transportPresets } from './transport.js'
 import { utilityPresets } from './utility.js'
 import { configPresets } from './config.js'
 import { monitorPresets } from './monitor.js'
+import { clipPresets } from './clips.js'
 
 export function initPresets(
 	self: InstanceBaseExt,
@@ -19,6 +20,11 @@ export function initPresets(
 		sections.push(section)
 		Object.assign(presets, sectionPresets)
 	}
+
+	// Clip presets depend on the current clip list, so are built separately
+	const [clipSection, clipSectionPresets] = clipPresets(self)
+	sections.push(clipSection)
+	Object.assign(presets, clipSectionPresets)
 
 	return [sections, presets]
 }

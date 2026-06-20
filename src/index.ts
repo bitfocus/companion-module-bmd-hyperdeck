@@ -467,6 +467,9 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 				// reinit due to clip list change
 				this.initActionsAndFeedbacks()
 
+				// Regenerate the per-clip preset template groups
+				this.initPresets()
+
 				// Update variables, as clip count can have changed. This will update all the values too
 				this.initVariables()
 			} else {

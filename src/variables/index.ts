@@ -146,10 +146,12 @@ export function updateClipVariables(instance: InstanceBaseExt, newValues: Partia
 	for (const { clipId, name } of instance.simpleClipsList) {
 		newValues[`clip${clipId}_name`] = stripExtension(name)
 	}
+	newValues['clipNames'] = instance.simpleClipsList.map(({ name }) => stripExtension(name))
 }
 
 export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	const activeSlotId = instance.transportInfo.slotId
+	newValues['recordingTime'] = '--:--:--'
 	instance.slotInfo.forEach((slot, index) => {
 		if (!slot) return
 
@@ -297,6 +299,7 @@ export function initVariables(instance: InstanceBaseExt) {
 
 		// clip vars:
 		clipCount: { name: 'Clip count' },
+		clipNames: { name: 'Clip names (array)' },
 
 		// configuration vars:
 		fileFormat: { name: 'File format' },
@@ -359,6 +362,7 @@ export function initVariables(instance: InstanceBaseExt) {
 	values['ip'] = instance.config.bonjourHost?.split(':')[0] ?? instance.config.host ?? '-'
 
 	updateTimecodeVariables(instance, values)
+	updateRemoteVariable(instance, values)
 
 	instance.setVariableDefinitions(variables)
 	instance.setVariableValues(values)

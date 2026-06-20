@@ -19,3 +19,4 @@ See HELP.md and LICENSE
 - Fix audio channel cycle skipping 2ch when switching from AAC to PCM (#138)
 - Fix Goto (TC) landing a few frames off in drop-frame video formats (#165)
 - Fix "Set Shuttle Speed to 0" returning a syntax error (#123)
+- Add a "Play single clip" preset (play one clip then stop) (#134)

@@ -35,6 +35,33 @@ export function transportPresets(): [
 		],
 	}
 
+	presets.playSingle = {
+		type: 'simple',
+		name: 'Play single clip',
+		style: {
+			text: '▶\nPlay\n1 clip',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'play' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.green,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'play', options: { speed: 100, loop: false, single: true } }],
+				up: [],
+			},
+		],
+	}
+
 	presets.rec = {
 		type: 'simple',
 		name: 'Record',

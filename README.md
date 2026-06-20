@@ -18,3 +18,4 @@ See HELP.md and LICENSE
 - Add optional config setting to warn (connection status) when remote (REM) is disabled (#115)
 - Fix audio channel cycle skipping 2ch when switching from AAC to PCM (#138)
 - Fix Goto (TC) landing a few frames off in drop-frame video formats (#165)
+- Fix "Set Shuttle Speed to 0" returning a syntax error (#123)

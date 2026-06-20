@@ -314,7 +314,7 @@ __metadata:
     "@types/node": "npm:^22.19.21"
     "@types/semver": "npm:^7.7.1"
     "@types/smpte-timecode": "npm:^1.2.5"
-    hyperdeck-connection: "npm:2.0.1"
+    hyperdeck-connection: "npm:^3.0.0"
     prettier: "npm:^3.8.4"
     semver: "npm:^7.8.4"
     smpte-timecode: "npm:^1.3.6"
@@ -522,13 +522,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:^4.0.7":
-  version: 4.0.7
-  resolution: "eventemitter3@npm:4.0.7"
-  checksum: 10c0/5f6d97cbcbac47be798e6355e3a7639a84ee1f7d9b199a07017f1d2f1e2fe236004d14fa5dfaeba661f94ea57805385e326236a6debbc7145c8877fbc0297c6b
-  languageName: node
-  linkType: hard
-
 "fast-diff@npm:^1.1.2":
   version: 1.3.0
   resolution: "fast-diff@npm:1.3.0"
@@ -576,13 +569,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hyperdeck-connection@npm:2.0.1":
-  version: 2.0.1
-  resolution: "hyperdeck-connection@npm:2.0.1"
-  dependencies:
-    eventemitter3: "npm:^4.0.7"
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/1046ae30504978737c5efd36476b035edb294f0ab64507acd0b4760463673f0f71848bf66cfbaf72ded937d119a1cbf6f8d51661d3228adb4a7a0a9b364f0e3f
+"hyperdeck-connection@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "hyperdeck-connection@npm:3.0.0"
+  checksum: 10c0/33aa1e24e5f76dbccf8170e6213c0a21aa3e58e9243dcb05a2ac7fa300563301414e25ff4c6ff829b1c20e64b2bd710757bebd5f2483d22f7bcedd1488d9eec3
   languageName: node
   linkType: hard
 
@@ -706,7 +696,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.6.2, tslib@npm:^2.8.1":
+"tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62

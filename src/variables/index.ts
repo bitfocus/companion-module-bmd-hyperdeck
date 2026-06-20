@@ -61,6 +61,19 @@ const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
 	[VideoFormat._8Kp25DCI]: 25,
 }
 
+/**
+ * Construct a Timecode, forcing non-drop-frame for rates that don't support it.
+ *
+ * Drop-frame is only valid for the fractional (…/1001) rates. The HyperDeck can report a
+ * drop-frame separator (';') for formats that don't support it (eg when switching to 1080p60),
+ * which makes smpte-timecode throw "Drop frame is only supported for 23.976, 29.97, and 59.94".
+ * For non drop-frame-capable rates we pass dropFrame=false so the separator is ignored.
+ */
+function makeTimecode(value: number | string, frameRate: Timecode.FRAMERATE): Timecode.TimecodeInstance {
+	const supportsDropFrame = frameRate === 23.976 || frameRate === 29.97 || frameRate === 59.94
+	return supportsDropFrame ? Timecode(value, frameRate) : Timecode(value, frameRate, false)
+}
+
 export function updateTransportInfoVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	const capitalise = (s: string) => {
 		if (typeof s !== 'string') return ''
@@ -103,7 +116,7 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 
 				if (clip.startTime) {
 					try {
-						tcStart = Timecode(clip.startTime, tb)
+						tcStart = makeTimecode(clip.startTime, tb)
 						newValues['clipStartTimecode'] = tcStart.toString()
 					} catch (err) {
 						newValues['clipStartTimecode'] = '--:--:--:--'
@@ -112,7 +125,7 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 
 				if (clip.duration) {
 					try {
-						tcDuration = Timecode(clip.duration, tb)
+						tcDuration = makeTimecode(clip.duration, tb)
 						newValues['clipDurationTimecode'] = tcDuration.toString()
 					} catch (err) {
 						newValues['clipDurationTimecode'] = '--:--:--:--'
@@ -121,7 +134,7 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 
 				if (tcStart && tcDuration) {
 					try {
-						const tcEnd = Timecode(tcStart.frameCount + tcDuration.frameCount, tb)
+						const tcEnd = makeTimecode(tcStart.frameCount + tcDuration.frameCount, tb)
 						newValues['clipEndTimecode'] = tcEnd.toString()
 					} catch (err) {
 						newValues['clipEndTimecode'] = '--:--:--:--'
@@ -217,7 +230,7 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Pa
 	if (instance.transportInfo.displayTimecode) {
 		if (tb) {
 			try {
-				let tc = Timecode(instance.transportInfo.displayTimecode, tb)
+				let tc = makeTimecode(instance.transportInfo.displayTimecode, tb)
 				countUp.tcH = tc.hours
 				countUp.tcM = tc.minutes
 				countUp.tcS = tc.seconds
@@ -230,10 +243,10 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Pa
 					//				instance.debug('Clip duration: ', clip.duration)
 					const modesWhereCountdownMakesNoSense = new Set(['preview', 'record'])
 					if (clip && clip.duration && !modesWhereCountdownMakesNoSense.has(instance.transportInfo.status)) {
-						const tcTot = Timecode(clip.duration, tb)
-						const tcStart = Timecode(clip.startTime, tb)
+						const tcTot = makeTimecode(clip.duration, tb)
+						const tcStart = makeTimecode(clip.startTime, tb)
 						const left = Math.max(0, tcTot.frameCount - (tc.frameCount - tcStart.frameCount) - 1)
-						const tcLeft = Timecode(left, tb) // todo - unhardcode
+						const tcLeft = makeTimecode(left, tb) // todo - unhardcode
 
 						countDown.tcH = tcLeft.hours
 						countDown.tcM = tcLeft.minutes

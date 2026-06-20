@@ -1,4 +1,5 @@
 import type { CompanionActionDefinitions } from '@companion-module/base'
+import { Regex } from '@companion-module/base'
 import { Commands } from 'hyperdeck-connection'
 import type { InstanceBaseExt } from '../types.js'
 
@@ -12,6 +13,8 @@ export type PlaybackActions = {
 	}
 	stop: { options: Record<string, never> }
 	playStopToggle: { options: Record<string, never> }
+	playrangeSet: { options: { in: string; out: string } }
+	playrangeClear: { options: Record<string, never> }
 }
 
 export function createPlaybackActions(self: InstanceBaseExt): CompanionActionDefinitions<PlaybackActions> {
@@ -63,6 +66,47 @@ export function createPlaybackActions(self: InstanceBaseExt): CompanionActionDef
 				await self.sendCommand(cmd)
 			},
 		},
+		playrangeSet:
+			self.config.modelID != 'bmdDup4K'
+				? {
+						name: 'Play range - set (in/out)',
+						options: [
+							{
+								type: 'textinput',
+								label: 'In (timecode hh:mm:ss:ff)',
+								id: 'in',
+								default: '00:00:00:00',
+								regex: Regex.TIMECODE,
+								useVariables: true,
+							},
+							{
+								type: 'textinput',
+								label: 'Out (timecode hh:mm:ss:ff)',
+								id: 'out',
+								default: '00:00:10:00',
+								regex: Regex.TIMECODE,
+								useVariables: true,
+							},
+						],
+						callback: async ({ options }) => {
+							const cmd = new Commands.PlayrangeSetCommand()
+							cmd.in = options.in
+							cmd.out = options.out
+							await self.sendCommand(cmd)
+						},
+					}
+				: undefined,
+		playrangeClear:
+			self.config.modelID != 'bmdDup4K'
+				? {
+						name: 'Play range - clear',
+						options: [],
+						callback: async () => {
+							const cmd = new Commands.PlayrangeClearCommand()
+							await self.sendCommand(cmd)
+						},
+					}
+				: undefined,
 		playStopToggle: {
 			name: 'Play/Stop Toggle',
 			description: 'Toggle between Play and Stop based on current transport status',

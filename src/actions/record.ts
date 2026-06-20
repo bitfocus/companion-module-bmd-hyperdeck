@@ -7,6 +7,7 @@ import { getTimestamp } from '../util.js'
 
 export type RecordActions = {
 	rec: { options: Record<string, never> }
+	recordStopToggle: { options: Record<string, never> }
 	spill: { options: { slot: 'next' | 'same' | number } }
 	recAppend: { options: Record<string, never> }
 	recName: { options: { name: string } }
@@ -25,6 +26,22 @@ export function createRecordActions(
 			callback: async () => {
 				const cmd = new Commands.RecordCommand()
 				await self.sendCommand(cmd)
+			},
+		},
+		recordStopToggle: {
+			name: 'Record/Stop Toggle',
+			description: 'Toggle between Record and Stop based on current transport status',
+			options: [],
+			callback: async () => {
+				if (self.transportInfo.status === 'record') {
+					// Currently recording, so stop
+					const cmd = new Commands.StopCommand()
+					await self.sendCommand(cmd)
+				} else {
+					// Not recording, so start recording
+					const cmd = new Commands.RecordCommand()
+					await self.sendCommand(cmd)
+				}
 			},
 		},
 

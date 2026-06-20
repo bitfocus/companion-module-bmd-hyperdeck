@@ -62,6 +62,41 @@ export function transportPresets(): [
 		],
 	}
 
+	presets.recStopToggle = {
+		type: 'simple',
+		name: 'Record/Stop Toggle',
+		style: {
+			text: '●/■\nRec/Stop',
+			size: '14',
+			color: colors.white,
+			bgcolor: colors.black,
+		},
+		feedbacks: [
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'record' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.red,
+				},
+			},
+			{
+				feedbackId: 'transport_status',
+				options: { status: 'stopped' },
+				style: {
+					color: colors.white,
+					bgcolor: colors.grey,
+				},
+			},
+		],
+		steps: [
+			{
+				down: [{ actionId: 'recordStopToggle', options: {} }],
+				up: [],
+			},
+		],
+	}
+
 	presets.spill = {
 		type: 'simple',
 		name: 'Spill',

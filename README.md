@@ -12,4 +12,5 @@ See HELP.md and LICENSE
 - Add presets for loading clips by name or index
 - Add presets for setting the video format and selecting the active slot
 - Add a feedback for the active video format
+- Add a Record/Stop toggle action and preset (#135)
 - Fix the active clip name feedback never matching

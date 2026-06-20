@@ -6,7 +6,7 @@ import { stripExtension, toHHMMSS } from '../util.js'
 import { CONFIG_FILEFORMATS } from '../choices/index.js'
 import { VariablesSchema } from './schema.js'
 
-const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
+export const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
 	[VideoFormat.NTSC]: 29.97,
 	[VideoFormat.PAL]: 25,
 	[VideoFormat.NTSCp]: 29.97,

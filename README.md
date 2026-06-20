@@ -17,3 +17,4 @@ See HELP.md and LICENSE
 - Fix the active clip name feedback never matching (#117)
 - Add optional config setting to warn (connection status) when remote (REM) is disabled (#115)
 - Fix audio channel cycle skipping 2ch when switching from AAC to PCM (#138)
+- Fix Goto (TC) landing a few frames off in drop-frame video formats (#165)

@@ -16,3 +16,4 @@ See HELP.md and LICENSE
 - Fix spurious drop-frame timecode errors at non drop-frame rates such as 1080p60 (#168)
 - Fix the active clip name feedback never matching (#117)
 - Add optional config setting to warn (connection status) when remote (REM) is disabled (#115)
+- Fix audio channel cycle skipping 2ch when switching from AAC to PCM (#138)

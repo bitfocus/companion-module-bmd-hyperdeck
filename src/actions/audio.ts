@@ -74,10 +74,13 @@ export function createAudioActions(
 						if (options.audioCodec == 'PCM') {
 							let channels = 2
 							if (options.audioChannels == 'cycle') {
+								const current = self.deckConfig.audioInputChannels
+								// When coming from a non-PCM codec (eg AAC, which is always 2ch) start at 2,
+								// otherwise the doubling would skip PCM 2ch and jump straight to 4ch.
 								channels =
-									self.deckConfig.audioInputChannels == 16 || typeof self.deckConfig.audioInputChannels !== 'number'
+									self.deckConfig.audioCodec !== 'PCM' || current == 16 || typeof current !== 'number'
 										? 2
-										: self.deckConfig.audioInputChannels * 2
+										: current * 2
 							} else {
 								channels = Number(options.audioChannels)
 								if (isNaN(channels)) {

@@ -16,7 +16,7 @@ CHOICES_MODEL.sort((a, b) => {
 	return x.localeCompare(y)
 })
 
-export interface HyperdeckConfig {
+export type HyperdeckConfig = {
 	bonjourHost?: string
 	host: string
 	modelID: string
@@ -47,7 +47,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			label: 'Target IP',
 			width: 6,
 			regex: Regex.IP,
-			isVisible: (options) => !options['bonjourHost'],
+			isVisibleExpression: `!$(options:bonjourHost)`,
 		},
 		{
 			type: 'static-text',
@@ -55,7 +55,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			width: 6,
 			label: '',
 			value: '',
-			isVisible: (options) => !!options['bonjourHost'],
+			isVisibleExpression: `!!$(options:bonjourHost)`,
 		},
 		{
 			type: 'dropdown',
@@ -111,7 +111,6 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			min: 15,
 			max: 10000,
 			default: 500,
-			required: true,
 		},
 	]
 }

@@ -1,9 +1,10 @@
 import Timecode from 'smpte-timecode'
 import { SlotStatus, VideoFormat } from 'hyperdeck-connection'
-import { CompanionVariableDefinition, CompanionVariableValues } from '@companion-module/base'
-import { InstanceBaseExt } from './types.js'
-import { stripExtension, toHHMMSS } from './util.js'
-import { CONFIG_FILEFORMATS } from './choices.js'
+import { CompanionVariableDefinitions } from '@companion-module/base'
+import { InstanceBaseExt } from '../types.js'
+import { stripExtension, toHHMMSS } from '../util.js'
+import { CONFIG_FILEFORMATS } from '../choices/index.js'
+import { VariablesSchema } from './schema.js'
 
 const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
 	[VideoFormat.NTSC]: 29.97,
@@ -60,7 +61,7 @@ const frameRates: { [k in VideoFormat]: Timecode.FRAMERATE } = {
 	[VideoFormat._8Kp25DCI]: 25,
 }
 
-export function updateTransportInfoVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+export function updateTransportInfoVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	const capitalise = (s: string) => {
 		if (typeof s !== 'string') return ''
 		return s.charAt(0).toUpperCase() + s.slice(1)
@@ -139,7 +140,7 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 	}
 }
 
-export function updateClipVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+export function updateClipVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	newValues['clipCount'] = instance.simpleClipsList.length
 	// Variables for every clip in the list
 	for (const { clipId, name } of instance.simpleClipsList) {
@@ -147,7 +148,7 @@ export function updateClipVariables(instance: InstanceBaseExt, newValues: Compan
 	}
 }
 
-export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	const activeSlotId = instance.transportInfo.slotId
 	instance.slotInfo.forEach((slot, index) => {
 		if (!slot) return
@@ -180,7 +181,7 @@ interface CounterValues {
 	tcHMSF: string
 }
 
-export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	const tb = instance.transportInfo.videoFormat && frameRates[instance.transportInfo.videoFormat]
 	const countUp: CounterValues = {
 		tcH: '--',
@@ -202,12 +203,13 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 	const pad = (n: number | string) => ('00' + n).substr(-2)
 
 	const setTcVariable = (isCountdown: boolean, { tcH, tcM, tcS, tcF, tcHMS, tcHMSF }: CounterValues) => {
-		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeHMS'] = tcHMS
-		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeHMSF'] = tcHMSF
-		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeH'] = pad(tcH)
-		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeM'] = pad(tcM)
-		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeS'] = pad(tcS)
-		newValues[(isCountdown ? 'countdownT' : 't') + 'imecodeF'] = pad(tcF)
+		const prefix = isCountdown ? 'countdownT' : 't'
+		newValues[`${prefix}imecodeHMS`] = tcHMS
+		newValues[`${prefix}imecodeHMSF`] = tcHMSF
+		newValues[`${prefix}imecodeH`] = pad(tcH)
+		newValues[`${prefix}imecodeM`] = pad(tcM)
+		newValues[`${prefix}imecodeS`] = pad(tcS)
+		newValues[`${prefix}imecodeF`] = pad(tcF)
 	}
 
 	if (instance.transportInfo.displayTimecode) {
@@ -246,7 +248,7 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 		} else {
 			// no timebase implies we can't use smpte-timecode lib
 			let tc = instance.transportInfo.displayTimecode.match(
-				/^(?<HMS>(?<H>\d{2}):(?<M>\d{2}):(?<S>\d{2}))[:;](?<F>\d{2})$/
+				/^(?<HMS>(?<H>\d{2}):(?<M>\d{2}):(?<S>\d{2}))[:;](?<F>\d{2})$/,
 			)
 			if (tc && tc.groups) {
 				countUp.tcH = tc.groups.H
@@ -263,7 +265,7 @@ export function updateTimecodeVariables(instance: InstanceBaseExt, newValues: Co
 	setTcVariable(true, countDown)
 }
 
-export function updateConfigurationVariables(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+export function updateConfigurationVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	const format = CONFIG_FILEFORMATS.find(({ id }) => id === instance.deckConfig.fileFormat)
 	newValues['fileFormat'] = format?.label ?? instance.deckConfig.fileFormat
 
@@ -271,152 +273,90 @@ export function updateConfigurationVariables(instance: InstanceBaseExt, newValue
 	newValues['audioChannels'] = instance.deckConfig.audioInputChannels
 }
 
-export function updateRemoteVariable(instance: InstanceBaseExt, newValues: CompanionVariableValues) {
+export function updateRemoteVariable(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	newValues['remoteEnabled'] = instance.remoteInfo?.enabled || false
 }
 
 export function initVariables(instance: InstanceBaseExt) {
-	const variables: CompanionVariableDefinition[] = []
+	const variables: CompanionVariableDefinitions<VariablesSchema> = {
+		// transport info vars:
+		status: { name: 'Transport status' },
+		speed: { name: 'Play speed' },
+		clipId: { name: 'Clip ID' },
+		clipName: { name: 'Clip Name' },
+		slotId: { name: 'Slot ID' },
+		videoFormat: { name: 'Video format' },
 
-	const values: CompanionVariableValues = {}
+		// active clip timecode vars:
+		clipDurationTimecode: { name: 'Active clip duration timecode' },
+		clipStartTimecode: { name: 'Active clip start timecode' },
+		clipEndTimecode: { name: 'Active clip end timecode' },
 
-	// transport info vars:
-	variables.push({
-		name: 'Transport status',
-		variableId: 'status',
-	})
-	variables.push({
-		name: 'Play speed',
-		variableId: 'speed',
-	})
-	variables.push({
-		name: 'Clip ID',
-		variableId: 'clipId',
-	})
-	variables.push({
-		name: 'Clip Name',
-		variableId: 'clipName',
-	})
-	variables.push({
-		name: 'Slot ID',
-		variableId: 'slotId',
-	})
-	variables.push({
-		name: 'Video format',
-		variableId: 'videoFormat',
-	})
-	if (instance.model.hasSeparateInputFormat) {
-		variables.push({
-			name: 'Input video format',
-			variableId: 'inputVideoFormat',
-		})
+		// slot vars:
+		recordingTime: { name: 'Active slot recording time available' },
+
+		// clip vars:
+		clipCount: { name: 'Clip count' },
+
+		// configuration vars:
+		fileFormat: { name: 'File format' },
+		audioCodec: { name: 'Audio codec' },
+		audioChannels: { name: 'Audio channels' },
+
+		// remote status:
+		remoteEnabled: { name: 'Remote enabled' },
+
+		// target IP:
+		ip: { name: 'Target IP' },
+
+		// timecode vars (count up):
+		timecodeHMS: { name: 'Timecode (HH:MM:SS)' },
+		timecodeHMSF: { name: 'Timecode (HH:MM:SS:FF)' },
+		timecodeH: { name: 'Timecode (HH)' },
+		timecodeM: { name: 'Timecode (MM)' },
+		timecodeS: { name: 'Timecode (SS)' },
+		timecodeF: { name: 'Timecode (FF)' },
+
+		// timecode vars (countdown):
+		countdownTimecodeHMS: { name: 'Countdown Timecode (HH:MM:SS)' },
+		countdownTimecodeHMSF: { name: 'Countdown Timecode (HH:MM:SS:FF)' },
+		countdownTimecodeH: { name: 'Countdown Timecode (HH)' },
+		countdownTimecodeM: { name: 'Countdown Timecode (MM)' },
+		countdownTimecodeS: { name: 'Countdown Timecode (SS)' },
+		countdownTimecodeF: { name: 'Countdown Timecode (FF)' },
 	}
 
-	// Add active clip timecode variables
-	variables.push({
-		name: 'Active clip duration timecode',
-		variableId: 'clipDurationTimecode',
-	})
-	variables.push({
-		name: 'Active clip start timecode',
-		variableId: 'clipStartTimecode',
-	})
-	variables.push({
-		name: 'Active clip end timecode',
-		variableId: 'clipEndTimecode',
-	})
+	if (instance.model.hasSeparateInputFormat) {
+		variables.inputVideoFormat = { name: 'Input video format' }
+	}
+
+	const values: Partial<VariablesSchema> = {}
 
 	updateTransportInfoVariables(instance, values)
 
 	// Slot variables
-	variables.push({
-		name: 'Active slot recording time available',
-		variableId: 'recordingTime',
-	})
 	instance.slotInfo.forEach((slot, index) => {
 		if (slot != null) {
-			variables.push({
+			variables[`slot${index}_recordingTime`] = {
 				name: `Slot ${index} recording time available`,
-				variableId: `slot${index}_recordingTime`,
-			})
+			}
 		}
 	})
 	updateSlotInfoVariables(instance, values)
 
 	// Clip variables
-	variables.push({
-		name: 'Clip count',
-		variableId: 'clipCount',
-	})
 	for (const { clipId } of instance.simpleClipsList) {
-		variables.push({
+		variables[`clip${clipId}_name`] = {
 			name: `Clip ${clipId} Name`,
-			variableId: `clip${clipId}_name`,
-		})
+		}
 	}
 	updateClipVariables(instance, values)
 
 	// Configuration variables
-	variables.push({
-		name: 'File format',
-		variableId: 'fileFormat',
-	})
-	variables.push({
-		name: 'Audio codec',
-		variableId: 'audioCodec',
-	})
-	variables.push({
-		name: 'Audio channels',
-		variableId: 'audioChannels',
-	})
 	updateConfigurationVariables(instance, values)
 
-	// Remote status
-	variables.push({
-		name: 'Remote enabled',
-		variableId: 'remoteEnabled',
-	})
 	// Target IP
-	variables.push({
-		name: 'Target IP',
-		variableId: 'ip',
-	})
 	values['ip'] = instance.config.bonjourHost?.split(':')[0] ?? instance.config.host ?? '-'
-
-	// Timecode variables
-	const initTcVariable = (isCountdown: boolean) => {
-		variables.push({
-			name: (isCountdown ? 'Countdown ' : '') + 'Timecode (HH:MM:SS)',
-			variableId: (isCountdown ? 'countdownT' : 't') + 'imecodeHMS',
-		})
-
-		variables.push({
-			name: (isCountdown ? 'Countdown ' : '') + 'Timecode (HH:MM:SS:FF)',
-			variableId: (isCountdown ? 'countdownT' : 't') + 'imecodeHMSF',
-		})
-
-		variables.push({
-			name: (isCountdown ? 'Countdown ' : '') + 'Timecode (HH)',
-			variableId: (isCountdown ? 'countdownT' : 't') + 'imecodeH',
-		})
-
-		variables.push({
-			name: (isCountdown ? 'Countdown ' : '') + 'Timecode (MM)',
-			variableId: (isCountdown ? 'countdownT' : 't') + 'imecodeM',
-		})
-
-		variables.push({
-			name: (isCountdown ? 'Countdown ' : '') + 'Timecode (SS)',
-			variableId: (isCountdown ? 'countdownT' : 't') + 'imecodeS',
-		})
-
-		variables.push({
-			name: (isCountdown ? 'Countdown ' : '') + 'Timecode (FF)',
-			variableId: (isCountdown ? 'countdownT' : 't') + 'imecodeF',
-		})
-	}
-	initTcVariable(false)
-	initTcVariable(true)
 
 	updateTimecodeVariables(instance, values)
 

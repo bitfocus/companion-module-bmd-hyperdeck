@@ -1,4 +1,4 @@
-import { AudioInputType, FileFormatFamily, VideoInputType } from './choices.js'
+import { AudioInputType, FileFormatFamily, VideoInputType } from './choices/index.js'
 import {
 	FORMATS_2K_DCI,
 	FORMATS_3G_SDI,

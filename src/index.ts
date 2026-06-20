@@ -1,4 +1,4 @@
-import { runEntrypoint, InstanceBase, InstanceStatus } from '@companion-module/base'
+import { InstanceBase, InstanceStatus } from '@companion-module/base'
 import { Hyperdeck, Commands, TransportStatus, VideoFormat, ErrorCode } from 'hyperdeck-connection'
 import {
 	initVariables,
@@ -8,16 +8,19 @@ import {
 	updateClipVariables,
 	updateConfigurationVariables,
 	updateRemoteVariable,
-} from './variables.js'
-import { initActions } from './actions.js'
-import { initFeedbacks } from './feedbacks.js'
-import { initPresets } from './presets.js'
-import { upgradeScripts } from './upgrades.js'
+} from './variables/index.js'
+import { initActions } from './actions/index.js'
+import { initFeedbacks } from './feedbacks/index.js'
+import { initPresets } from './presets/index.js'
+import { upgradeScripts } from './upgrades/index.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
 import { makeSimpleClipInfos, mergeState, protocolGte, SimpleClipInfo, stripExtension } from './util.js'
 import { InstanceBaseExt, IpAndPort, TransportInfoStateExt } from './types.js'
 import { isDeepStrictEqual } from 'util'
+import type { HyperdeckSchema } from './schema.js'
+
+export const UpgradeScripts = upgradeScripts
 
 /**
  * Companion instance class for the Blackmagic HyperDeck Disk Recorders.
@@ -28,7 +31,7 @@ import { isDeepStrictEqual } from 'util'
  * @author Per Roine <per.roine@gmail.com>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
  */
-class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements InstanceBaseExt {
+export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> implements InstanceBaseExt {
 	// TODO - make type safe
 	private hyperDeck: Hyperdeck | undefined
 	config!: HyperdeckConfig
@@ -82,7 +85,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 	}
 
 	private initPresets() {
-		this.setPresetDefinitions(initPresets(this))
+		this.setPresetDefinitions(...initPresets(this))
 	}
 
 	/**
@@ -225,7 +228,7 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 				this.updateStatus(InstanceStatus.Ok)
 
 				await this.updateClips(true)
-				this.checkFeedbacks()
+				this.checkAllFeedbacks()
 
 				// If polling is enabled, setup interval command
 				if (this.pollTimer) clearInterval(this.pollTimer)
@@ -277,7 +280,8 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 			updateSlotInfoVariables(this, newVariables)
 			this.setVariableValues(newVariables)
 
-			this.checkFeedbacks()
+			// TODO - can this be more granular?
+			this.checkAllFeedbacks()
 		})
 
 		this.hyperDeck.on('notify.remote', async (res) => {
@@ -553,5 +557,3 @@ class HyperdeckInstance extends InstanceBase<HyperdeckConfig> implements Instanc
 		return null
 	}
 }
-
-runEntrypoint(HyperdeckInstance, upgradeScripts)

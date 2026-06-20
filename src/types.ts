@@ -1,14 +1,15 @@
 import type { DropdownChoice, InstanceBase } from '@companion-module/base'
-import type { HyperdeckConfig } from './config'
+import type { HyperdeckConfig } from './config.js'
 import type { Commands } from 'hyperdeck-connection'
-import type { ModelInfo } from './models'
-import type { SimpleClipInfo } from './util'
+import type { ModelInfo } from './models.js'
+import type { SimpleClipInfo } from './util.js'
+import type { HyperdeckSchema } from './schema.js'
 
 export interface ClipDropdownChoice extends DropdownChoice {
 	clipId: number
 }
 
-export interface InstanceBaseExt extends InstanceBase<HyperdeckConfig> {
+export interface InstanceBaseExt extends InstanceBase<HyperdeckSchema> {
 	transportInfo: TransportInfoStateExt
 	deckConfig: Commands.ConfigurationCommandResponse
 	slotInfo: Commands.SlotInfoCommandResponse[]

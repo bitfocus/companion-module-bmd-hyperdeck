@@ -6,6 +6,7 @@ import { utilityPresets } from './utility.js'
 import { configPresets } from './config.js'
 import { monitorPresets } from './monitor.js'
 import { clipPresets } from './clips.js'
+import { videoFormatPresets, slotPresets } from './slotFormat.js'
 
 export function initPresets(
 	self: InstanceBaseExt,
@@ -21,10 +22,12 @@ export function initPresets(
 		Object.assign(presets, sectionPresets)
 	}
 
-	// Clip presets depend on the current clip list, so are built separately
-	const [clipSection, clipSectionPresets] = clipPresets(self)
-	sections.push(clipSection)
-	Object.assign(presets, clipSectionPresets)
+	// These presets depend on the model/clip list, so are built separately with the instance
+	for (const builder of [clipPresets, videoFormatPresets, slotPresets]) {
+		const [section, sectionPresets] = builder(self)
+		sections.push(section)
+		Object.assign(presets, sectionPresets)
+	}
 
 	return [sections, presets]
 }

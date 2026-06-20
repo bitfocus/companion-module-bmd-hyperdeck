@@ -23,7 +23,6 @@ export function createSlotActions(
 			options: [
 				{
 					type: 'dropdown',
-					disableAutoExpression: true,
 					label: 'Slot',
 					id: 'slot',
 					default: 1,
@@ -37,7 +36,6 @@ export function createSlotActions(
 				},
 				{
 					type: 'dropdown',
-					disableAutoExpression: true,
 					label: 'Format',
 					id: 'format',
 					default: 'unchanged',

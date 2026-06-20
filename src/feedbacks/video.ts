@@ -4,6 +4,7 @@ import type { ModelChoices } from '../choices/index.js'
 
 export type VideoFeedbacks = {
 	video_input: { type: 'boolean'; options: { setting: string } }
+	video_format: { type: 'boolean'; options: { format: string } }
 }
 
 export function createVideoFeedbacks(
@@ -31,6 +32,27 @@ export function createVideoFeedbacks(
 			},
 			callback: ({ options }) => {
 				return options.setting === String(self.deckConfig.videoInput)
+			},
+		},
+		video_format: {
+			type: 'boolean',
+			name: 'Active video format',
+			description: 'Set feedback based on the active video format',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Format',
+					id: 'format',
+					choices: modelChoices.VideoFormats,
+					default: modelChoices.VideoFormats[0]?.id,
+				},
+			],
+			defaultStyle: {
+				color: combineRgb(255, 255, 255),
+				bgcolor: combineRgb(0, 0, 0),
+			},
+			callback: ({ options }) => {
+				return options.format === String(self.transportInfo.videoFormat)
 			},
 		},
 	}

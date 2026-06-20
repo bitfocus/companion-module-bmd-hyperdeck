@@ -21,3 +21,4 @@ See HELP.md and LICENSE
 - Fix "Set Shuttle Speed to 0" returning a syntax error (#123)
 - Add a "Play single clip" preset (play one clip then stop) (#134)
 - Add play range set (in/out) and clear actions (#87)
+- Add active/per-slot volume name variables (#133)

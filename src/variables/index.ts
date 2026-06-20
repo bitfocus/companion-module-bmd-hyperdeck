@@ -165,6 +165,7 @@ export function updateClipVariables(instance: InstanceBaseExt, newValues: Partia
 export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
 	const activeSlotId = instance.transportInfo.slotId
 	newValues['recordingTime'] = '--:--:--'
+	newValues['volumeName'] = '-'
 	instance.slotInfo.forEach((slot, index) => {
 		if (!slot) return
 
@@ -180,9 +181,13 @@ export function updateSlotInfoVariables(instance: InstanceBaseExt, newValues: Pa
 			}
 		}
 
+		const volumeName = slot.volumeName || '-'
+
 		newValues[`slot${index}_recordingTime`] = recordingTime
+		newValues[`slot${index}_volumeName`] = volumeName
 		if (slot.slotId === activeSlotId) {
 			newValues['recordingTime'] = recordingTime
+			newValues['volumeName'] = volumeName
 		}
 	})
 }
@@ -309,6 +314,7 @@ export function initVariables(instance: InstanceBaseExt) {
 
 		// slot vars:
 		recordingTime: { name: 'Active slot recording time available' },
+		volumeName: { name: 'Active slot volume name' },
 
 		// clip vars:
 		clipCount: { name: 'Clip count' },
@@ -355,6 +361,9 @@ export function initVariables(instance: InstanceBaseExt) {
 		if (slot != null) {
 			variables[`slot${index}_recordingTime`] = {
 				name: `Slot ${index} recording time available`,
+			}
+			variables[`slot${index}_volumeName`] = {
+				name: `Slot ${index} volume name`,
 			}
 		}
 	})

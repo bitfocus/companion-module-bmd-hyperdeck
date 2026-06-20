@@ -463,6 +463,11 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 			this.simpleClipsList = makeSimpleClipInfos(queryResponse.clips)
 			this.fullClipsList = queryResponse.clips
 
+			// Recompute derived transport fields (eg clipName) now the clip list is known.
+			// At startup refreshTransportInfo() runs before the clips are loaded, so clipName
+			// would otherwise stay null until the next transport notification.
+			this.transportInfo = this.extendTransportInfo(this.transportInfo)
+
 			if (doFullInit || !isDeepStrictEqual(oldClips, this.simpleClipsList)) {
 				// reinit due to clip list change
 				this.initActionsAndFeedbacks()
@@ -495,7 +500,7 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 		}
 
 		if (res.clipId !== null) {
-			const clipObj = this.simpleClipsList.find(({ clipId }) => clipId == this.transportInfo.clipId)
+			const clipObj = this.simpleClipsList.find(({ clipId }) => clipId == res.clipId)
 			if (clipObj) {
 				res.clipName = stripExtension(clipObj.name)
 			}

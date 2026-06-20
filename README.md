@@ -14,4 +14,5 @@ See HELP.md and LICENSE
 - Add a feedback for the active video format
 - Add a Record/Stop toggle action and preset (#135)
 - Fix spurious drop-frame timecode errors at non drop-frame rates such as 1080p60 (#168)
-- Fix the active clip name feedback never matching
+- Fix the active clip name feedback never matching (#117)
+- Add optional config setting to warn (connection status) when remote (REM) is disabled (#115)

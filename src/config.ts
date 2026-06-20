@@ -23,6 +23,7 @@ export type HyperdeckConfig = {
 	reel: string
 	timecodeVariables: 'disabled' | 'notifications' | 'polling'
 	pollingInterval: number
+	warnRemoteDisabled: boolean
 }
 
 export function getConfigFields(): SomeCompanionConfigField[] {
@@ -73,27 +74,13 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			value: '',
 		},
 		{
-			type: 'static-text',
-			id: 'info1',
-			width: 12,
-			label: 'Custom Clip Record Naming',
-			value:
-				"Companion is able to initiate recordings where the file names use a custom 'Reel-[####]' naming convention.  The 'Reel' is a custom name defined below and [####] is auto incremented from '0' by the HyperDeck.  <b>This naming is only used when starting records using the 'Record (with custom reel)' action.</b>",
-		},
-		{
 			type: 'textinput',
 			id: 'reel',
 			label: 'Custom Reel',
 			width: 6,
 			default: 'A001',
-		},
-		{
-			type: 'static-text',
-			id: 'info2',
-			width: 12,
-			label: 'Displaying Timecode Variable',
-			value:
-				'Timecode variables have to be explicitly enabled by selecting "Notifications" or "Polling". Note that timecode notifications are not supported before hyperdeck firmware V7!',
+			description:
+				"Used to initiate recordings with a custom 'Reel-[####]' naming convention, where [####] is auto-incremented from '0' by the HyperDeck. Only used by the 'Record (with custom reel)' action.",
 		},
 		{
 			type: 'dropdown',
@@ -102,6 +89,8 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			width: 6,
 			choices: CONFIG_NOTIFICATION_METHOD,
 			default: 'disabled',
+			description:
+				'Timecode variables have to be explicitly enabled by selecting "Notifications" or "Polling". Note that timecode notifications are not supported before HyperDeck firmware V7!',
 		},
 		{
 			type: 'number',
@@ -111,6 +100,15 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			min: 15,
 			max: 10000,
 			default: 500,
+		},
+		{
+			type: 'checkbox',
+			id: 'warnRemoteDisabled',
+			label: 'Warn when remote (REM) is disabled',
+			width: 12,
+			default: false,
+			description:
+				'Put the connection into a warning state whenever remote control (REM) is disabled on the HyperDeck. The deck ignores control commands while REM is off.',
 		},
 	]
 }

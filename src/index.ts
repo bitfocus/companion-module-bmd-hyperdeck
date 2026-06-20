@@ -89,6 +89,18 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 	}
 
 	/**
+	 * INTERNAL: resolve the status for a connected deck, optionally warning when remote is disabled.
+	 * Only call this once the deck is connected, so it never overrides Connecting/Disconnected/etc.
+	 */
+	private updateConnectionStatus() {
+		if (this.config.warnRemoteDisabled && !this.remoteInfo?.enabled) {
+			this.updateStatus(InstanceStatus.InsufficientPermissions, 'Remote (REM) is disabled')
+		} else {
+			this.updateStatus(InstanceStatus.Ok)
+		}
+	}
+
+	/**
 	 * Creates the configuration fields for web config.
 	 */
 	getConfigFields() {
@@ -225,7 +237,7 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 					return
 				}
 
-				this.updateStatus(InstanceStatus.Ok)
+				this.updateConnectionStatus()
 
 				await this.updateClips(true)
 				this.checkAllFeedbacks()
@@ -293,6 +305,9 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 			this.setVariableValues(newVariables)
 
 			this.checkFeedbacks('remote_status')
+
+			// Remote state affects the connection warning status
+			this.updateConnectionStatus()
 		})
 
 		this.hyperDeck.on('notify.configuration', async (res) => {
@@ -388,6 +403,9 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 			if (this.config.timecodeVariables === 'polling') {
 				this.pollTimer = setInterval(this.sendPollCommand.bind(this), this.config.pollingInterval)
 			}
+
+			// The warn-on-remote-disabled setting may have changed; recompute the status
+			if (this.hyperDeck?.connected) this.updateConnectionStatus()
 		}
 	}
 

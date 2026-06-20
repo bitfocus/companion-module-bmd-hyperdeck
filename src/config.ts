@@ -29,7 +29,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
 			type: 'static-text',
-			id: 'info',
+			id: 'info0',
 			width: 12,
 			label: 'Warning',
 			value:
@@ -74,7 +74,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 		},
 		{
 			type: 'static-text',
-			id: 'info',
+			id: 'info1',
 			width: 12,
 			label: 'Custom Clip Record Naming',
 			value:
@@ -89,7 +89,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 		},
 		{
 			type: 'static-text',
-			id: 'info',
+			id: 'info2',
 			width: 12,
 			label: 'Displaying Timecode Variable',
 			value:

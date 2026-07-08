@@ -1,10 +1,9 @@
 import type { CompanionActionDefinitions } from '@companion-module/base'
-import { Regex } from '@companion-module/base'
 import { Commands } from 'hyperdeck-connection'
 import Timecode from 'smpte-timecode'
 import type { InstanceBaseExt, ClipDropdownChoice } from '../types.js'
 import { CHOICES_STARTEND } from '../choices/index.js'
-import { stripExtension } from '../util.js'
+import { stripExtension, TIMECODE_REGEX } from '../util.js'
 import { frameRates } from '../variables/index.js'
 
 /**
@@ -63,7 +62,7 @@ export function createNavigationActions(
 					label: 'Timecode hh:mm:ss:ff',
 					id: 'tc',
 					default: '00:00:01:00',
-					regex: Regex.TIMECODE,
+					regex: TIMECODE_REGEX,
 					useVariables: true,
 				},
 			],

@@ -1,5 +1,5 @@
 import type { CompanionActionDefinitions } from '@companion-module/base'
-import { Regex } from '@companion-module/base'
+import { TIMECODE_REGEX } from '../util.js'
 import { Commands } from 'hyperdeck-connection'
 import type { InstanceBaseExt } from '../types.js'
 
@@ -29,7 +29,7 @@ export function createShuttleActions(self: InstanceBaseExt): CompanionActionDefi
 					label: 'Timecode hh:mm:ss:ff',
 					id: 'jogFwdTc',
 					default: '00:00:00:01',
-					regex: Regex.TIMECODE,
+					regex: TIMECODE_REGEX,
 					useVariables: true,
 				},
 			],
@@ -47,7 +47,7 @@ export function createShuttleActions(self: InstanceBaseExt): CompanionActionDefi
 					label: 'Timecode hh:mm:ss:ff',
 					id: 'jogRewTc',
 					default: '00:00:00:01',
-					regex: Regex.TIMECODE,
+					regex: TIMECODE_REGEX,
 					useVariables: true,
 				},
 			],

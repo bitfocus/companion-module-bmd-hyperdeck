@@ -1,7 +1,7 @@
 import type { CompanionActionDefinitions } from '@companion-module/base'
-import { Regex } from '@companion-module/base'
 import { Commands } from 'hyperdeck-connection'
 import type { InstanceBaseExt } from '../types.js'
+import { TIMECODE_REGEX } from '../util.js'
 
 export type PlaybackActions = {
 	play: {
@@ -76,7 +76,7 @@ export function createPlaybackActions(self: InstanceBaseExt): CompanionActionDef
 								label: 'In (timecode hh:mm:ss:ff)',
 								id: 'in',
 								default: '00:00:00:00',
-								regex: Regex.TIMECODE,
+								regex: TIMECODE_REGEX,
 								useVariables: true,
 							},
 							{
@@ -84,7 +84,7 @@ export function createPlaybackActions(self: InstanceBaseExt): CompanionActionDef
 								label: 'Out (timecode hh:mm:ss:ff)',
 								id: 'out',
 								default: '00:00:10:00',
-								regex: Regex.TIMECODE,
+								regex: TIMECODE_REGEX,
 								useVariables: true,
 							},
 						],

@@ -31,6 +31,18 @@ export function protocolGte(a: string | number, b: string | number): boolean {
 	return !!v1 && !!v2 && semver.gte(v1, v2)
 }
 
+/**
+ * Timecode regex (hh:mm:ss:ff) allowing frame counts up to 59.
+ *
+ * The built-in `Regex.TIMECODE` from `@companion-module/base` caps the frames
+ * field at 30, which rejects valid timecodes for higher frame rate video
+ * standards such as 1080p50/1080p60.
+ *
+ * @access public
+ */
+export const TIMECODE_REGEX =
+	'/^(0*[0-9]|1[0-9]|2[0-4]):(0*[0-9]|[1-5][0-9]|60):(0*[0-9]|[1-5][0-9]|60):(0*[0-9]|[1-5][0-9])$/'
+
 export function stripExtension(fileName: string): string {
 	const re = /(.*?)(\.([a-z]|\d){3})?$/
 	return fileName.replace(re, '$1')

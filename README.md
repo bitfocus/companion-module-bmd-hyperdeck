@@ -4,6 +4,11 @@ See HELP.md and LICENSE
 
 ## Changes
 
+## v3.1.0
+
+- Add playrange variables
+- Fix rejecting some valid timecodes
+
 ## v3.0.0
 
 - Update module api to v2.0

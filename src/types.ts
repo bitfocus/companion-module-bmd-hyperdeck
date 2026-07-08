@@ -19,6 +19,7 @@ export interface InstanceBaseExt extends InstanceBase<HyperdeckSchema> {
 	config: HyperdeckConfig
 
 	remoteInfo: Commands.RemoteInfoCommandResponse | null
+	playrangeInfo: Commands.PlayrangeCommandResponse | null
 	formatToken: string | null
 	formatTokenTimeout: NodeJS.Timeout | null
 

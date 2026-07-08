@@ -8,6 +8,7 @@ import {
 	updateClipVariables,
 	updateConfigurationVariables,
 	updateRemoteVariable,
+	updatePlayrangeVariables,
 } from './variables/index.js'
 import { initActions } from './actions/index.js'
 import { initFeedbacks } from './feedbacks/index.js'
@@ -45,6 +46,7 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 	slotInfo: Commands.SlotInfoCommandResponse[] = []
 
 	remoteInfo: Commands.RemoteInfoCommandResponse | null = null
+	playrangeInfo: Commands.PlayrangeCommandResponse | null = null
 	formatToken: string | null = null
 	formatTokenTimeout: NodeJS.Timeout | null = null
 
@@ -202,6 +204,7 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 					notify.transport = true
 					notify.slot = true
 					notify.remote = true
+					notify.playrange = true
 					if (protocolGte(this.protocolVersion, '1.11') && this.config.timecodeVariables === 'notifications')
 						notify.displayTimecode = true
 
@@ -220,6 +223,8 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 					this.deckConfig = await hyperdeck.sendCommand(new Commands.ConfigurationGetCommand())
 					// this.debug('Initial config:', this.deckConfig)
 					this.remoteInfo = await hyperdeck.sendCommand(new Commands.RemoteGetCommand())
+
+					await this.refreshPlayrangeInfo()
 				} catch (e: any) {
 					if (e.code) {
 						this.log('error', `Connection error - ${e.code} ${e.name}`)
@@ -327,6 +332,15 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 
 			const newVariables = {}
 			updateTimecodeVariables(this, newVariables)
+			this.setVariableValues(newVariables)
+		})
+
+		this.hyperDeck.on('notify.playrange', (res) => {
+			this.log('debug', 'Play range Changed')
+			this.playrangeInfo = res
+
+			const newVariables = {}
+			updatePlayrangeVariables(this, newVariables)
 			this.setVariableValues(newVariables)
 		})
 
@@ -558,6 +572,21 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 				throw e
 			}
 		}
+	}
+
+	private async refreshPlayrangeInfo(): Promise<void> {
+		// The bmdDup4K does not support play ranges (the actions are hidden for it too)
+		if (!this.hyperDeck || !this.hyperDeck.connected || this.config.modelID === 'bmdDup4K') return
+		try {
+			this.playrangeInfo = await this.hyperDeck.sendCommand(new Commands.PlayrangeGetCommand())
+		} catch (e: any) {
+			this.log('debug', `Failed to query play range: ${e?.code ? `${e.code} ${e.name}` : e}`)
+			this.playrangeInfo = null
+		}
+
+		const newVariables = {}
+		updatePlayrangeVariables(this, newVariables)
+		this.setVariableValues(newVariables)
 	}
 
 	parseIpAndPort(): IpAndPort | null {

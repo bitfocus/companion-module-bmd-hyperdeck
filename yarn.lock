@@ -314,7 +314,7 @@ __metadata:
     "@types/node": "npm:^22.20.0"
     "@types/semver": "npm:^7.7.1"
     "@types/smpte-timecode": "npm:^1.2.5"
-    hyperdeck-connection: "npm:^3.0.0"
+    hyperdeck-connection: "npm:^3.1.0"
     prettier: "npm:^3.9.4"
     semver: "npm:^7.8.5"
     smpte-timecode: "npm:^1.3.6"
@@ -569,10 +569,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hyperdeck-connection@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "hyperdeck-connection@npm:3.0.0"
-  checksum: 10c0/33aa1e24e5f76dbccf8170e6213c0a21aa3e58e9243dcb05a2ac7fa300563301414e25ff4c6ff829b1c20e64b2bd710757bebd5f2483d22f7bcedd1488d9eec3
+"hyperdeck-connection@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "hyperdeck-connection@npm:3.1.0"
+  checksum: 10c0/d961a92ac74e11e30e1e092aa488917af52ce38178c5ae5dc71c8be522c2a1633db94c9801d29640d2def14df31e62327bd939c6ce2bbe40d9c316a92d4b5ee3
   languageName: node
   linkType: hard
 

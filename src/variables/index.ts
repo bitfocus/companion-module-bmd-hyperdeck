@@ -297,6 +297,35 @@ export function updateRemoteVariable(instance: InstanceBaseExt, newValues: Parti
 	newValues['remoteEnabled'] = instance.remoteInfo?.enabled || false
 }
 
+export function updatePlayrangeVariables(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
+	// The deck reports timeline in/out as a 1-based frame count, or 'none' when no play range is set
+	const parseFrame = (value: string | undefined): number | null => {
+		if (!value || value === 'none') return null
+		const frame = Number(value)
+		return Number.isFinite(frame) ? frame : null
+	}
+
+	const inFrame = parseFrame(instance.playrangeInfo?.timelineIn)
+	const outFrame = parseFrame(instance.playrangeInfo?.timelineOut)
+
+	newValues['playrangeIn'] = inFrame ?? '-'
+	newValues['playrangeOut'] = outFrame ?? '-'
+
+	const tb = instance.transportInfo.videoFormat && frameRates[instance.transportInfo.videoFormat]
+	const toTimecode = (frame: number | null): string => {
+		if (frame === null || !tb) return '--:--:--:--'
+		try {
+			// Timeline frames are 1-based (frame 1 == 00:00:00:00), so shift to the 0-based frame count smpte-timecode expects
+			return makeTimecode(Math.max(0, frame - 1), tb).toString()
+		} catch (err) {
+			return '--:--:--:--'
+		}
+	}
+
+	newValues['playrangeInTimecode'] = toTimecode(inFrame)
+	newValues['playrangeOutTimecode'] = toTimecode(outFrame)
+}
+
 export function initVariables(instance: InstanceBaseExt) {
 	const variables: CompanionVariableDefinitions<VariablesSchema> = {
 		// transport info vars:
@@ -324,6 +353,12 @@ export function initVariables(instance: InstanceBaseExt) {
 		fileFormat: { name: 'File format' },
 		audioCodec: { name: 'Audio codec' },
 		audioChannels: { name: 'Audio channels' },
+
+		// play range:
+		playrangeIn: { name: 'Play range in (timeline frame)' },
+		playrangeOut: { name: 'Play range out (timeline frame)' },
+		playrangeInTimecode: { name: 'Play range in (timecode)' },
+		playrangeOutTimecode: { name: 'Play range out (timecode)' },
 
 		// remote status:
 		remoteEnabled: { name: 'Remote enabled' },
@@ -385,6 +420,7 @@ export function initVariables(instance: InstanceBaseExt) {
 
 	updateTimecodeVariables(instance, values)
 	updateRemoteVariable(instance, values)
+	updatePlayrangeVariables(instance, values)
 
 	instance.setVariableDefinitions(variables)
 	instance.setVariableValues(values)

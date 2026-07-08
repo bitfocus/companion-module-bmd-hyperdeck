@@ -29,6 +29,12 @@ export type VariablesSchema = {
 	audioCodec: string | undefined
 	audioChannels: number | undefined
 
+	// Play range
+	playrangeIn: number | string
+	playrangeOut: number | string
+	playrangeInTimecode: string
+	playrangeOutTimecode: string
+
 	// Remote
 	remoteEnabled: boolean
 

@@ -204,9 +204,10 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 					notify.transport = true
 					notify.slot = true
 					notify.remote = true
-					notify.playrange = true
-					if (protocolGte(this.protocolVersion, '1.11') && this.config.timecodeVariables === 'notifications')
-						notify.displayTimecode = true
+					if (protocolGte(this.protocolVersion, '1.11')) {
+						notify.playrange = true
+						if (this.config.timecodeVariables === 'notifications') notify.displayTimecode = true
+					}
 
 					await hyperdeck.sendCommand(notify)
 

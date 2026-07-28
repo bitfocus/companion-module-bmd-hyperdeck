@@ -4,6 +4,10 @@ See HELP.md and LICENSE
 
 ## Changes
 
+## v3.1.1
+
+- Protocol older than 1.11 not working
+
 ## v3.1.0
 
 - Add playrange variables

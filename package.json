@@ -4,7 +4,7 @@
 	"main": "dist/index.js",
 	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "npm run build && node --test test/*.test.js",
 		"build": "tsc",
 		"dev": "tsc --watch",
 		"format": "prettier --write ."

@@ -17,6 +17,7 @@ import { upgradeScripts } from './upgrades/index.js'
 import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
 import { makeSimpleClipInfos, mergeState, protocolGte, SimpleClipInfo, stripExtension } from './util.js'
+import { shouldRefreshClipsAfterTransportUpdate } from './refresh.js'
 import { InstanceBaseExt, IpAndPort, TransportInfoStateExt } from './types.js'
 import { isDeepStrictEqual } from 'util'
 import type { HyperdeckSchema } from './schema.js'
@@ -268,8 +269,17 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 
 		this.hyperDeck.on('notify.slot', async (res) => {
 			this.log('debug', 'Slot Status Changed')
+			const hyperDeck = this.hyperDeck
+			if (!hyperDeck) return
 
-			this.slotInfo[res.slotId] = mergeState(this.slotInfo[res.slotId], res)
+			// Slot notifications only contain the changed fields. Refresh the full slot
+			// record so an ejected card cannot retain a previous volume name or time.
+			try {
+				this.slotInfo[res.slotId] = await hyperDeck.sendCommand(new Commands.SlotInfoCommand(res.slotId))
+			} catch (error) {
+				this.log('warn', `Could not refresh slot ${res.slotId}: ${error}`)
+				this.slotInfo[res.slotId] = mergeState(this.slotInfo[res.slotId], res)
+			}
 
 			// Update the transport status to catch slot changes
 			await this.refreshTransportInfo()
@@ -290,6 +300,7 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 
 		this.hyperDeck.on('notify.transport', async (res) => {
 			this.log('debug', 'Transport Status Changed')
+			const previousStatus = this.transportInfo.status
 			this.transportInfo = this.extendTransportInfo(mergeState(this.transportInfo, res))
 
 			const newVariables = {}
@@ -297,6 +308,12 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 			updateTimecodeVariables(this, newVariables)
 			updateSlotInfoVariables(this, newVariables)
 			this.setVariableValues(newVariables)
+
+			// HyperDeck updates disk list after recording finishes, but its transport
+			// notification does not carry clip metadata. Refresh once on that transition.
+			if (shouldRefreshClipsAfterTransportUpdate(previousStatus, this.transportInfo.status)) {
+				await this.updateClips()
+			}
 
 			// TODO - can this be more granular?
 			this.checkAllFeedbacks()

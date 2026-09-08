@@ -2,6 +2,8 @@ export type VariablesSchema = {
 	// Transport info
 	status: string
 	speed: number
+	loop: boolean
+	singleClip: boolean
 	clipId: number | string
 	clipName: string
 	clipCount: number

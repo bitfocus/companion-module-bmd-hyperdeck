@@ -18,6 +18,7 @@ import { CONFIG_MODELS, ModelInfo } from './models.js'
 import { HyperdeckConfig, getConfigFields } from './config.js'
 import { makeSimpleClipInfos, mergeState, protocolGte, SimpleClipInfo, stripExtension } from './util.js'
 import { InstanceBaseExt, IpAndPort, TransportInfoStateExt } from './types.js'
+import { shouldRefreshClipsAfterTransportUpdate } from './refresh.js'
 import { isDeepStrictEqual } from 'util'
 import type { HyperdeckSchema } from './schema.js'
 
@@ -298,6 +299,7 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 
 		this.hyperDeck.on('notify.transport', async (res) => {
 			this.log('debug', 'Transport Status Changed')
+			const previousStatus = this.transportInfo.status
 			this.transportInfo = this.extendTransportInfo(mergeState(this.transportInfo, res))
 
 			const newVariables = {}
@@ -305,6 +307,12 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 			updateTimecodeVariables(this, newVariables)
 			updateSlotInfoVariables(this, newVariables)
 			this.setVariableValues(newVariables)
+
+			// The deck only adds a finished recording to its disk list once recording stops, so refresh
+			// the clip list on that transition to keep clipCount/clipNames current (#172)
+			if (shouldRefreshClipsAfterTransportUpdate(previousStatus, this.transportInfo.status)) {
+				await this.updateClips()
+			}
 
 			// TODO - can this be more granular?
 			this.checkAllFeedbacks()

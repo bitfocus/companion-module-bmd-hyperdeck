@@ -269,7 +269,15 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 		this.hyperDeck.on('notify.slot', async (res) => {
 			this.log('debug', 'Slot Status Changed')
 
-			this.slotInfo[res.slotId] = mergeState(this.slotInfo[res.slotId], res)
+			// Slot notifications only contain the changed fields. Query the full slot record so an
+			// ejected card cannot retain a previous volume name or recording time (#173). Fall back
+			// to merging the notification if the query fails.
+			try {
+				this.slotInfo[res.slotId] = await this.sendCommand(new Commands.SlotInfoCommand(res.slotId))
+			} catch (e: any) {
+				this.log('error', `Slot info refresh error - ${e?.message ?? e}`)
+				this.slotInfo[res.slotId] = mergeState(this.slotInfo[res.slotId], res)
+			}
 
 			// Update the transport status to catch slot changes
 			await this.refreshTransportInfo()

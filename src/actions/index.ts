@@ -11,6 +11,7 @@ import { createVideoActions, type VideoActions } from './video.js'
 import { createFormatActions, type FormatActions } from './format.js'
 import { createRemoteActions, type RemoteActions } from './remote.js'
 import { createClipsActions, type ClipsActions } from './clips.js'
+import { createConfigurationActions, type ConfigurationActions } from './configuration.js'
 
 export type HyperdeckActionsSchema = PlaybackActions &
 	NavigationActions &
@@ -21,7 +22,8 @@ export type HyperdeckActionsSchema = PlaybackActions &
 	VideoActions &
 	FormatActions &
 	RemoteActions &
-	ClipsActions
+	ClipsActions &
+	ConfigurationActions
 
 export function initActions(self: InstanceBaseExt): CompanionActionDefinitions<HyperdeckActionsSchema> {
 	const modelChoices = createModelChoices(self.model)
@@ -38,5 +40,6 @@ export function initActions(self: InstanceBaseExt): CompanionActionDefinitions<H
 		...createFormatActions(self, modelChoices),
 		...createRemoteActions(self),
 		...createClipsActions(self),
+		...createConfigurationActions(self),
 	}
 }

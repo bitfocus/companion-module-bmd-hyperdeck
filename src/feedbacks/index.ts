@@ -7,13 +7,15 @@ import { createAudioFeedbacks, type AudioFeedbacks } from './audio.js'
 import { createVideoFeedbacks, type VideoFeedbacks } from './video.js'
 import { createFormatFeedbacks, type FormatFeedbacks } from './format.js'
 import { createRemoteFeedbacks, type RemoteFeedbacks } from './remote.js'
+import { createConfigurationFeedbacks, type ConfigurationFeedbacks } from './configuration.js'
 
 export type HyperdeckFeedbacksSchema = TransportFeedbacks &
 	SlotFeedbacks &
 	AudioFeedbacks &
 	VideoFeedbacks &
 	FormatFeedbacks &
-	RemoteFeedbacks
+	RemoteFeedbacks &
+	ConfigurationFeedbacks
 
 export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitions<HyperdeckFeedbacksSchema> {
 	const modelChoices = createModelChoices(self.model)
@@ -26,5 +28,6 @@ export function initFeedbacks(self: InstanceBaseExt): CompanionFeedbackDefinitio
 		...createVideoFeedbacks(self, modelChoices),
 		...createFormatFeedbacks(self),
 		...createRemoteFeedbacks(self),
+		...createConfigurationFeedbacks(self),
 	}
 }

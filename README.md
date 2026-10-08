@@ -10,6 +10,7 @@ See HELP.md and LICENSE
 - Add loop and single clip playback status variables (#170)
 - Fix slot volume name and recording time not clearing when a card is ejected (#173)
 - Fix clip count and clip names not updating when a recording stops (#172)
+- Add timecode input/preset actions, feedback, variables and presets (#177)
 
 ## v3.1.1
 

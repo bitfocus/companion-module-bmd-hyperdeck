@@ -37,6 +37,13 @@ export const CHOICES_DYNAMICRANGE: DropdownChoice[] = [
 	{ id: 'ST2048', label: 'ST2048' },
 ]
 
+export const CHOICES_TIMECODEINPUT: DropdownChoice<'external' | 'embedded' | 'preset' | 'clip'>[] = [
+	{ id: 'external', label: 'External' },
+	{ id: 'embedded', label: 'Embedded' },
+	{ id: 'preset', label: 'Preset' },
+	{ id: 'clip', label: 'Clip' },
+]
+
 export const CHOICES_FILESYSTEM: DropdownChoice[] = [
 	{ id: 'HFS+', label: 'HFS+' },
 	{ id: 'exFAT', label: 'exFAT' },

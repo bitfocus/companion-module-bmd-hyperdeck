@@ -30,6 +30,8 @@ export type VariablesSchema = {
 	fileFormat: string
 	audioCodec: string | undefined
 	audioChannels: number | undefined
+	timecodeInput: string
+	timecodePreset: string
 
 	// Play range
 	playrangeIn: number | string

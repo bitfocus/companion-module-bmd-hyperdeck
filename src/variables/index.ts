@@ -293,6 +293,9 @@ export function updateConfigurationVariables(instance: InstanceBaseExt, newValue
 
 	newValues['audioCodec'] = instance.deckConfig.audioCodec
 	newValues['audioChannels'] = instance.deckConfig.audioInputChannels
+
+	newValues['timecodeInput'] = instance.deckConfig.timecodeInput ?? '-'
+	newValues['timecodePreset'] = instance.deckConfig.timecodePreset ?? '-'
 }
 
 export function updateRemoteVariable(instance: InstanceBaseExt, newValues: Partial<VariablesSchema>) {
@@ -357,6 +360,8 @@ export function initVariables(instance: InstanceBaseExt) {
 		fileFormat: { name: 'File format' },
 		audioCodec: { name: 'Audio codec' },
 		audioChannels: { name: 'Audio channels' },
+		timecodeInput: { name: 'Timecode input' },
+		timecodePreset: { name: 'Timecode preset' },
 
 		// play range:
 		playrangeIn: { name: 'Play range in (timeline frame)' },

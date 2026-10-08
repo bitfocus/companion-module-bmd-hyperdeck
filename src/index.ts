@@ -337,7 +337,7 @@ export default class HyperdeckInstance extends InstanceBase<HyperdeckSchema> imp
 			this.deckConfig = mergeState(this.deckConfig, res)
 
 			// this.debug('Config:', this.deckConfig)
-			this.checkFeedbacks('video_input', 'audio_input', 'audio_channels')
+			this.checkFeedbacks('video_input', 'audio_input', 'audio_channels', 'timecode_input')
 
 			const newVariables = {}
 			updateConfigurationVariables(this, newVariables)

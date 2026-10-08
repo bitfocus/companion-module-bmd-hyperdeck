@@ -81,6 +81,8 @@ export function updateTransportInfoVariables(instance: InstanceBaseExt, newValue
 	}
 	newValues['status'] = capitalise(instance.transportInfo.status)
 	newValues['speed'] = instance.transportInfo.speed
+	newValues['loop'] = instance.transportInfo.loop
+	newValues['singleClip'] = instance.transportInfo.singleClip
 
 	//Clip ID and Slot ID  null exceptions
 	let clipNameVariable: string | undefined
@@ -335,6 +337,8 @@ export function initVariables(instance: InstanceBaseExt) {
 		clipName: { name: 'Clip Name' },
 		slotId: { name: 'Slot ID' },
 		videoFormat: { name: 'Video format' },
+		loop: { name: 'Loop playback enabled' },
+		singleClip: { name: 'Single clip playback enabled' },
 
 		// active clip timecode vars:
 		clipDurationTimecode: { name: 'Active clip duration timecode' },

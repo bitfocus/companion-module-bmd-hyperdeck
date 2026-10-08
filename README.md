@@ -7,6 +7,7 @@ See HELP.md and LICENSE
 ## v3.2.0
 
 - Add 4xSDI input and slot 4 (internal SSD) options for HyperDeck Extreme 8K (#178)
+- Add loop and single clip playback status variables (#170)
 
 ## v3.1.1
 

@@ -8,6 +8,8 @@ export type VariablesSchema = {
 	slotId: number | string
 	videoFormat: string
 	inputVideoFormat?: string
+	loop: boolean
+	singleClip: boolean
 
 	// Active clip timecode
 	clipDurationTimecode: string

@@ -4,6 +4,10 @@ See HELP.md and LICENSE
 
 ## Changes
 
+## v3.2.0
+
+- Add 4xSDI input and slot 4 (internal SSD) options for HyperDeck Extreme 8K (#178)
+
 ## v3.1.1
 
 - Protocol older than 1.11 not working

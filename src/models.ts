@@ -228,6 +228,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 		label: 'HyperDeck Extreme 8K',
 		videoInputs: [
 			VideoInputType.SDI,
+			VideoInputType.QuadSDI,
 			VideoInputType.HDMI,
 			VideoInputType.Component,
 			VideoInputType.Composite,
@@ -246,7 +247,7 @@ export const CONFIG_MODELS: Record<string, ModelInfo> = {
 			...FORMATS_8K,
 			...FORMATS_8K_DCI,
 		],
-		slotLabels: 'CFAST2_USBNAS',
+		slotLabels: 'CFAST2_USBNAS_SSD',
 		maxShuttle: 5000,
 		hasSeparateInputFormat: true,
 	},

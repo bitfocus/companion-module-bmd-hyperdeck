@@ -14,6 +14,7 @@ export const CONFIG_AUDIOINPUTS: Record<string, DropdownChoice | undefined> = {
 
 export enum VideoInputType {
 	SDI = 'SDI',
+	QuadSDI = '4xSDI',
 	HDMI = 'HDMI',
 	Component = 'component',
 	Composite = 'composite',
@@ -22,6 +23,7 @@ export enum VideoInputType {
 
 export const CONFIG_VIDEOINPUTS: Record<string, DropdownChoice | undefined> = {
 	SDI: { id: VideoInputType.SDI, label: 'SDI' },
+	'4xSDI': { id: VideoInputType.QuadSDI, label: '4x SDI' },
 	HDMI: { id: VideoInputType.HDMI, label: 'HDMI' },
 	component: { id: VideoInputType.Component, label: 'Component' },
 	composite: { id: VideoInputType.Composite, label: 'Composite' },
@@ -54,6 +56,12 @@ export const CONFIG_SLOT_LABELS: Record<string, DropdownChoice[] | undefined> = 
 		{ id: 1, label: '1: CFast 1' },
 		{ id: 2, label: '2: CFast 2' },
 		{ id: 3, label: '3: USB-C/NAS' },
+	],
+	CFAST2_USBNAS_SSD: [
+		{ id: 1, label: '1: CFast 1' },
+		{ id: 2, label: '2: CFast 2' },
+		{ id: 3, label: '3: USB-C/NAS' },
+		{ id: 4, label: '4: SSD' },
 	],
 	SSD2_SD2_USB: [
 		{ id: 1, label: '1: SSD 1' },
